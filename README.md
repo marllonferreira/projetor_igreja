@@ -1,6 +1,8 @@
 # Projetor Igreja
 
-![Demonstração da Extensão](doc/01.PNG)
+<div align="center">
+  <img src="doc/01.PNG" width="300" alt="Exemplo de Uso">
+</div>
 
 Uma extensão para navegadores baseados em Chromium (Google Chrome, Edge, Brave) desenvolvida especificamente para facilitar e profissionalizar a projeção de vídeos do YouTube em igrejas, cultos e eventos. Ela limpa toda a interface do YouTube, removendo distrações, e oferece um controle remoto simples e prático diretamente pelo menu da extensão.
 
