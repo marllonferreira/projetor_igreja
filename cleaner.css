@@ -1,0 +1,88 @@
+/* Oculta toda a interface do YouTube apenas quando o modo projetor está ativo */
+
+.extensao-igreja-projector-active #masthead-container,
+.extensao-igreja-projector-active #masthead,
+.extensao-igreja-projector-active ytd-masthead,
+.extensao-igreja-projector-active #secondary,
+.extensao-igreja-projector-active #sidebar,
+.extensao-igreja-projector-active ytd-watch-next-secondary-results-renderer,
+.extensao-igreja-projector-active #columns #primary #primary-inner #below,
+.extensao-igreja-projector-active #comments,
+.extensao-igreja-projector-active ytd-watch-metadata,
+.extensao-igreja-projector-active #description,
+.extensao-igreja-projector-active ytd-video-secondary-info-renderer,
+.extensao-igreja-projector-active #chat,
+.extensao-igreja-projector-active #ticket-shelf,
+.extensao-igreja-projector-active ytd-live-chat-frame {
+    display: none !important;
+}
+
+/* Oculta o título do vídeo no canto superior do player (não é elegânte na tela de projeção) */
+.extensao-igreja-projector-active .ytp-chrome-top,
+.extensao-igreja-projector-active .ytp-title,
+.extensao-igreja-projector-active .ytp-title-text,
+.extensao-igreja-projector-active .ytp-title-link {
+    display: none !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+}
+
+/* Ajusta o container do vídeo para ocupar a tela toda */
+.extensao-igreja-projector-active ytd-watch-flexy {
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+.extensao-igreja-projector-active #columns {
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+.extensao-igreja-projector-active #primary {
+    padding: 0 !important;
+    margin: 0 !important;
+    max-width: 100vw !important;
+    min-width: 100vw !important;
+}
+
+/* Remove a barra de rolagem */
+.extensao-igreja-projector-active body {
+    overflow: hidden !important;
+}
+
+/* Força o player a ficar no topo e ocupar tudo */
+.extensao-igreja-projector-active #player-container-outer {
+    max-width: 100vw !important;
+    max-height: 100vh !important;
+    min-width: 100vw !important;
+}
+
+.extensao-igreja-projector-active #player-container-inner {
+    padding-top: 56.25% !important;
+    /* Proporção 16:9 */
+}
+
+.extensao-igreja-projector-active ytd-watch-flexy[theater] #player-container-outer {
+    height: 100vh !important;
+}
+
+/* MODO BLACKOUT (Pós-Culto) */
+.video-finalizado .html5-video-player,
+.video-finalizado #player-container,
+.video-finalizado video {
+    background: black !important;
+    opacity: 0 !important;
+}
+
+/* Cortina preta total que cobre tudo ao finalizar */
+.video-finalizado::after {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: black;
+    z-index: 999999;
+    pointer-events: none;
+}

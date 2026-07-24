@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg:        #0e0e14;
+            --surface:   #17171f;
+            --border:    #2a2a38;
+            --accent:    #7c5cbf;
+            --accent-glow: rgba(124, 92, 191, 0.35);
+            --red:       #c0392b;
+            --red-glow:  rgba(192, 57, 43, 0.35);
+            --green:     #27ae60;
+            --green-glow: rgba(39, 174, 96, 0.35);
+            --mute:      #0e8fa1;
+            --text:      #e8e8f0;
+            --muted:     #6b6b82;
+            --radius:    10px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            width: 240px;
+            padding: 14px;
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            user-select: none;
+        }
+
+        /* ── Header ── */
+        .header {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            margin-bottom: 14px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .header-icon {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, var(--accent), #5b3fa0);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            flex-shrink: 0;
+            box-shadow: 0 0 12px var(--accent-glow);
+        }
+
+        .header-text h1 {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--text);
+            letter-spacing: 0.3px;
+        }
+
+        .header-text p {
+            font-size: 10px;
+            color: var(--muted);
+            margin-top: 1px;
+            font-weight: 500;
+        }
+
+        /* ── Seções ── */
+        .section-label {
+            font-size: 9px;
+            font-weight: 700;
+            color: var(--muted);
+            letter-spacing: 1.2px;
+            text-transform: uppercase;
+            margin-bottom: 7px;
+        }
+
+        .section {
+            margin-bottom: 12px;
+        }
+
+        /* ── Botões principais ── */
+        .btn {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            padding: 9px 12px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            background: var(--surface);
+            color: var(--text);
+            font-family: 'Inter', sans-serif;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.4px;
+            cursor: pointer;
+            transition: all 0.18s ease;
+            text-align: left;
+            margin-bottom: 6px;
+        }
+
+        .btn:last-child { margin-bottom: 0; }
+
+        .btn .btn-icon {
+            font-size: 15px;
+            flex-shrink: 0;
+            line-height: 1;
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+            border-color: #3a3a50;
+        }
+
+        .btn:active {
+            transform: translateY(0);
+            opacity: 0.85;
+        }
+
+        .btn-abrir {
+            background: linear-gradient(135deg, #0891b2, #0e6f88);
+            border-color: #0891b2;
+            color: #fff;
+        }
+        .btn-abrir:hover { box-shadow: 0 4px 16px rgba(8, 145, 178, 0.4); border-color: #22d3ee; }
+
+        .btn-enviar {
+            background: linear-gradient(135deg, var(--red), #a93226);
+            border-color: var(--red);
+            color: #fff;
+        }
+        .btn-enviar:hover { box-shadow: 0 4px 16px var(--red-glow); border-color: #e74c3c; }
+
+        /* ── Controles (Play / Fullscreen) ── */
+        .controls-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px;
+            margin-bottom: 12px;
+        }
+
+        .btn-control {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            padding: 10px 6px;
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            background: var(--surface);
+            color: var(--text);
+            font-family: 'Inter', sans-serif;
+            font-size: 9px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.18s ease;
+        }
+
+        .btn-control .icon { font-size: 18px; line-height: 1; }
+
+        .btn-control:hover  { transform: translateY(-1px); border-color: #3a3a50; }
+        .btn-control:active { transform: translateY(0); opacity: 0.85; }
+
+        #btnPlayPause {
+            background: linear-gradient(135deg, var(--green), #1e8449);
+            border-color: var(--green);
+            color: #fff;
+        }
+        #btnPlayPause:hover { box-shadow: 0 4px 16px var(--green-glow); }
+
+        #btnFullscreen {
+            background: linear-gradient(135deg, var(--accent), #5b3fa0);
+            border-color: var(--accent);
+            color: #fff;
+        }
+        #btnFullscreen:hover { box-shadow: 0 4px 16px var(--accent-glow); }
+
+        /* ── Volume ── */
+        .volume-section {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 10px 12px;
+        }
+
+        .volume-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .volume-title {
+            font-size: 9px;
+            font-weight: 700;
+            color: var(--muted);
+            letter-spacing: 1.2px;
+            text-transform: uppercase;
+        }
+
+        #volumeLabel {
+            font-size: 10px;
+            font-weight: 700;
+            color: var(--accent);
+            min-width: 28px;
+            text-align: right;
+        }
+
+        .volume-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        #btnMute {
+            flex-shrink: 0;
+            width: 30px;
+            height: 30px;
+            background: #1f1f2e;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.18s ease;
+            padding: 0;
+            line-height: 1;
+        }
+
+        #btnMute:hover {
+            background: #2a2a3e;
+            border-color: var(--mute);
+            box-shadow: 0 0 8px rgba(14, 143, 161, 0.3);
+        }
+
+        #volumeSlider {
+            flex: 1;
+            -webkit-appearance: none;
+            appearance: none;
+            height: 4px;
+            border-radius: 4px;
+            background: #2a2a3a;
+            outline: none;
+            cursor: pointer;
+        }
+
+        #volumeSlider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent), #5b3fa0);
+            cursor: pointer;
+            box-shadow: 0 0 6px var(--accent-glow);
+            transition: transform 0.15s;
+        }
+
+        #volumeSlider::-webkit-slider-thumb:hover {
+            transform: scale(1.25);
+        }
+
+        /* ── Divider ── */
+        .divider {
+            height: 1px;
+            background: var(--border);
+            margin: 12px 0;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Header -->
+    <div class="header">
+        <div class="header-icon">🎬</div>
+        <div class="header-text">
+            <h1>Projetor Igreja</h1>
+            <p>Controle de Projeção</p>
+        </div>
+    </div>
+
+    <!-- Setup -->
+    <div class="section">
+        <div class="section-label">Configuração</div>
+        <button class="btn btn-abrir" id="abrirProjetor">
+            <span class="btn-icon">🖥️</span>
+            <span>Abrir Tela de Projeção</span>
+        </button>
+        <button class="btn btn-enviar" id="enviarVideo">
+            <span class="btn-icon">▶️</span>
+            <span>Projetar Vídeo Atual</span>
+        </button>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- Controles -->
+    <div class="section-label">Controles</div>
+    <div class="controls-grid">
+        <button class="btn-control" id="btnPlayPause">
+            <span class="icon">▶</span>
+            <span>PLAY</span>
+        </button>
+        <button class="btn-control" id="btnFullscreen">
+            <span class="icon">⛶</span>
+            <span>TELA CHEIA</span>
+        </button>
+    </div>
+
+    <!-- Volume -->
+    <div class="volume-section">
+        <div class="volume-header">
+            <span class="volume-title">🔊 Volume</span>
+            <span id="volumeLabel">100%</span>
+        </div>
+        <div class="volume-row">
+            <button id="btnMute" title="Ativar / Desativar Áudio">🔊</button>
+            <input type="range" id="volumeSlider" min="0" max="100" value="100">
+        </div>
+    </div>
+
+    <script src="popup.js"></script>
+</body>
+
+</html>
