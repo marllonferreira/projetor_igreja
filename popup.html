@@ -8,19 +8,19 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg:        #0e0e14;
-            --surface:   #17171f;
-            --border:    #2a2a38;
-            --accent:    #7c5cbf;
+            --bg: #0e0e14;
+            --surface: #17171f;
+            --border: #2a2a38;
+            --accent: #7c5cbf;
             --accent-glow: rgba(124, 92, 191, 0.35);
-            --red:       #c0392b;
-            --red-glow:  rgba(192, 57, 43, 0.35);
-            --green:     #27ae60;
+            --red: #c0392b;
+            --red-glow: rgba(192, 57, 43, 0.35);
+            --green: #27ae60;
             --green-glow: rgba(39, 174, 96, 0.35);
-            --mute:      #0e8fa1;
-            --text:      #e8e8f0;
-            --muted:     #6b6b82;
-            --radius:    10px;
+            --mute: #0e8fa1;
+            --text: #e8e8f0;
+            --muted: #6b6b82;
+            --radius: 10px;
         }
 
         * {
@@ -30,7 +30,7 @@
         }
 
         body {
-            width: 240px;
+            width: 280px;
             padding: 14px;
             font-family: 'Inter', sans-serif;
             background: var(--bg);
@@ -110,7 +110,22 @@
             margin-bottom: 6px;
         }
 
-        .btn:last-child { margin-bottom: 0; }
+        .flex-row {
+            display: flex;
+            gap: 6px;
+            width: 100%;
+            margin-bottom: 6px;
+        }
+
+        .flex-row .btn {
+            margin-bottom: 0;
+            flex: 1;
+            padding: 9px 8px;
+        }
+
+        .btn:last-child {
+            margin-bottom: 0;
+        }
 
         .btn .btn-icon {
             font-size: 15px;
@@ -133,24 +148,44 @@
             border-color: #0891b2;
             color: #fff;
         }
-        .btn-abrir:hover { box-shadow: 0 4px 16px rgba(8, 145, 178, 0.4); border-color: #22d3ee; }
 
-        .btn-enviar {
-            background: linear-gradient(135deg, var(--red), #a93226);
-            border-color: var(--red);
+        .btn-abrir:hover {
+            box-shadow: 0 4px 16px rgba(8, 145, 178, 0.4);
+            border-color: #22d3ee;
+        }
+        
+        .btn-fechar {
+            background: linear-gradient(135deg, #8e44ad, #732d91);
+            border-color: #8e44ad;
             color: #fff;
         }
-        .btn-enviar:hover { box-shadow: 0 4px 16px var(--red-glow); border-color: #e74c3c; }
 
-        /* ── Controles (Play / Fullscreen) ── */
+        .btn-fechar:hover {
+            border-color: #9b59b6;
+            box-shadow: 0 4px 12px rgba(142, 68, 173, 0.4);
+        }
+
+        .btn-enviar {
+            background: linear-gradient(135deg, #e67e22, #d35400);
+            border-color: #e67e22;
+            color: #fff;
+        }
+
+        .btn-enviar:hover {
+            box-shadow: 0 4px 16px rgba(230, 126, 34, 0.4);
+            border-color: #f39c12;
+        }
+
+        /* ── Controles (Play / Stop / Fullscreen) ── */
         .controls-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
+            display: flex;
             gap: 6px;
+            width: 100%;
             margin-bottom: 12px;
         }
 
         .btn-control {
+            flex: 1;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -170,24 +205,47 @@
             transition: all 0.18s ease;
         }
 
-        .btn-control .icon { font-size: 18px; line-height: 1; }
+        .btn-control .icon {
+            font-size: 18px;
+            line-height: 1;
+        }
 
-        .btn-control:hover  { transform: translateY(-1px); border-color: #3a3a50; }
-        .btn-control:active { transform: translateY(0); opacity: 0.85; }
+        .btn-control:hover {
+            transform: translateY(-1px);
+            border-color: #3a3a50;
+        }
+
+        .btn-control:active {
+            transform: translateY(0);
+            opacity: 0.85;
+        }
 
         #btnPlayPause {
             background: linear-gradient(135deg, var(--green), #1e8449);
             border-color: var(--green);
             color: #fff;
         }
-        #btnPlayPause:hover { box-shadow: 0 4px 16px var(--green-glow); }
+
+        #btnPlayPause:hover {
+            box-shadow: 0 4px 16px var(--green-glow);
+        }
+        
+        #btnStop {
+            background: linear-gradient(135deg, var(--red), #a93226);
+            border-color: var(--red);
+            color: #fff;
+        }
+        #btnStop:hover { box-shadow: 0 4px 16px var(--red-glow); }
 
         #btnFullscreen {
             background: linear-gradient(135deg, var(--accent), #5b3fa0);
             border-color: var(--accent);
             color: #fff;
         }
-        #btnFullscreen:hover { box-shadow: 0 4px 16px var(--accent-glow); }
+
+        #btnFullscreen:hover {
+            box-shadow: 0 4px 16px var(--accent-glow);
+        }
 
         /* ── Volume ── */
         .volume-section {
@@ -204,7 +262,7 @@
             margin-bottom: 8px;
         }
 
-        .volume-title {
+        .volume-title, .progress-title {
             font-size: 9px;
             font-weight: 700;
             color: var(--muted);
@@ -216,6 +274,14 @@
             font-size: 10px;
             font-weight: 700;
             color: var(--accent);
+            min-width: 28px;
+            text-align: right;
+        }
+
+        #progressLabel {
+            font-size: 10px;
+            font-weight: 700;
+            color: #fff;
             min-width: 28px;
             text-align: right;
         }
@@ -249,7 +315,7 @@
             box-shadow: 0 0 8px rgba(14, 143, 161, 0.3);
         }
 
-        #volumeSlider {
+        #volumeSlider, #progressSlider {
             flex: 1;
             -webkit-appearance: none;
             appearance: none;
@@ -282,6 +348,99 @@
             background: var(--border);
             margin: 12px 0;
         }
+
+        .settings-icon {
+            font-size: 16px;
+            cursor: pointer;
+            padding: 4px;
+            transition: transform 0.2s;
+            opacity: 0.7;
+        }
+
+        .settings-icon:hover {
+            opacity: 1;
+            transform: scale(1.15);
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(50px);
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            color: #fff;
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-size: 11px;
+            font-weight: 600;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 4px 12px rgba(231, 76, 60, 0.4);
+            z-index: 1000;
+            white-space: nowrap;
+        }
+
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+
+        .form-group {
+            margin-bottom: 12px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 10px;
+            margin-bottom: 4px;
+            color: var(--muted);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 6px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            color: var(--text);
+            border-radius: 6px;
+            font-size: 11px;
+        }
+
+        .form-control:disabled {
+            opacity: 0.5;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .checkbox-group input {
+            margin: 0;
+            cursor: pointer;
+        }
+
+        .checkbox-group label {
+            margin: 0;
+            display: inline;
+            font-size: 11px;
+            color: var(--text);
+            cursor: pointer;
+        }
+
+        .btn-save {
+            background: linear-gradient(135deg, var(--green), #1e8449);
+            border-color: var(--green);
+            color: #fff;
+            justify-content: center;
+            margin-top: 16px;
+        }
+
+        .btn-save:hover {
+            box-shadow: 0 4px 16px var(--green-glow);
+        }
     </style>
 </head>
 
@@ -290,51 +449,137 @@
     <!-- Header -->
     <div class="header">
         <div class="header-icon">🎬</div>
-        <div class="header-text">
+        <div class="header-text" style="flex: 1;">
             <h1>Projetor Igreja</h1>
             <p>Controle de Projeção</p>
         </div>
+        <div class="settings-icon" id="btnSettings" title="Configurações">⚙️</div>
     </div>
 
-    <!-- Setup -->
-    <div class="section">
-        <div class="section-label">Configuração</div>
-        <button class="btn btn-abrir" id="abrirProjetor">
-            <span class="btn-icon">🖥️</span>
-            <span>Abrir Tela de Projeção</span>
-        </button>
-        <button class="btn btn-enviar" id="enviarVideo">
-            <span class="btn-icon">▶️</span>
-            <span>Projetar Vídeo Atual</span>
-        </button>
-    </div>
-
-    <div class="divider"></div>
-
-    <!-- Controles -->
-    <div class="section-label">Controles</div>
-    <div class="controls-grid">
-        <button class="btn-control" id="btnPlayPause">
-            <span class="icon">▶</span>
-            <span>PLAY</span>
-        </button>
-        <button class="btn-control" id="btnFullscreen">
-            <span class="icon">⛶</span>
-            <span>TELA CHEIA</span>
-        </button>
-    </div>
-
-    <!-- Volume -->
-    <div class="volume-section">
-        <div class="volume-header">
-            <span class="volume-title">🔊 Volume</span>
-            <span id="volumeLabel">100%</span>
+    <div id="mainView">
+        <!-- Setup -->
+        <div class="section">
+            <div class="section-label">Configuração</div>
+            <div class="flex-row" id="setupFlexRow">
+                <button class="btn btn-abrir" id="abrirProjetor">
+                    <span class="btn-icon">🖥️</span>
+                    <span>Abrir Telão</span>
+                </button>
+                <button class="btn btn-fechar" id="fecharProjetor">
+                    <span class="btn-icon">❌</span>
+                    <span>Fechar Telão</span>
+                </button>
+            </div>
+            <button class="btn btn-enviar" id="enviarVideo">
+                <span class="btn-icon">▶️</span>
+                <span>Projetar Vídeo Atual</span>
+            </button>
         </div>
-        <div class="volume-row">
-            <button id="btnMute" title="Ativar / Desativar Áudio">🔊</button>
-            <input type="range" id="volumeSlider" min="0" max="100" value="100">
+
+        <div class="divider"></div>
+
+        <!-- Controles -->
+        <div class="section-label" id="labelControles">Controles</div>
+        <div class="controls-grid" id="controlsGrid">
+            <button class="btn-control" id="btnPlayPause" style="background: linear-gradient(135deg, #555, #333); border-color: #555;">
+                <span class="icon">⏸</span>
+                <span>PAUSE</span>
+            </button>
+            <button class="btn-control" id="btnStop">
+                <span class="icon">⏹</span>
+                <span>STOP</span>
+            </button>
+            <button class="btn-control" id="btnFullscreen">
+                <span class="icon">⛶</span>
+                <span>T. CHEIA</span>
+            </button>
         </div>
-    </div>
+
+        <!-- Volume -->
+        <div class="volume-section" id="volumeSection">
+            <div class="volume-header">
+                <span class="volume-title">🔊 Volume</span>
+                <span id="volumeLabel">100%</span>
+            </div>
+            <div class="volume-row">
+                <button id="btnMute" title="Ativar / Desativar Áudio">🔊</button>
+                <input type="range" id="volumeSlider" min="0" max="100" value="100">
+            </div>
+        </div>
+
+        <!-- Progresso -->
+        <div class="volume-section" id="progressSection" style="margin-top: 12px;">
+            <div class="volume-header">
+                <span class="progress-title">⏳ Progresso</span>
+                <span id="progressLabel">00:00 / 00:00</span>
+            </div>
+            <div id="videoTitleLabel" style="font-size: 10px; color: #aaa; margin-bottom: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block;">Nenhum vídeo carregado</div>
+            <div class="volume-row">
+                <input type="range" id="progressSlider" min="0" max="100" value="0" style="pointer-events: none;">
+            </div>
+        </div>
+
+    </div> <!-- Fim Main View -->
+
+    <!-- Settings View (hidden) -->
+    <div id="settingsView" style="display: none;">
+        <div class="section-label">Preferências</div>
+
+        <div class="form-group">
+            <label for="configMonitor">Monitor Alvo:</label>
+            <select id="configMonitor" class="form-control">
+                <option value="auto">Automático (Secundário)</option>
+            </select>
+        </div>
+
+        <div class="form-group checkbox-group">
+            <input type="checkbox" id="configFullscreen" checked>
+            <label for="configFullscreen">Abrir em Tela Cheia</label>
+        </div>
+
+        <div class="section-label" style="margin-top: 16px;">Exibir Botões</div>
+        
+        <div class="form-group checkbox-group">
+            <input type="checkbox" id="prefShowClose" checked>
+            <label for="prefShowClose">Mostrar botão Fechar Tela</label>
+        </div>
+        <div class="form-group checkbox-group">
+            <input type="checkbox" id="prefShowStop" checked>
+            <label for="prefShowStop">Mostrar botão STOP</label>
+        </div>
+        <div class="form-group checkbox-group">
+            <input type="checkbox" id="prefShowFullscreen" checked>
+            <label for="prefShowFullscreen">Mostrar botão Tela Cheia</label>
+        </div>
+        <div class="form-group checkbox-group">
+            <input type="checkbox" id="prefShowVolume" checked>
+            <label for="prefShowVolume">Mostrar controle de Volume</label>
+        </div>
+        <div class="form-group checkbox-group">
+            <input type="checkbox" id="prefShowProgress" checked>
+            <label for="prefShowProgress">Mostrar progresso do Vídeo</label>
+        </div>
+
+        <div class="section-label" style="margin-top: 16px;">Avançado</div>
+
+        <div class="form-group">
+            <label for="configWindowSize">Tamanho (se não for Tela Cheia):</label>
+            <select id="configWindowSize" class="form-control" disabled>
+                <option value="1920x1080">1920 x 1080</option>
+                <option value="1280x720" selected>1280 x 720</option>
+                <option value="1024x768">1024 x 768</option>
+                <option value="800x600">800 x 600</option>
+            </select>
+        </div>
+
+        <button class="btn btn-save" id="btnSaveSettings">
+            <span class="btn-icon">💾</span>
+            <span>Salvar e Voltar</span>
+        </button>
+    </div> <!-- Fim Settings View -->
+
+    <!-- Toast Notification -->
+    <div id="toastNotification" class="toast"></div>
 
     <script src="popup.js"></script>
 </body>

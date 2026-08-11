@@ -21,7 +21,6 @@ function applyProjectorRules() {
             const video = document.querySelector('video');
             if (video) {
                 // Verifica se está mudo, e se estiver, clica no botão nativo do YouTube
-                // Isso é inteligente e evita que inverta o áudio que já está tocando
                 if (video.muted) {
                     const muteBtn = document.querySelector('.ytp-mute-button');
                     if (muteBtn) {
@@ -30,6 +29,9 @@ function applyProjectorRules() {
                         video.muted = false;
                     }
                 }
+                
+                // Força o volume interno do YouTube para 50% (que equivale a 100% na escala da extensão)
+                video.volume = 0.5;
 
                 if (video.paused) {
                     video.play().catch(() => { });
@@ -70,7 +72,10 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             sendResponse({
                 volume: video ? Math.min(1, video.volume * 2) : 1,  // 0-0.5 → 0-1 para o popup
                 muted: video ? video.muted : false,
-                playing: video ? (!video.paused && !video.ended && video.readyState >= 2) : false
+                playing: video ? (!video.paused && !video.ended && video.readyState >= 2) : false,
+                currentTime: video ? video.currentTime : 0,
+                duration: video && !isNaN(video.duration) ? video.duration : 0,
+                title: document.title.replace(/ - YouTube$/, '')
             });
             return true;
         }
@@ -84,6 +89,12 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
             } else if (request.command === "pause") {
                 video.pause();
+                sendResponse({ playing: false });
+
+            } else if (request.command === "stop") {
+                video.pause();
+                video.currentTime = 0;
+                document.documentElement.classList.add('video-finalizado');
                 sendResponse({ playing: false });
 
             } else if (request.command === "mute_toggle") {

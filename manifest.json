@@ -1,12 +1,13 @@
 {
     "manifest_version": 3,
     "name": "Projetor Igreja",
-    "version": "1.6",
+    "version": "2.0",
     "description": "Sistema de projeção profissional para YouTube em igrejas.",
     "permissions": [
         "storage",
         "tabs",
-        "scripting"
+        "scripting",
+        "system.display"
     ],
     "action": {
         "default_popup": "popup.html",
