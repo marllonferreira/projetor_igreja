@@ -12,15 +12,15 @@
     "action": {
         "default_popup": "popup.html",
         "default_icon": {
-            "16": "16.png",
-            "48": "48.png",
-            "128": "128.png"
+            "16": "assets/images/16.png",
+            "48": "assets/images/48.png",
+            "128": "assets/images/128.png"
         }
     },
     "icons": {
-        "16": "16.png",
-        "48": "48.png",
-        "128": "128.png"
+        "16": "assets/images/16.png",
+        "48": "assets/images/48.png",
+        "128": "assets/images/128.png"
     },
     "background": {
         "service_worker": "background.js"
@@ -38,7 +38,7 @@
                 "content.js"
             ],
             "css": [
-                "cleaner.css"
+                "assets/css/cleaner.css"
             ],
             "run_at": "document_idle"
         }
