@@ -23,20 +23,14 @@ Uma extensão para navegadores baseados em Chromium (Google Chrome, Edge, Brave)
 
 ## 📦 Como Instalar a Extensão
 
+Como a extensão será instalada de forma local, siga o passo a passo seguro abaixo:
 
-### Opção 1 — Instalador Automático (Recomendado para uso final)
-
-Acesse a pasta [`instalacao/`](instalacao/) deste projeto. Lá você encontrará a extensão compactada (`.crx`) junto com um script que configura tudo automaticamente no Windows:
-
-1. Copie a pasta `instalacao/projetor_igreja` para `C:\projetor_igreja\`
-2. Execute `instalar.bat` como **Administrador**
-3. Reinicie o Chrome — a extensão será instalada permanentemente ✅
-
-### Opção 2 — Modo Desenvolvedor (para contribuidores e testes)
-
-1. **Acesse as Extensões:** `chrome://extensions/` e ative o **"Modo do desenvolvedor"**.
-2. **Carregar sem compactação:** Clique em "Load unpacked" e selecione esta pasta (a que contém o `manifest.json`).
-3. **Fixe a extensão** clicando no ícone de quebra-cabeça 🧩 na barra do Chrome.
+1. **Baixe os arquivos:** Faça o download do código-fonte ou clone este repositório no seu computador e extraia os arquivos para uma pasta segura de sua escolha.
+2. **Acesse as Extensões:** Abra o seu navegador Chrome, Edge ou Brave, digite na barra de endereços `chrome://extensions/` (ou `edge://extensions/`) e pressione **Enter**.
+3. **Modo do Desenvolvedor:** No canto superior direito da tela de extensões, ative a chave ou botão chamado **"Modo do desenvolvedor"** (Developer mode).
+4. **Carregar a Extensão:** Clique no botão **"Carregar sem compactação"** (Load unpacked) que aparecerá no canto superior esquerdo.
+5. **Selecione a Pasta:** Navegue até a pasta onde você salvou ou extraiu os arquivos da extensão (a pasta que contém o arquivo `manifest.json`) e selecione-a.
+6. **Tudo pronto!** A extensão **Projetor Igreja** aparecerá na sua lista. Para facilitar o uso, clique no ícone de "quebra-cabeça" 🧩 na barra superior do navegador e **fixe (pin)** o ícone da extensão para que ele fique sempre visível.
 
 ## 💻 Como Usar
 
