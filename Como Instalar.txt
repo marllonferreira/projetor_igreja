@@ -1,0 +1,23 @@
+Como Instalar a Extensão
+=========================
+
+Como a extensão será instalada de forma local, siga o passo a passo seguro abaixo:
+
+1. Baixe os arquivos: Faça o download do código-fonte ou clone este repositório no seu computador e extraia os arquivos para uma pasta segura de sua escolha.
+2. Acesse as Extensões: Abra o seu navegador Chrome, Edge ou Brave, digite na barra de endereços chrome://extensions/ (ou edge://extensions/) e pressione Enter.
+3. Modo do Desenvolvedor: No canto superior direito da tela de extensões, ative a chave ou botão chamado "Modo do desenvolvedor" (Developer mode).
+4. Carregar a Extensão: Clique no botão "Carregar sem compactação" (Load unpacked) que aparecerá no canto superior esquerdo.
+5. Selecione a Pasta: Navegue até a pasta onde você salvou ou extraiu os arquivos da extensão (a pasta que contém o arquivo manifest.json) e selecione-a.
+6. Tudo pronto! A extensão Projetor Igreja aparecerá na sua lista. Para facilitar o uso, clique no ícone de "quebra-cabeça" na barra superior do navegador e fixe (pin) o ícone da extensão para que ele fique sempre visível.
+
+
+Como Usar
+=========
+
+1. Clique no ícone da extensão na sua barra superior.
+2. Clique no botão "Abrir Telão". Isso abrirá uma janela limpa, que você pode arrastar para o seu segundo monitor (telão).
+3. Na sua janela principal, navegue normalmente pelo YouTube e encontre o vídeo desejado.
+4. Abra o vídeo, clique no ícone da extensão novamente e escolha "Projetar Vídeo Atual".
+5. O vídeo será automaticamente enviado e aberto na janela do projetor.
+6. Use os controles de Play, Pause, Stop, Tela Cheia, Volume e a nova Barra de Progresso no popup da extensão para manipular o vídeo remotamente, sem precisar clicar no telão.
+7. (Dica) Você pode clicar no ícone de "Engrenagem" para abrir as Preferências e ocultar botões que não utilize muito, deixando a interface mais minimalista!
