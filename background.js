@@ -33,3 +33,15 @@ chrome.tabs.onRemoved.addListener((tabId) => {
         console.log("Background: Aba do projetor fechada. ID removido.");
     }
 });
+
+// Limpa estado da mídia ao reiniciar o navegador, se configurado
+chrome.runtime.onStartup.addListener(() => {
+    chrome.storage.local.get(["projetorSettings"], (result) => {
+        const settings = result.projetorSettings || {};
+        // Se a opção não existir, assumimos true (padrão)
+        if (settings.prefMemorizarMidia === false) {
+            chrome.storage.local.remove("midiaState");
+            console.log("Background: Galeria de mídias limpa ao iniciar (prefMemorizarMidia = false)");
+        }
+    });
+});

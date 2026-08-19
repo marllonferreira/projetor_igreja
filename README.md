@@ -1,46 +1,67 @@
-# Projetor Igreja (v2.0)
+# Projetor Igreja
 
 <div align="center">
-  <img src="doc/01.PNG" width="300" alt="Exemplo de Uso">
+  <p>
+    <img src="https://img.shields.io/badge/vers%C3%A3o-3.0-blue.svg" alt="Versão">
+    <img src="https://img.shields.io/badge/plataforma-Chrome%20Extension-4285F4.svg" alt="Plataforma">
+    <img src="https://img.shields.io/badge/HTML5%20|%20CSS3%20|%20JS-Vanilla-F7DF1E.svg" alt="Tecnologias">
+    <a href="LICENSE"><img src="https://img.shields.io/badge/licen%C3%A7a-MIT-green.svg" alt="Licença"></a>
+  </p>
 </div>
 
-Uma extensão para navegadores baseados em Chromium (Google Chrome, Edge, Brave) desenvolvida especificamente para facilitar e profissionalizar a projeção de vídeos do YouTube em igrejas, cultos e eventos. Ela limpa toda a interface do YouTube, removendo distrações, e oferece um painel de controle remoto avançado diretamente pelo menu da extensão.
+<div align="center">
+  <table>
+    <tr>
+      <td align="center"><img src="doc/youtube.PNG" width="220" alt="Módulo YouTube"><br><b>YouTube</b></td>
+      <td align="center"><img src="doc/media.PNG" width="220" alt="Módulo Mídia"><br><b>Mídia</b></td>
+      <td align="center"><img src="doc/biblia.PNG" width="220" alt="Módulo Bíblia"><br><b>Bíblia</b></td>
+    </tr>
+  </table>
+</div>
+
+Uma extensão para navegadores baseados em Chromium (Google Chrome, Edge, Brave) desenvolvida especificamente para facilitar e profissionalizar a projeção multimídia em igrejas, cultos e eventos. Com um **sistema modular**, ela permite gerenciar de um só lugar projeções de vídeos do YouTube, leitura de versículos bíblicos e exibição de imagens locais, tudo com um painel de controle remoto avançado e uma saída de vídeo extremamente limpa.
+
+## 🧩 Módulos do Sistema
+
+### 🔴 Módulo YouTube
+- **Limpeza de Interface:** Oculta completamente barra de pesquisa, comentários, vídeos sugeridos, chat ao vivo e o título do vídeo.
+- **Controle Remoto Sincronizado:** Play/Pause, Stop (escurece a tela e reinicia o tempo), Tela Cheia e Controle de Volume (com botão Mute).
+- **Acompanhamento de Status:** Barra de progresso visível no popup mostrando o tempo decorrido do vídeo.
+- **Modo Blackout (Pós-Culto):** Quando o vídeo termina, a tela escurece e bloqueia o autoplay nativo do YouTube, evitando vídeos surpresas.
+
+### 🖼️ Módulo Mídia (Imagens)
+- **Seleção Flexível:** Carregue arquivos de imagem individuais ou selecione uma pasta inteira de uma vez.
+- **Galeria Interativa:** Visualize miniaturas das mídias carregadas com destaque na imagem que está sendo projetada.
+- **Manipulação Ao Vivo:** Ajuste o zoom para adequar à tela e rotacione as imagens em 90 graus (ideal para fotos de celular).
+- **Transição Suave:** Encerre a apresentação de mídia a qualquer momento com um clique, aplicando um "fade out" escuro na tela.
+
+### 📖 Módulo Bíblia
+- **Projeção de Versículos:** Escolha versão (NVI, ARA, ACF, etc), Livro, Capítulo e os versículos desejados, que são buscados rapidamente via API.
+- **Paginação:** Agrupe múltiplos versículos por tela (ex: 3 versículos por vez) e passe os "slides" facilmente pelos botões de Anterior/Próximo.
+- **Ajustes Rápidos:** Possibilidade de ajustar o Zoom rapidamente de dentro do próprio painel para melhorar a legibilidade no telão.
 
 ## 🚀 Recursos Principais
-
-- **Limpeza de Interface Automática:** Oculta completamente barra de pesquisa, comentários, vídeos sugeridos, chat ao vivo e o título do vídeo, deixando apenas o conteúdo visual em destaque.
-- **Ajuste Automático:** Força o player do YouTube para o modo cinema/teatro e maximiza o vídeo.
-- **Painel de Controle Remoto via Popup:** 
-  - Controle unificado de **Play/Pause**, sincronizado em tempo real.
-  - Função de **Stop** real (interrompe, escurece a tela e reinicia o tempo).
-  - Alternância de **Tela Cheia** com apenas um clique.
-  - **Barra de Progresso e Título (NOVO):** Acompanhe o título do vídeo atual, e o progresso do tempo (minutos e segundos) direto do popup sem precisar olhar para o telão.
-  - Controle de Volume integrado com botão rápido de Mudo (Mute).
-- **Menu de Preferências (NOVO):** Personalize sua extensão ativando/desativando botões para limpar o painel. Você também pode definir se a janela abre em Tela Cheia por padrão, e em qual monitor ela deve abrir.
-- **Segurança Antifalhas:** O botão "Fechar Telão" exige clique duplo para confirmação, evitando que a projeção seja desligada acidentalmente no meio do culto.
-- **Modo Blackout de Segurança (Pós-Culto):** Quando o vídeo termina, a tela escurece (blackout total) automaticamente e o autoplay nativo do YouTube é bloqueado, evitando que outro vídeo inicie de surpresa.
-- **Gerenciamento Inteligente de Abas:** Botão para abrir uma tela de projeção exclusiva e enviar os vídeos para ela em tempo real. Possui detecção aprimorada e notificações amigáveis diretamente na interface.
+- **Gerenciamento Inteligente de Abas e Telas:** Botão para abrir o telão em uma janela limpa, que detecta automaticamente seu monitor secundário e pode iniciar já em Fullscreen.
+- **Menu de Preferências (Global):** Personalize sua extensão ativando/desativando botões, definindo a resolução da janela, cor da fonte e níveis de zoom padrão para a Bíblia.
+- **Armazenamento Seguro:** As imagens carregadas na mídia ficam seguras no seu armazenamento local, permitindo o carregamento de várias imagens em alta resolução.
 
 ## 📦 Como Instalar a Extensão
 
-Como a extensão será instalada de forma local, siga o passo a passo seguro abaixo:
-
-1. **Baixe os arquivos:** Faça o download do código-fonte ou clone este repositório no seu computador e extraia os arquivos para uma pasta segura de sua escolha.
-2. **Acesse as Extensões:** Abra o seu navegador Chrome, Edge ou Brave, digite na barra de endereços `chrome://extensions/` (ou `edge://extensions/`) e pressione **Enter**.
-3. **Modo do Desenvolvedor:** No canto superior direito da tela de extensões, ative a chave ou botão chamado **"Modo do desenvolvedor"** (Developer mode).
-4. **Carregar a Extensão:** Clique no botão **"Carregar sem compactação"** (Load unpacked) que aparecerá no canto superior esquerdo.
-5. **Selecione a Pasta:** Navegue até a pasta onde você salvou ou extraiu os arquivos da extensão (a pasta que contém o arquivo `manifest.json`) e selecione-a.
-6. **Tudo pronto!** A extensão **Projetor Igreja** aparecerá na sua lista. Para facilitar o uso, clique no ícone de "quebra-cabeça" 🧩 na barra superior do navegador e **fixe (pin)** o ícone da extensão para que ele fique sempre visível.
+1. **Baixe os arquivos:** Faça o download ou clone este repositório no seu computador e extraia os arquivos.
+2. **Acesse as Extensões:** Abra o seu navegador (Chrome/Edge/Brave), digite na barra de endereços `chrome://extensions/` e pressione **Enter**.
+3. **Modo do Desenvolvedor:** No canto superior direito, ative a chave **"Modo do desenvolvedor"** (Developer mode).
+4. **Carregar a Extensão:** Clique no botão **"Carregar sem compactação"** (Load unpacked) no canto superior esquerdo.
+5. **Selecione a Pasta:** Navegue até a pasta da extensão (que contém o `manifest.json`) e selecione-a.
+6. **Fixe o ícone!** A extensão aparecerá na lista. Clique no ícone de "quebra-cabeça" 🧩 na barra do navegador e **fixe (pin)** o Projetor Igreja.
 
 ## 💻 Como Usar
 
-1. Clique no ícone da extensão na sua barra superior.
-2. Clique no botão **"Abrir Telão"**. Isso abrirá uma janela limpa, que você pode arrastar para o seu segundo monitor (telão).
-3. Na sua janela principal, navegue normalmente pelo YouTube e encontre o vídeo desejado.
-4. Abra o vídeo, clique no ícone da extensão novamente e escolha **"Projetar Vídeo Atual"**.
-5. O vídeo será automaticamente enviado e aberto na janela do projetor. 
-6. Use os controles de Play, Pause, Stop, Tela Cheia, Volume e a nova Barra de Progresso no popup da extensão para manipular o vídeo remotamente, sem precisar clicar no telão.
-7. **(Dica)** Você pode clicar no ícone de "Engrenagem" ⚙️ para abrir as Preferências e ocultar botões que não utilize muito, deixando a interface mais minimalista!
+1. Clique no ícone da extensão na barra superior para abrir o popup.
+2. Clique no botão **"Abrir Telão"**. Uma tela escura se abrirá no seu segundo monitor (projetor).
+3. **Para YouTube:** No seu navegador, abra um vídeo no YouTube, selecione a aba 🔴 YouTube no popup e clique em "Projetar Vídeo Atual".
+4. **Para Mídia:** Selecione a aba 🖼️ Mídia, carregue as imagens que vai usar no culto e clique na imagem desejada para enviá-la ao telão instantaneamente.
+5. **Para Bíblia:** Selecione a aba 📖 Bíblia, escolha o texto, os ajustes de formatação e clique em "Projetar". Navegue pelos versículos com os botões de Avançar/Voltar.
+6. **(Dica)** Você pode clicar no ícone de "Engrenagem" ⚙️ para abrir as Preferências e deixar a extensão do seu jeito!
 
 ## 📄 Licença
 

@@ -12,8 +12,9 @@
             --surface: #17171f;
             --border: #2a2a38;
             --accent: #7c5cbf;
+            --accent-hover: #9965f4;
             --accent-glow: rgba(124, 92, 191, 0.35);
-            --red: #c0392b;
+            --red: #cf6679;
             --red-glow: rgba(192, 57, 43, 0.35);
             --green: #27ae60;
             --green-glow: rgba(39, 174, 96, 0.35);
@@ -21,6 +22,21 @@
             --text: #e8e8f0;
             --muted: #6b6b82;
             --radius: 10px;
+        }
+
+        html {
+            color-scheme: dark;
+        }
+
+        /* Remove setas dos inputs numéricos */
+        input[type=number]::-webkit-inner-spin-button,
+        input[type=number]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        input[type=number] {
+            appearance: textfield;
         }
 
         * {
@@ -143,6 +159,41 @@
             opacity: 0.85;
         }
 
+        /* ── Tabs ── */
+        .tabs {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 12px;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 8px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            color: var(--muted);
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .tab-btn.active {
+            background: linear-gradient(135deg, var(--accent), #5b3fa0);
+            border-color: var(--accent);
+            color: #fff;
+            box-shadow: 0 0 12px var(--accent-glow);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
         .btn-abrir {
             background: linear-gradient(135deg, #0891b2, #0e6f88);
             border-color: #0891b2;
@@ -153,7 +204,7 @@
             box-shadow: 0 4px 16px rgba(8, 145, 178, 0.4);
             border-color: #22d3ee;
         }
-        
+
         .btn-fechar {
             background: linear-gradient(135deg, #8e44ad, #732d91);
             border-color: #8e44ad;
@@ -229,13 +280,16 @@
         #btnPlayPause:hover {
             box-shadow: 0 4px 16px var(--green-glow);
         }
-        
+
         #btnStop {
             background: linear-gradient(135deg, var(--red), #a93226);
             border-color: var(--red);
             color: #fff;
         }
-        #btnStop:hover { box-shadow: 0 4px 16px var(--red-glow); }
+
+        #btnStop:hover {
+            box-shadow: 0 4px 16px var(--red-glow);
+        }
 
         #btnFullscreen {
             background: linear-gradient(135deg, var(--accent), #5b3fa0);
@@ -262,7 +316,8 @@
             margin-bottom: 8px;
         }
 
-        .volume-title, .progress-title {
+        .volume-title,
+        .progress-title {
             font-size: 9px;
             font-weight: 700;
             color: var(--muted);
@@ -315,7 +370,8 @@
             box-shadow: 0 0 8px rgba(14, 143, 161, 0.3);
         }
 
-        #volumeSlider, #progressSlider {
+        #volumeSlider,
+        #progressSlider {
             flex: 1;
             -webkit-appearance: none;
             appearance: none;
@@ -441,6 +497,201 @@
         .btn-save:hover {
             box-shadow: 0 4px 16px var(--green-glow);
         }
+
+        /* ── Galeria de Mídia ── */
+        .midia-toolbar {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 10px;
+        }
+
+        .midia-toolbar .btn {
+            margin-bottom: 0;
+            justify-content: center;
+            font-size: 10px;
+            padding: 8px 6px;
+        }
+
+        .midia-gallery {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 6px;
+            max-height: 180px;
+            overflow-y: auto;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 6px;
+            margin-bottom: 10px;
+        }
+
+        .midia-gallery:empty::after {
+            content: 'Nenhuma imagem carregada';
+            grid-column: 1 / -1;
+            text-align: center;
+            font-size: 10px;
+            color: var(--muted);
+            padding: 20px 0;
+        }
+
+        .midia-gallery .gallery-item {
+            position: relative;
+            aspect-ratio: 1;
+            border-radius: 6px;
+            overflow: hidden;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: border-color 0.2s, transform 0.15s;
+            background: #111;
+        }
+
+        .midia-gallery .gallery-item:hover {
+            transform: scale(1.04);
+            border-color: var(--accent);
+        }
+
+        .midia-gallery .gallery-item.active {
+            border-color: #2ecc71;
+            border-width: 3px;
+            box-shadow: 0 0 0 2px #2ecc71, 0 0 18px rgba(46,204,113,0.7);
+            transform: scale(1.05);
+        }
+
+        .midia-gallery .gallery-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .midia-gallery .gallery-item .remove-btn {
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            width: 16px;
+            height: 16px;
+            background: rgba(0,0,0,0.7);
+            border: none;
+            border-radius: 50%;
+            color: #fff;
+            font-size: 9px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.15s;
+            padding: 0;
+            line-height: 1;
+        }
+
+        .midia-gallery .gallery-item:hover .remove-btn {
+            opacity: 1;
+        }
+
+        .midia-controls {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 10px;
+        }
+
+        .midia-controls .ctrl-row {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .midia-controls .ctrl-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .midia-controls .ctrl-label {
+            font-size: 9px;
+            font-weight: 700;
+            color: var(--muted);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            flex-shrink: 0;
+            min-width: 28px;
+        }
+
+        .btn-midia-ctrl {
+            flex: 1;
+            padding: 7px 6px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            font-size: 14px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.18s ease;
+        }
+
+        .btn-midia-ctrl:hover {
+            background: #22223a;
+            border-color: var(--accent);
+        }
+
+        .btn-zoom-step {
+            width: 20px;
+            height: 20px;
+            flex-shrink: 0;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            color: var(--text);
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.15s ease;
+            padding: 0;
+            line-height: 1;
+        }
+
+        .btn-zoom-step:hover {
+            background: #22223a;
+            border-color: var(--accent);
+        }
+
+        #midiaZoomSlider {
+            flex: 1;
+            min-width: 30px;
+            -webkit-appearance: none;
+            appearance: none;
+            height: 4px;
+            border-radius: 4px;
+            background: #2a2a3a;
+            outline: none;
+            cursor: pointer;
+        }
+
+        #midiaZoomSlider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent), #5b3fa0);
+            cursor: pointer;
+            box-shadow: 0 0 6px var(--accent-glow);
+        }
+
+        #midiaZoomLabel {
+            font-size: 9px;
+            font-weight: 700;
+            color: var(--accent);
+            min-width: 28px;
+            width: 28px;
+            flex-shrink: 0;
+            text-align: right;
+            margin-left: -2px;
+        }
     </style>
 </head>
 
@@ -470,100 +721,218 @@
                     <span>Fechar Telão</span>
                 </button>
             </div>
-            <button class="btn btn-enviar" id="enviarVideo">
-                <span class="btn-icon">▶️</span>
-                <span>Projetar Vídeo Atual</span>
-            </button>
         </div>
 
         <div class="divider"></div>
 
-        <!-- Controles -->
-        <div class="section-label" id="labelControles">Controles</div>
-        <div class="controls-grid" id="controlsGrid">
-            <button class="btn-control" id="btnPlayPause" style="background: linear-gradient(135deg, #555, #333); border-color: #555;">
-                <span class="icon">⏸</span>
-                <span>PAUSE</span>
-            </button>
-            <button class="btn-control" id="btnStop">
-                <span class="icon">⏹</span>
-                <span>STOP</span>
-            </button>
-            <button class="btn-control" id="btnFullscreen">
-                <span class="icon">⛶</span>
-                <span>T. CHEIA</span>
-            </button>
+        <!-- Abas Principais -->
+        <div class="tabs">
+            <div class="tab-btn main-tab-btn active" data-target="youtubeView"><span style="color: #e74c3c; margin-right: 2px;">▶</span> YouTube</div>
+            <div class="tab-btn main-tab-btn" data-target="midiaView">🖼️ Mídia</div>
+            <div class="tab-btn main-tab-btn" data-target="bibliaView">📖 Bíblia</div>
         </div>
 
-        <!-- Volume -->
-        <div class="volume-section" id="volumeSection">
-            <div class="volume-header">
-                <span class="volume-title">🔊 Volume</span>
-                <span id="volumeLabel">100%</span>
-            </div>
-            <div class="volume-row">
-                <button id="btnMute" title="Ativar / Desativar Áudio">🔊</button>
-                <input type="range" id="volumeSlider" min="0" max="100" value="100">
-            </div>
-        </div>
+        <!-- Aba YouTube -->
+        <div id="youtubeView" class="tab-content main-tab-content active">
+            <button class="btn btn-enviar" id="enviarVideo" style="margin-bottom: 12px;">
+                <span class="btn-icon" style="color: #fff;">▶</span>
+                <span>Projetar Vídeo Atual</span>
+            </button>
+            <div class="divider"></div>
 
-        <!-- Progresso -->
-        <div class="volume-section" id="progressSection" style="margin-top: 12px;">
-            <div class="volume-header">
-                <span class="progress-title">⏳ Progresso</span>
-                <span id="progressLabel">00:00 / 00:00</span>
+            <!-- Controles -->
+            <div class="section-label" id="labelControles">Controles</div>
+            <div class="controls-grid" id="controlsGrid">
+                <button class="btn-control" id="btnPlayPause"
+                    style="background: linear-gradient(135deg, #555, #333); border-color: #555;">
+                    <span class="icon">⏸</span>
+                    <span>PAUSE</span>
+                </button>
+                <button class="btn-control" id="btnStop">
+                    <span class="icon">⏹</span>
+                    <span>STOP</span>
+                </button>
+                <button class="btn-control" id="btnFullscreen">
+                    <span class="icon">⛶</span>
+                    <span>T. CHEIA</span>
+                </button>
             </div>
-            <div id="videoTitleLabel" style="font-size: 10px; color: #aaa; margin-bottom: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block;">Nenhum vídeo carregado</div>
-            <div class="volume-row">
-                <input type="range" id="progressSlider" min="0" max="100" value="0" style="pointer-events: none;">
+
+            <!-- Volume -->
+            <div class="volume-section" id="volumeSection">
+                <div class="volume-header">
+                    <span class="volume-title">🔊 Volume</span>
+                    <span id="volumeLabel">100%</span>
+                </div>
+                <div class="volume-row">
+                    <button id="btnMute" title="Ativar / Desativar Áudio">🔊</button>
+                    <input type="range" id="volumeSlider" min="0" max="100" value="100">
+                </div>
             </div>
-        </div>
+
+            <!-- Progresso -->
+            <div class="volume-section" id="progressSection" style="margin-top: 12px;">
+                <div class="volume-header">
+                    <span class="progress-title">⏳ Progresso</span>
+                    <span id="progressLabel">00:00 / 00:00</span>
+                </div>
+                <div id="videoTitleLabel"
+                    style="font-size: 10px; color: #aaa; margin-bottom: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block;">
+                    Nenhum vídeo carregado</div>
+                <div class="volume-row">
+                    <input type="range" id="progressSlider" min="0" max="100" value="0" style="pointer-events: none;">
+                </div>
+            </div>
+        </div> <!-- Fim Aba YouTube -->
+
+        <!-- Aba Bíblia -->
+        <div id="bibliaView" class="tab-content main-tab-content">
+            <div class="form-group">
+                <label for="bibliaVersao">Versão:</label>
+                <select id="bibliaVersao" class="form-control">
+                    <option value="NVIPT">NVI - Nova Versão Internacional</option>
+                    <option value="NVT">NVT - Nova Versão Transformadora</option>
+                    <option value="ARA">ARA - Almeida Revista e Atualizada</option>
+                    <option value="ARC09">ARC - Almeida Revista e Corrigida</option>
+                    <option value="ACF11">ACF - Almeida Corrigida Fiel</option>
+                    <option value="NAA">NAA - Nova Almeida Atualizada</option>
+                    <option value="NTLH">NTLH - Nova Tradução Linguagem Hoje</option>
+                    <option value="KJA">KJA - King James Atualizada</option>
+                    <option value="NBV07">NBV - Nova Bíblia Viva</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="bibliaLivro">Livro:</label>
+                <select id="bibliaLivro" class="form-control"></select>
+            </div>
+            <div class="flex-row">
+                <div class="form-group" style="flex: 1; margin-bottom: 0;">
+                    <label for="bibliaCapitulo">Cap.:</label>
+                    <input type="number" id="bibliaCapitulo" class="form-control" value="1" min="1" max="150">
+                </div>
+                <div class="form-group" style="flex: 1; margin-bottom: 0;">
+                    <label for="bibliaVersiculo">Vers.:</label>
+                    <input type="number" id="bibliaVersiculo" class="form-control" placeholder="1" min="1">
+                </div>
+                <div class="form-group" style="flex: 1; margin-bottom: 0;">
+                    <label for="bibliaAgrupar">Por tela:</label>
+                    <input type="number" id="bibliaAgrupar" class="form-control" value="1" min="1" max="10">
+                </div>
+                <div class="form-group" style="flex: 1; margin-bottom: 0;">
+                    <label for="bibliaZoomRapido">Zoom %:</label>
+                    <input type="number" id="bibliaZoomRapido" class="form-control" value="100" min="50" max="400" step="10">
+                </div>
+            </div>
+            <div class="flex-row" style="margin-top: 12px; margin-bottom: 0;">
+                <button class="btn btn-enviar" id="projetarBiblia"
+                    style="flex: 2; margin-bottom: 0; background: linear-gradient(135deg, #0984e3, #0652DD); border-color: #0984e3;">
+                    <span class="btn-icon">📖</span>
+                    <span>Projetar</span>
+                </button>
+                <button class="btn" id="encerrarBiblia"
+                    style="flex: 1; margin-bottom: 0; background: linear-gradient(135deg, #1a1a2e, #16213e); border-color: #444; color: var(--muted); justify-content: center;">
+                    <span class="btn-icon">⏹</span>
+                    <span>Encerrar</span>
+                </button>
+            </div>
+
+            <!-- Paginação -->
+            <div id="containerPaginacao" style="display: none;">
+                <div class="section-label" style="margin-top: 12px;">Controle (Passar Versículos)</div>
+                <div class="flex-row">
+                    <button class="btn btn-abrir" id="btnVersiculoAnterior"
+                        style="flex: 1; justify-content: center; background: linear-gradient(135deg, #4b6584, #778ca3); border-color: #4b6584;">
+                        <span class="btn-icon">◀</span>
+                        <span>Anterior</span>
+                    </button>
+                    <button class="btn btn-abrir" id="btnVersiculoProximo"
+                        style="flex: 1; justify-content: center; background: linear-gradient(135deg, #0984e3, #0652DD); border-color: #0984e3;">
+                        <span>Próximo</span>
+                        <span class="btn-icon">▶</span>
+                    </button>
+                </div>
+            </div>
+
+            <div style="font-size: 9px; color: var(--muted); text-align: center; margin-top: 12px;">Fornecido por
+                Bolls.life API</div>
+        </div> <!-- Fim Aba Bíblia -->
+
+        <!-- Aba Mídia -->
+        <div id="midiaView" class="tab-content main-tab-content">
+
+            <!-- Botões de Seleção -->
+            <div class="midia-toolbar">
+                <button class="btn btn-enviar" id="midiaSelectFiles" style="flex: 1; margin-bottom: 0; background: linear-gradient(135deg, #8e44ad, #6c3483); border-color: #8e44ad;">
+                    <span class="btn-icon">🖼️</span>
+                    <span>Imagem(ns)</span>
+                </button>
+                <button class="btn btn-enviar" id="midiaSelectFolder" style="flex: 1; margin-bottom: 0; background: linear-gradient(135deg, #5b3fa0, #3d2b7a); border-color: #5b3fa0;">
+                    <span class="btn-icon">📁</span>
+                    <span>Pasta</span>
+                </button>
+            </div>
+            <button class="btn btn-enviar" id="midiaLimparTudo" style="width: 100%; padding: 6px; font-size: 11px; margin-bottom: 10px; background: linear-gradient(135deg, #c0392b, #922b21); border-color: #922b21; margin-top: -4px;">
+                <span class="btn-icon">🗑️</span>
+                <span>Limpar Todas as Imagens</span>
+            </button>
+
+            <!-- Input de arquivo oculto (aceita imagens) -->
+            <input type="file" id="midiaFileInput" accept="image/*" multiple style="display:none;">
+            <input type="file" id="midiaFolderInput" accept="image/*" webkitdirectory multiple style="display:none;">
+
+            <!-- Galeria de Miniaturas -->
+            <div class="midia-gallery" id="midiaGallery"></div>
+
+            <!-- Controles -->
+            <div class="midia-controls">
+                <!-- Navegação -->
+                <div class="ctrl-row">
+                    <span class="ctrl-label">Nav.</span>
+                    <button class="btn-midia-ctrl" id="midiaAnterior" title="Imagem Anterior">◀</button>
+                    <button class="btn-midia-ctrl" id="midiaProximo" title="Próxima Imagem">▶</button>
+                    <button class="btn-midia-ctrl" id="midiaRemoverTelao" title="Encerrar Apresentação" style="background: linear-gradient(135deg, #1a1a2e, #16213e); border-color: #444; color: var(--muted); font-size: 10px; font-weight: 600; letter-spacing: 0.3px;">⏹ Encerrar</button>
+                </div>
+                <!-- Giro -->
+                <div class="ctrl-row">
+                    <span class="ctrl-label">Giro</span>
+                    <button class="btn-midia-ctrl" id="midiaGirarEsq" title="Girar 90° à Esquerda">↩️</button>
+                    <button class="btn-midia-ctrl" id="midiaGirarDir" title="Girar 90° à Direita">↪️</button>
+                    <button class="btn-midia-ctrl" id="midiaResetTransform" title="Resetar Zoom e Rotação" style="font-size: 11px;">Reset</button>
+                </div>
+                <!-- Zoom -->
+                <div class="ctrl-row">
+                    <span class="ctrl-label">Zoom</span>
+                    <button class="btn-zoom-step" id="midiaZoomMenos" title="Diminuir Zoom">−</button>
+                    <input type="range" id="midiaZoomSlider" min="50" max="300" value="100" step="5">
+                    <button class="btn-zoom-step" id="midiaZoomMais" title="Aumentar Zoom">+</button>
+                    <span id="midiaZoomLabel">100%</span>
+                </div>
+            </div>
+        </div> <!-- Fim Aba Mídia -->
 
     </div> <!-- Fim Main View -->
 
     <!-- Settings View (hidden) -->
-    <div id="settingsView" style="display: none;">
-        <div class="section-label">Preferências</div>
+    <div id="settingsView" style="display: none; padding: 16px;">
+        <div class="section-label">Configurações Globais</div>
 
-        <div class="form-group">
+        <div class="form-group" style="margin-bottom: 8px;">
             <label for="configMonitor">Monitor Alvo:</label>
-            <select id="configMonitor" class="form-control">
-                <option value="auto">Automático (Secundário)</option>
-            </select>
+            <select id="configMonitor" class="form-control"></select>
         </div>
 
-        <div class="form-group checkbox-group">
-            <input type="checkbox" id="configFullscreen" checked>
-            <label for="configFullscreen">Abrir em Tela Cheia</label>
+        <div class="checkbox-label" style="margin-bottom: 8px;">
+            <input type="checkbox" id="configFullscreen">
+            <span>Tela Cheia ao abrir</span>
         </div>
 
-        <div class="section-label" style="margin-top: 16px;">Exibir Botões</div>
-        
-        <div class="form-group checkbox-group">
-            <input type="checkbox" id="prefShowClose" checked>
-            <label for="prefShowClose">Mostrar botão Fechar Tela</label>
-        </div>
-        <div class="form-group checkbox-group">
-            <input type="checkbox" id="prefShowStop" checked>
-            <label for="prefShowStop">Mostrar botão STOP</label>
-        </div>
-        <div class="form-group checkbox-group">
-            <input type="checkbox" id="prefShowFullscreen" checked>
-            <label for="prefShowFullscreen">Mostrar botão Tela Cheia</label>
-        </div>
-        <div class="form-group checkbox-group">
-            <input type="checkbox" id="prefShowVolume" checked>
-            <label for="prefShowVolume">Mostrar controle de Volume</label>
-        </div>
-        <div class="form-group checkbox-group">
-            <input type="checkbox" id="prefShowProgress" checked>
-            <label for="prefShowProgress">Mostrar progresso do Vídeo</label>
+        <div class="checkbox-label" style="margin-bottom: 8px;">
+            <input type="checkbox" id="prefShowClose">
+            <span>Botão Fechar Telão</span>
         </div>
 
-        <div class="section-label" style="margin-top: 16px;">Avançado</div>
-
-        <div class="form-group">
-            <label for="configWindowSize">Tamanho (se não for Tela Cheia):</label>
+        <div class="form-group" style="margin-top: 8px;">
+            <label for="configWindowSize">Resolução (se não for Tela Cheia):</label>
             <select id="configWindowSize" class="form-control" disabled>
                 <option value="1920x1080">1920 x 1080</option>
                 <option value="1280x720" selected>1280 x 720</option>
@@ -572,7 +941,54 @@
             </select>
         </div>
 
-        <button class="btn btn-save" id="btnSaveSettings">
+        <div class="tabs" style="margin-top: 20px;">
+            <div class="tab-btn active config-tab-btn" data-target="config-youtube">YouTube</div>
+            <div class="tab-btn config-tab-btn" data-target="config-biblia">Bíblia</div>
+            <div class="tab-btn config-tab-btn" data-target="config-midia">Mídia</div>
+        </div>
+
+        <div id="config-youtube" class="tab-content active config-tab-content"
+            style="padding-top: 12px; margin-bottom: 16px;">
+            <div class="checkbox-label"><input type="checkbox" id="prefShowStop"> <span>Botão Parar (Tela Preta)</span>
+            </div>
+            <div class="checkbox-label"><input type="checkbox" id="prefShowFullscreen"> <span>Botão Tela Cheia</span>
+            </div>
+            <div class="checkbox-label"><input type="checkbox" id="prefShowVolume"> <span>Controles de Volume</span>
+            </div>
+            <div class="checkbox-label"><input type="checkbox" id="prefShowProgress"> <span>Barra de Progresso</span>
+            </div>
+        </div>
+
+        <div id="config-biblia" class="tab-content config-tab-content" style="padding-top: 12px; margin-bottom: 16px;">
+            <div class="flex-row">
+                <div class="form-group" style="flex: 1; margin-bottom: 0;">
+                    <label for="bibliaCor">Cor do Texto:</label>
+                    <input type="color" id="bibliaCor" class="form-control" value="#ffffff"
+                        style="padding: 0; height: 30px; cursor: pointer;">
+                </div>
+                <div class="form-group" style="flex: 1; margin-bottom: 0;">
+                    <label for="bibliaZoom">Zoom (%):</label>
+                    <input type="number" id="bibliaZoom" class="form-control" value="100" min="50" max="400" step="10">
+                </div>
+            </div>
+            <button class="btn btn-abrir" id="btnResetBiblia"
+                style="margin-top: 16px; justify-content: center; background: #333; border-color: #444; width: 100%;">
+                <span>🔄 Resetar para Padrões</span>
+            </button>
+        </div>
+
+        <div id="config-midia" class="tab-content config-tab-content" style="padding-top: 12px; margin-bottom: 16px;">
+            <div class="checkbox-label">
+                <input type="checkbox" id="prefMemorizarMidia" checked>
+                <span>Memorizar imagens ao fechar o navegador</span>
+            </div>
+            <div style="font-size: 11px; color: var(--muted); margin-top: 8px;">
+                *O navegador sempre abre a última pasta usada por padrão ao selecionar arquivos, conforme diretriz de segurança do Windows/Navegador.
+            </div>
+        </div>
+
+
+        <button class="btn btn-save" id="btnSaveSettings" style="margin-top: 16px;">
             <span class="btn-icon">💾</span>
             <span>Salvar e Voltar</span>
         </button>

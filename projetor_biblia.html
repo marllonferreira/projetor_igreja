@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <title>PROJEÇÃO - BÍBLIA</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0e0e14;
+            --text-main: #ffffff;
+            --text-secondary: #0891b2; /* cyan/blue from the popup */
+            --accent: #7c5cbf;
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            background: var(--bg);
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Inter', sans-serif;
+            color: var(--text-main);
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1600px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            gap: 40px;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+
+        .container.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .versiculo-texto {
+            font-size: 5.5vw;
+            font-weight: 600;
+            line-height: 1.4;
+            text-shadow: 0 4px 20px rgba(0,0,0,0.8);
+        }
+
+        .verse-num {
+            font-size: 0.6em;
+            font-weight: 800;
+            color: var(--text-secondary);
+            vertical-align: super;
+            margin-right: 8px;
+            margin-left: 8px;
+        }
+
+        .referencia-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            font-size: 2.5vw;
+            font-weight: 800;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .versao-badge {
+            font-size: 0.5em;
+            padding: 8px 16px;
+            background: rgba(124, 92, 191, 0.2);
+            border: 1px solid var(--accent);
+            border-radius: 50px;
+            color: #d1bdf5;
+            letter-spacing: 1px;
+            vertical-align: middle;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container" id="conteudoBiblia">
+        <div class="versiculo-texto" id="texto-alvo">
+            Aguardando texto...
+        </div>
+        <div class="referencia-container">
+            <span id="referencia-alvo">BÍBLIA</span>
+            <span class="versao-badge" id="versao-alvo">--</span>
+        </div>
+    </div>
+
+    <script src="projetor_biblia.js"></script>
+</body>
+
+</html>
