@@ -47,9 +47,18 @@ Uma extensão para navegadores baseados em Chromium (Google Chrome, Edge, Brave)
 
 ## 📦 Como Instalar a Extensão
 
-1. **Baixe os arquivos:** Faça o download ou clone este repositório no seu computador e extraia os arquivos.
-2. **Acesse as Extensões:** Abra o seu navegador (Chrome/Edge/Brave), digite na barra de endereços `chrome://extensions/` e pressione **Enter**.
-3. **Modo do Desenvolvedor:** No canto superior direito, ative a chave **"Modo do desenvolvedor"** (Developer mode).
+### Método 1: Versão Otimizada (Recomendado)
+1. Vá na aba **Releases / Versões** (na lateral direita do GitHub).
+2. Baixe o arquivo `projetor_igreja.zip` da versão mais recente.
+3. Extraia o conteúdo para uma pasta segura no seu computador.
+
+### Método 2: Código Completo (Repositório)
+1. Faça o download do código-fonte completo (Download ZIP) ou clone este repositório no seu computador.
+2. Extraia os arquivos para uma pasta segura.
+
+### Habilitando no Navegador
+1. Abra o seu navegador (Chrome/Edge/Brave), digite na barra de endereços `chrome://extensions/` e pressione **Enter**.
+2. No canto superior direito, ative a chave **"Modo do desenvolvedor"** (Developer mode).
 4. **Carregar a Extensão:** Clique no botão **"Carregar sem compactação"** (Load unpacked) no canto superior esquerdo.
 5. **Selecione a Pasta:** Navegue até a pasta da extensão (que contém o `manifest.json`) e selecione-a.
 6. **Fixe o ícone!** A extensão aparecerá na lista. Clique no ícone de "quebra-cabeça" 🧩 na barra do navegador e **fixe (pin)** o Projetor Igreja.
