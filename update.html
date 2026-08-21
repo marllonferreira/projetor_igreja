@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Projetor Igreja — Atualização Disponível</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0a0a12;
+            --surface: #111119;
+            --surface2: #17171f;
+            --border: #2a2a38;
+            --accent: #7c5cbf;
+            --accent-hover: #9965f4;
+            --accent-glow: rgba(124, 92, 191, 0.4);
+            --green: #2ecc71;
+            --green-glow: rgba(46, 204, 113, 0.35);
+            --text: #e8e8f0;
+            --muted: #6b6b82;
+            --muted2: #9b9bbb;
+            --radius: 12px;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        html { color-scheme: dark; }
+
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            padding: 40px 20px;
+        }
+
+        /* Fundo animado */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background:
+                radial-gradient(ellipse at 20% 20%, rgba(124, 92, 191, 0.12) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 80%, rgba(46, 204, 113, 0.06) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            max-width: 680px;
+        }
+
+        /* ── Header ── */
+        .page-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+
+        .logo-box {
+            width: 56px;
+            height: 56px;
+            background: linear-gradient(135deg, #7c5cbf, #5b3fa0);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 26px;
+            flex-shrink: 0;
+            box-shadow: 0 0 28px var(--accent-glow);
+        }
+
+        .page-header-text h1 {
+            font-size: 20px;
+            font-weight: 800;
+            letter-spacing: -0.3px;
+        }
+
+        .page-header-text p {
+            font-size: 13px;
+            color: var(--muted2);
+            margin-top: 3px;
+        }
+
+        /* ── Badge de versão ── */
+        .version-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        .badge-current {
+            background: rgba(107, 107, 130, 0.15);
+            border: 1px solid var(--border);
+            color: var(--muted2);
+        }
+
+        .badge-new {
+            background: linear-gradient(135deg, rgba(124, 92, 191, 0.3), rgba(91, 63, 160, 0.3));
+            border: 1px solid var(--accent);
+            color: #c7aeff;
+        }
+
+        .badge-arrow {
+            color: var(--muted);
+            font-size: 16px;
+        }
+
+        .badge-date {
+            background: rgba(46, 204, 113, 0.1);
+            border: 1px solid rgba(46, 204, 113, 0.3);
+            color: var(--green);
+        }
+
+        /* ── Card principal ── */
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 16px;
+        }
+
+        .card-title {
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 1.2px;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .card-title::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--border);
+        }
+
+        /* ── Notas de lançamento ── */
+        .changelog {
+            font-size: 13.5px;
+            color: var(--muted2);
+            line-height: 1.75;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        .changelog strong { color: var(--text); }
+
+        /* Parsing de markdown básico do GitHub */
+        .changelog .ch-h2 {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text);
+            margin: 16px 0 6px;
+        }
+
+        .changelog .ch-h3 {
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--muted2);
+            margin: 12px 0 4px;
+        }
+
+        .changelog .ch-li {
+            display: flex;
+            align-items: flex-start;
+            gap: 6px;
+            padding: 3px 0;
+        }
+
+        .changelog .ch-li-dot {
+            color: var(--accent);
+            font-size: 16px;
+            line-height: 1.5;
+            flex-shrink: 0;
+        }
+
+        /* ── Ações ── */
+        .actions {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .btn-download {
+            flex: 1;
+            min-width: 180px;
+            padding: 14px 20px;
+            background: linear-gradient(135deg, #7c5cbf, #5b3fa0);
+            border: none;
+            border-radius: var(--radius);
+            color: #fff;
+            font-family: 'Inter', sans-serif;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            letter-spacing: 0.3px;
+            box-shadow: 0 4px 20px var(--accent-glow);
+        }
+
+        .btn-download:hover {
+            background: linear-gradient(135deg, #9965f4, #7c5cbf);
+            box-shadow: 0 6px 28px rgba(124, 92, 191, 0.6);
+            transform: translateY(-1px);
+        }
+
+        .btn-download:active {
+            transform: translateY(0);
+        }
+
+        .btn-download:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-secondary {
+            padding: 14px 20px;
+            background: transparent;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            color: var(--muted2);
+            font-family: 'Inter', sans-serif;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.18s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            text-decoration: none;
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--accent);
+            color: var(--text);
+        }
+
+        /* ── Status do download ── */
+        .download-status {
+            display: none;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 16px;
+            background: rgba(46, 204, 113, 0.08);
+            border: 1px solid rgba(46, 204, 113, 0.25);
+            border-radius: var(--radius);
+            font-size: 13px;
+            color: var(--green);
+            font-weight: 600;
+            margin-top: 12px;
+        }
+
+        .download-status.show { display: flex; }
+
+        .download-status.error {
+            background: rgba(231, 76, 60, 0.08);
+            border-color: rgba(231, 76, 60, 0.25);
+            color: #e74c3c;
+        }
+
+        /* ── Estado de carregamento ── */
+        .loading-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 60px 20px;
+            gap: 16px;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid var(--border);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .loading-state p {
+            font-size: 13px;
+            color: var(--muted);
+        }
+
+        /* ── Estado já atualizado ── */
+        .up-to-date {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 48px 20px;
+            gap: 12px;
+            text-align: center;
+        }
+
+        .up-to-date.show { display: flex; }
+
+        .up-to-date .big-icon {
+            font-size: 48px;
+            margin-bottom: 4px;
+        }
+
+        .up-to-date h2 {
+            font-size: 17px;
+            font-weight: 700;
+        }
+
+        .up-to-date p {
+            font-size: 13px;
+            color: var(--muted2);
+        }
+
+        /* ── Rodapé ── */
+        .page-footer {
+            text-align: center;
+            margin-top: 24px;
+            font-size: 11px;
+            color: var(--muted);
+        }
+
+        .page-footer a {
+            color: var(--accent);
+            text-decoration: none;
+        }
+
+        .page-footer a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <div class="container">
+
+        <!-- Header -->
+        <div class="page-header">
+            <div class="logo-box">🎬</div>
+            <div class="page-header-text">
+                <h1>Projetor Igreja</h1>
+                <p id="pageSubtitle">Carregando informações de atualização...</p>
+            </div>
+        </div>
+
+        <!-- Conteúdo principal (carregado via JS) -->
+        <div id="mainContent">
+            <div class="card loading-state" id="loadingState">
+                <div class="spinner"></div>
+                <p>Verificando informações da atualização...</p>
+            </div>
+        </div>
+
+        <!-- Rodapé -->
+        <div class="page-footer">
+            Projetor Igreja &mdash; Desenvolvido por <a href="https://github.com/marllonferreira/projetor_igreja" target="_blank">Marllon Ferreira</a>
+        </div>
+
+    </div>
+
+    <script src="update.js"></script>
+</body>
+</html>

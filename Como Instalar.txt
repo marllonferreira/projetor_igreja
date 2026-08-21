@@ -22,6 +22,13 @@ Habilitando no Navegador
 4. Selecione a pasta onde você extraiu os arquivos da extensão (a pasta que contém o arquivo manifest.json).
 5. Tudo pronto! A extensão Projetor Igreja aparecerá na lista. Clique no ícone de "quebra-cabeça" na barra do navegador e fixe (pin) a extensão para facilitar o acesso.
 
+Como Atualizar a Extensão
+----------------------------------------
+1. A extensão possui um sistema de Atualização Automática Inteligente. Quando houver uma nova versão, ela exibirá uma notificação direto na sua tela!
+2. Clique no botão "Saiba Mais" na notificação para ver o que mudou e faça o download da nova versão (arquivo .zip).
+3. Extraia o conteúdo do novo arquivo .zip por cima dos arquivos antigos, substituindo-os na mesma pasta usada para a instalação.
+4. Volte em chrome://extensions/ e clique no botão de Recarregar (seta circular em formato de ciclo) no card do Projetor Igreja. Pronto! Sua extensão já está na versão mais nova.
+
 
 Como Usar
 =========

@@ -1,14 +1,17 @@
 {
     "manifest_version": 3,
     "name": "Projetor Igreja",
-    "version": "3.0",
+    "version": "1.3",
     "description": "Sistema de projeção profissional para YouTube em igrejas.",
     "permissions": [
         "storage",
         "unlimitedStorage",
         "tabs",
         "scripting",
-        "system.display"
+        "system.display",
+        "downloads",
+        "alarms",
+        "activeTab"
     ],
     "action": {
         "default_popup": "popup.html",
@@ -28,14 +31,22 @@
     },
     "web_accessible_resources": [
         {
-            "resources": ["projetor_midia.html", "projetor_midia.js"],
-            "matches": ["<all_urls>"]
+            "resources": [
+                "projetor_midia.html",
+                "projetor_midia.js",
+                "update.html"
+            ],
+            "matches": [
+                "<all_urls>"
+            ]
         }
     ],
     "host_permissions": [
+        "<all_urls>",
         "https://www.youtube.com/*",
         "https://www.youtube-nocookie.com/*",
-        "https://bolls.life/*"
+        "https://bolls.life/*",
+        "https://api.github.com/*"
     ],
     "content_scripts": [
         {

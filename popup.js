@@ -80,6 +80,8 @@ if (document.getElementById('btnSettings')) {
             btnSettings.title = 'Fechar e Cancelar';
             document.getElementById('mainView').style.display = 'none';
             document.getElementById('settingsView').style.display = 'block';
+            // Garante que "Sobre" esteja fechado
+            document.getElementById('sobreView').style.display = 'none';
 
             const monitorSelect = document.getElementById('configMonitor');
             monitorSelect.innerHTML = '<option value="auto">Automático (Secundário)</option>';
@@ -119,6 +121,129 @@ if (document.getElementById('btnSettings')) {
             document.getElementById('settingsView').style.display = 'none';
             document.getElementById('mainView').style.display = 'block';
         }
+    });
+}
+
+// ── Tela "Sobre" ──────────────────────────────────────────────────────────────
+if (document.getElementById('btnSobre')) {
+    const btnSobre = document.getElementById('btnSobre');
+
+    btnSobre.addEventListener('click', () => {
+        const sobreView = document.getElementById('sobreView');
+        const isSobreOpen = sobreView.style.display === 'block';
+
+        if (!isSobreOpen) {
+            // Fechar outras views se abertas
+            document.getElementById('mainView').style.display = 'none';
+            document.getElementById('settingsView').style.display = 'none';
+
+            // Preenche versão atual
+            const versaoAtual = chrome.runtime.getManifest().version;
+            const pillVersao = document.getElementById('sobreVersaoAtual');
+            if (pillVersao) pillVersao.textContent = `Versão ${versaoAtual}`;
+
+            // Mostra última checagem salva se existir
+            chrome.storage.local.get(['dadosAtualizacao'], (result) => {
+                const dados = result.dadosAtualizacao;
+                if (dados && dados.ultimaChecagem) {
+                    const rowChecagem = document.getElementById('sobreUltimaChecagem');
+                    const valChecagem = document.getElementById('sobreChecagemValor');
+                    if (rowChecagem) rowChecagem.style.display = 'flex';
+                    if (valChecagem) valChecagem.textContent = dados.ultimaChecagem;
+                }
+            });
+
+            sobreView.style.display = 'block';
+            btnSobre.title = 'Fechar Sobre';
+            btnSobre.style.opacity = '0.5';
+        } else {
+            fecharSobre();
+        }
+    });
+}
+
+function fecharSobre() {
+    const sobreView = document.getElementById('sobreView');
+    const btnSobre = document.getElementById('btnSobre');
+    if (sobreView) sobreView.style.display = 'none';
+    if (btnSobre) {
+        btnSobre.title = 'Sobre / Versão';
+        btnSobre.style.opacity = '';
+    }
+    document.getElementById('mainView').style.display = 'block';
+    // Reseta o resultado da verificação
+    const resultEl = document.getElementById('sobreResult');
+    if (resultEl) { resultEl.style.display = 'none'; resultEl.className = 'sobre-result'; }
+    const iconEl = document.getElementById('verificarIcon');
+    const textoEl = document.getElementById('verificarTexto');
+    if (iconEl) iconEl.textContent = '🔍';
+    if (textoEl) textoEl.textContent = 'Verificar Atualizações';
+    const btnVer = document.getElementById('btnVerificarAtualizacao');
+    if (btnVer) btnVer.disabled = false;
+}
+
+// Botão "Verificar Atualizações" dentro do Sobre
+if (document.getElementById('btnVerificarAtualizacao')) {
+    document.getElementById('btnVerificarAtualizacao').addEventListener('click', () => {
+        const iconEl = document.getElementById('verificarIcon');
+        const textoEl = document.getElementById('verificarTexto');
+        const resultEl = document.getElementById('sobreResult');
+        const btnVer = document.getElementById('btnVerificarAtualizacao');
+
+        // Estado: carregando
+        iconEl.innerHTML = '<span class="spin-inline">⟳</span>';
+        textoEl.textContent = 'Verificando...';
+        btnVer.disabled = true;
+        resultEl.style.display = 'none';
+        resultEl.className = 'sobre-result';
+
+        chrome.runtime.sendMessage({ action: 'verificarAtualizacaoManual' }, (response) => {
+            btnVer.disabled = false;
+            iconEl.textContent = '🔍';
+            textoEl.textContent = 'Verificar Atualizações';
+
+            if (chrome.runtime.lastError || !response) {
+                resultEl.className = 'sobre-result erro';
+                resultEl.innerHTML = '<div class="sobre-result-title">⚠️ Erro ao verificar</div>Verifique sua conexão com a internet.';
+                resultEl.style.display = 'block';
+                return;
+            }
+
+            // Atualiza última checagem na UI
+            if (response.ultimaChecagem) {
+                const rowChecagem = document.getElementById('sobreUltimaChecagem');
+                const valChecagem = document.getElementById('sobreChecagemValor');
+                if (rowChecagem) rowChecagem.style.display = 'flex';
+                if (valChecagem) valChecagem.textContent = response.ultimaChecagem;
+            }
+
+            if (response.erro) {
+                resultEl.className = 'sobre-result erro';
+                resultEl.innerHTML = `<div class="sobre-result-title">⚠️ Erro ao verificar</div>${response.erro}`;
+            } else if (!response.temAtualizacao) {
+                resultEl.className = 'sobre-result atualizado';
+                resultEl.innerHTML = `<div class="sobre-result-title">✅ Você já possui a versão mais recente!</div><span style="font-size:10px; opacity:0.8;">Versão atual: v${response.versaoAtual}</span>`;
+            } else {
+                const notasPreview = response.notas
+                    ? response.notas.substring(0, 200) + (response.notas.length > 200 ? '...' : '')
+                    : '';
+                const updateUrl = chrome.runtime.getURL('update.html');
+                resultEl.className = 'sobre-result tem-update';
+                resultEl.innerHTML = `
+                    <div class="sobre-result-title">✨ Nova versão v${response.versaoNova} disponível!</div>
+                    ${notasPreview ? `<div class="sobre-result-notas">${notasPreview}</div>` : ''}
+                    <button class="btn-saiba-mais" id="sobreSaibaMais">🔗 Ver Detalhes e Baixar</button>
+                `;
+                resultEl.style.display = 'block';
+                const btnSaibaMais = document.getElementById('sobreSaibaMais');
+                if (btnSaibaMais) {
+                    btnSaibaMais.addEventListener('click', () => {
+                        chrome.tabs.create({ url: updateUrl });
+                    });
+                }
+            }
+            resultEl.style.display = 'block';
+        });
     });
 }
 

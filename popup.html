@@ -692,6 +692,166 @@
             text-align: right;
             margin-left: -2px;
         }
+
+        /* ── Seção Sobre ── */
+        #sobreView {
+            display: none;
+            padding: 16px;
+        }
+
+        .sobre-header {
+            text-align: center;
+            padding: 8px 0 16px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 16px;
+        }
+
+        .sobre-logo {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, var(--accent), #5b3fa0);
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            margin: 0 auto 10px;
+            box-shadow: 0 0 20px var(--accent-glow);
+        }
+
+        .sobre-nome {
+            font-size: 14px;
+            font-weight: 800;
+            letter-spacing: -0.2px;
+        }
+
+        .sobre-desc {
+            font-size: 10px;
+            color: var(--muted);
+            margin-top: 2px;
+        }
+
+        .sobre-versao-pill {
+            display: inline-block;
+            background: linear-gradient(135deg, rgba(124,92,191,0.25), rgba(91,63,160,0.25));
+            border: 1px solid var(--accent);
+            color: #c7aeff;
+            font-size: 10px;
+            font-weight: 700;
+            padding: 3px 10px;
+            border-radius: 20px;
+            margin-top: 8px;
+            letter-spacing: 0.5px;
+        }
+
+        .sobre-info-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 7px 0;
+            border-bottom: 1px solid rgba(42,42,56,0.5);
+            font-size: 11px;
+        }
+
+        .sobre-info-row:last-child {
+            border-bottom: none;
+        }
+
+        .sobre-info-label {
+            color: var(--muted);
+            font-size: 10px;
+        }
+
+        .sobre-info-value {
+            font-weight: 600;
+            font-size: 11px;
+            color: var(--text);
+        }
+
+        .btn-verificar {
+            background: linear-gradient(135deg, var(--accent), #5b3fa0);
+            border-color: var(--accent);
+            color: #fff;
+            justify-content: center;
+            margin-top: 14px;
+        }
+
+        .btn-verificar:hover {
+            box-shadow: 0 4px 16px var(--accent-glow);
+        }
+
+        .sobre-result {
+            display: none;
+            margin-top: 12px;
+            padding: 12px;
+            border-radius: var(--radius);
+            font-size: 11px;
+            line-height: 1.5;
+            animation: fadeIn 0.25s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .sobre-result.atualizado {
+            background: rgba(39,174,96,0.1);
+            border: 1px solid rgba(39,174,96,0.3);
+            color: #2ecc71;
+        }
+
+        .sobre-result.tem-update {
+            background: rgba(124,92,191,0.1);
+            border: 1px solid rgba(124,92,191,0.4);
+            color: var(--text);
+        }
+
+        .sobre-result.erro {
+            background: rgba(231,76,60,0.1);
+            border: 1px solid rgba(231,76,60,0.3);
+            color: #e74c3c;
+        }
+
+        .sobre-result-title {
+            font-weight: 700;
+            font-size: 11px;
+            margin-bottom: 4px;
+        }
+
+        .sobre-result-notas {
+            font-size: 10px;
+            color: var(--muted2, #9b9bbb);
+            margin-top: 4px;
+            max-height: 80px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+
+        .btn-saiba-mais {
+            margin-top: 8px;
+            padding: 6px 10px;
+            background: linear-gradient(135deg, var(--accent), #5b3fa0);
+            border: none;
+            border-radius: 8px;
+            color: #fff;
+            font-size: 10px;
+            font-weight: 700;
+            cursor: pointer;
+            letter-spacing: 0.3px;
+            transition: all 0.18s;
+        }
+
+        .btn-saiba-mais:hover {
+            box-shadow: 0 3px 10px var(--accent-glow);
+        }
+
+        .spin-inline {
+            display: inline-block;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
 
@@ -704,6 +864,7 @@
             <h1>Projetor Igreja</h1>
             <p>Controle de Projeção</p>
         </div>
+        <div class="settings-icon" id="btnSobre" title="Sobre / Versão" style="font-size:14px; margin-right: 2px;">ℹ️</div>
         <div class="settings-icon" id="btnSettings" title="Configurações">⚙️</div>
     </div>
 
@@ -993,6 +1154,37 @@
             <span>Salvar e Voltar</span>
         </button>
     </div> <!-- Fim Settings View -->
+
+    <!-- ── Tela Sobre ── -->
+    <div id="sobreView">
+        <div class="sobre-header">
+            <div class="sobre-logo">🎬</div>
+            <div class="sobre-nome">Projetor Igreja</div>
+            <div class="sobre-desc">Sistema de Projeção para Igrejas</div>
+            <div class="sobre-versao-pill" id="sobreVersaoAtual">Versão ...</div>
+        </div>
+
+        <div class="sobre-info-row">
+            <span class="sobre-info-label">Desenvolvedor</span>
+            <span class="sobre-info-value">Marllon Ferreira</span>
+        </div>
+        <div class="sobre-info-row">
+            <span class="sobre-info-label">Repositório</span>
+            <span class="sobre-info-value" style="color: var(--accent);">GitHub</span>
+        </div>
+        <div class="sobre-info-row" id="sobreUltimaChecagem" style="display:none;">
+            <span class="sobre-info-label">Última verificação</span>
+            <span class="sobre-info-value" id="sobreChecagemValor">—</span>
+        </div>
+
+        <button class="btn btn-verificar" id="btnVerificarAtualizacao">
+            <span id="verificarIcon">🔍</span>
+            <span id="verificarTexto">Verificar Atualizações</span>
+        </button>
+
+        <!-- Resultado da verificação -->
+        <div class="sobre-result" id="sobreResult"></div>
+    </div>
 
     <!-- Toast Notification -->
     <div id="toastNotification" class="toast"></div>

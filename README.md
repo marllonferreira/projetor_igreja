@@ -44,6 +44,7 @@ Uma extensão para navegadores baseados em Chromium (Google Chrome, Edge, Brave)
 - **Gerenciamento Inteligente de Abas e Telas:** Botão para abrir o telão em uma janela limpa, que detecta automaticamente seu monitor secundário e pode iniciar já em Fullscreen.
 - **Menu de Preferências (Global):** Personalize sua extensão ativando/desativando botões, definindo a resolução da janela, cor da fonte e níveis de zoom padrão para a Bíblia.
 - **Armazenamento Seguro:** As imagens carregadas na mídia ficam seguras no seu armazenamento local, permitindo o carregamento de várias imagens em alta resolução.
+- **Atualização Automática Inteligente:** A extensão verifica novidades diariamente e exibe uma bela notificação direto na sua tela, permitindo ver as melhorias e baixar a nova versão com um clique!
 
 ## 📦 Como Instalar a Extensão
 
@@ -62,6 +63,12 @@ Uma extensão para navegadores baseados em Chromium (Google Chrome, Edge, Brave)
 4. **Carregar a Extensão:** Clique no botão **"Carregar sem compactação"** (Load unpacked) no canto superior esquerdo.
 5. **Selecione a Pasta:** Navegue até a pasta da extensão (que contém o `manifest.json`) e selecione-a.
 6. **Fixe o ícone!** A extensão aparecerá na lista. Clique no ícone de "quebra-cabeça" 🧩 na barra do navegador e **fixe (pin)** o Projetor Igreja.
+
+### 🔄 Como Atualizar a Extensão
+1. Quando houver uma nova versão, a extensão enviará uma notificação no seu navegador avisando da atualização.
+2. Clique no botão **Saiba Mais** na notificação para ver o que mudou e clique no botão de download.
+3. Extraia o conteúdo do novo arquivo `projetor_igreja.zip`, substituindo os arquivos na mesma pasta que você usou para a instalação.
+4. Vá em `chrome://extensions/` e clique no botão de **Recarregar (seta circular)** no card do Projetor Igreja. Pronto! A extensão já estará atualizada.
 
 ## 💻 Como Usar
 
