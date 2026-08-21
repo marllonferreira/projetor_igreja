@@ -3,44 +3,21 @@ Como Instalar a Extensão
 
 Como a extensão será instalada de forma local, siga o passo a passo seguro abaixo:
 
-Método 1: Versão Otimizada (Recomendado)
-----------------------------------------
-1. Vá na aba Releases (Versões) no GitHub.
-2. Baixe o arquivo projetor_igreja.zip mais recente.
-3. Extraia o conteúdo para uma pasta segura no seu computador.
-
-Método 2: Código Completo (Repositório)
-----------------------------------------
-1. Faça o download do código-fonte completo ou clone o repositório.
-2. Extraia os arquivos para uma pasta segura no seu computador.
-
-Habilitando no Navegador
-----------------------------------------
-1. Abra o seu navegador Chrome, Edge ou Brave, digite na barra de endereços chrome://extensions/ (ou edge://extensions/) e pressione Enter.
-2. No canto superior direito da tela de extensões, ative a chave "Modo do desenvolvedor" (Developer mode).
-3. Clique no botão "Carregar sem compactação" (Load unpacked) que aparecerá no canto superior esquerdo.
-4. Selecione a pasta onde você extraiu os arquivos da extensão (a pasta que contém o arquivo manifest.json).
-5. Tudo pronto! A extensão Projetor Igreja aparecerá na lista. Clique no ícone de "quebra-cabeça" na barra do navegador e fixe (pin) a extensão para facilitar o acesso.
+1. Baixe os arquivos: Faça o download do código-fonte ou clone este repositório no seu computador e extraia os arquivos para uma pasta segura de sua escolha.
+2. Acesse as Extensões: Abra o seu navegador Chrome, Edge ou Brave, digite na barra de endereços chrome://extensions/ (ou edge://extensions/) e pressione Enter.
+3. Modo do Desenvolvedor: No canto superior direito da tela de extensões, ative a chave ou botão chamado "Modo do desenvolvedor" (Developer mode).
+4. Carregar a Extensão: Clique no botão "Carregar sem compactação" (Load unpacked) que aparecerá no canto superior esquerdo.
+5. Selecione a Pasta: Navegue até a pasta onde você salvou ou extraiu os arquivos da extensão (a pasta que contém o arquivo manifest.json) e selecione-a.
+6. Tudo pronto! A extensão Projetor Igreja aparecerá na sua lista. Para facilitar o uso, clique no ícone de "quebra-cabeça" na barra superior do navegador e fixe (pin) o ícone da extensão para que ele fique sempre visível.
 
 
 Como Usar
 =========
 
-1. Abra o painel clicando no ícone da extensão.
-2. Clique no botão "Abrir Telão". Isso abrirá uma janela limpa, que será jogada para o seu projetor/telão (Monitor Secundário).
-
-Módulo YouTube:
-- Abra qualquer vídeo no YouTube e clique em "Projetar Vídeo Atual".
-- Use os botões (Play, Stop, Fullscreen, Volume) no painel para controlá-lo de forma remota.
-
-Módulo Mídia (Imagens):
-- Clique na aba "Mídia" no painel.
-- Adicione fotos soltas ou uma pasta inteira.
-- Clique em qualquer imagem para enviá-la instantaneamente para o telão, e controle o zoom ou rotação ao vivo.
-
-Módulo Bíblia:
-- Clique na aba "Bíblia" no painel.
-- Selecione a versão, livro e versículos.
-- Clique em "Projetar" e navegue facilmente pelos botões de "Anterior" e "Próximo".
-
-(Dica): A mesma janela do projetor é reciclada de forma inteligente. Ao alternar entre YouTube, Mídia e Bíblia no painel, a tela se atualiza sozinha sem abrir janelas extras! E lembre-se: nas engrenagens (Configurações) você pode personalizar atalhos e cores.
+1. Clique no ícone da extensão na sua barra superior.
+2. Clique no botão "Abrir Telão". Isso abrirá uma janela limpa, que você pode arrastar para o seu segundo monitor (telão).
+3. Na sua janela principal, navegue normalmente pelo YouTube e encontre o vídeo desejado.
+4. Abra o vídeo, clique no ícone da extensão novamente e escolha "Projetar Vídeo Atual".
+5. O vídeo será automaticamente enviado e aberto na janela do projetor.
+6. Use os controles de Play, Pause, Stop, Tela Cheia, Volume e a nova Barra de Progresso no popup da extensão para manipular o vídeo remotamente, sem precisar clicar no telão.
+7. (Dica) Você pode clicar no ícone de "Engrenagem" para abrir as Preferências e ocultar botões que não utilize muito, deixando a interface mais minimalista!
