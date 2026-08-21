@@ -44,7 +44,7 @@ Uma extensão para navegadores baseados em Chromium (Google Chrome, Edge, Brave)
 - **Gerenciamento Inteligente de Abas e Telas:** Botão para abrir o telão em uma janela limpa, que detecta automaticamente seu monitor secundário e pode iniciar já em Fullscreen.
 - **Menu de Preferências (Global):** Personalize sua extensão ativando/desativando botões, definindo a resolução da janela, cor da fonte e níveis de zoom padrão para a Bíblia.
 - **Armazenamento Seguro:** As imagens carregadas na mídia ficam seguras no seu armazenamento local, permitindo o carregamento de várias imagens em alta resolução.
-- **Atualização Automática Inteligente:** A extensão verifica novidades diariamente e exibe uma bela notificação direto na sua tela, permitindo ver as melhorias e baixar a nova versão com um clique!
+- **Notificação Inteligente de Atualização:** A extensão verifica novidades e exibe uma notificação direto na sua tela, permitindo ver as melhorias e baixar a versão com um clique!
 
 ## 📦 Como Instalar a Extensão
 
