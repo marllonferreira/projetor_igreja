@@ -90,8 +90,16 @@ chrome.runtime.onInstalled.addListener(() => {
 // ── Ouve o alarme periódico ───────────────────────────────────────────────────
 chrome.alarms.onAlarm.addListener((alarm) => {
     if (alarm.name === 'verificarAtualizacaoAlarm') {
-        console.log("Background: Alarme disparado - verificando atualização...");
-        verificarAtualizacao(false);
+        console.log("Background: Alarme disparado...");
+        if (MODO_TESTE) {
+            verificarAtualizacao(false);
+        } else {
+            chrome.storage.local.get(['projetorSettings'], (result) => {
+                const settings = result.projetorSettings || {};
+                const dias = settings.prefFrequenciaAtualizacao || 3;
+                verificarSeDeveChecar(dias);
+            });
+        }
     }
 });
 
