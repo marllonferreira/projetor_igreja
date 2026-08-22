@@ -13,7 +13,8 @@ let currentSettings = {
     lastVideoTitle: "",
     bibliaGlobalCor: '#ffffff',
     bibliaGlobalZoom: 100,
-    prefMemorizarMidia: true
+    prefMemorizarMidia: true,
+    prefFrequenciaAtualizacao: 3
 };
 
 function aplicarVisibilidadeControles() {
@@ -64,6 +65,10 @@ chrome.storage.local.get(["projetorSettings"], (result) => {
 
         if (document.getElementById('prefMemorizarMidia')) {
             document.getElementById('prefMemorizarMidia').checked = currentSettings.prefMemorizarMidia;
+        }
+
+        if (document.getElementById('configFrequenciaUpdate')) {
+            document.getElementById('configFrequenciaUpdate').value = currentSettings.prefFrequenciaAtualizacao || 3;
         }
     }
     
@@ -272,6 +277,10 @@ if (document.getElementById('btnSaveSettings')) {
 
         if (document.getElementById('prefMemorizarMidia')) {
             currentSettings.prefMemorizarMidia = document.getElementById('prefMemorizarMidia').checked;
+        }
+
+        if (document.getElementById('configFrequenciaUpdate')) {
+            currentSettings.prefFrequenciaAtualizacao = parseInt(document.getElementById('configFrequenciaUpdate').value) || 3;
         }
 
         chrome.storage.local.set({ "projetorSettings": currentSettings });

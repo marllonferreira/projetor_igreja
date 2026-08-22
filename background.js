@@ -3,7 +3,6 @@
 // ============================================================
 
 const GITHUB_REPO = 'marllonferreira/projetor_igreja';
-const CHECK_INTERVAL_HORAS = 24; // Verificar 1x por dia
 
 // ⚠️ MODO TESTE ATIVO ⚠️
 // Coloque false abaixo para voltar ao comportamento normal (1x ao dia)
@@ -98,43 +97,49 @@ chrome.alarms.onAlarm.addListener((alarm) => {
 
 // ── Agenda alarme diário ──────────────────────────────────────────────────────
 function agendarVerificacaoDiaria() {
-    // Em modo teste: recria o alarme sempre para garantir disparo imediato
-    chrome.alarms.clear('verificarAtualizacaoAlarm', () => {
-        const intervaloMinutos = MODO_TESTE ? 1 : CHECK_INTERVAL_HORAS * 60;
-        const delayMinutos = MODO_TESTE ? 0.1 : 1; // 6 segundos no modo teste
+    chrome.storage.local.get(['projetorSettings'], (result) => {
+        const settings = result.projetorSettings || {};
+        const dias = settings.prefFrequenciaAtualizacao || 3;
+        
+        // Em modo teste: recria o alarme sempre para garantir disparo imediato
+        chrome.alarms.clear('verificarAtualizacaoAlarm', () => {
+            const intervaloMinutos = MODO_TESTE ? 1 : (dias * 24) * 60;
+            const delayMinutos = MODO_TESTE ? 0.1 : 1; // 6 segundos no modo teste
 
-        chrome.alarms.create('verificarAtualizacaoAlarm', {
-            delayInMinutes: delayMinutos,
-            periodInMinutes: intervaloMinutos
+            chrome.alarms.create('verificarAtualizacaoAlarm', {
+                delayInMinutes: delayMinutos,
+                periodInMinutes: intervaloMinutos
+            });
+
+            if (MODO_TESTE) {
+                console.log("Background: ⚠️ MODO TESTE — alarme disparará em ~6 segundos e repetirá a cada 1 minuto.");
+            } else {
+                console.log(`Background: Alarme de verificação de atualização criado (intervalo normal de ${dias} dias).`);
+            }
         });
 
-        if (MODO_TESTE) {
-            console.log("Background: ⚠️ MODO TESTE — alarme disparará em ~6 segundos e repetirá a cada 1 minuto.");
+        // Em modo normal: verifica se já passou o tempo necessário antes de checar
+        if (!MODO_TESTE) {
+            verificarSeDeveChecar(dias);
         } else {
-            console.log("Background: Alarme de verificação de atualização criado (intervalo normal de 24h).");
+            console.log("Background: ⚠️ MODO TESTE — pulando guarda temporal.");
         }
     });
-
-    // Em modo normal: verifica se já passou 24h antes de checar
-    if (!MODO_TESTE) {
-        verificarSeDeveChecar();
-    } else {
-        console.log("Background: ⚠️ MODO TESTE — pulando guarda de 24h.");
-    }
 }
 
 // ── Verifica se já passou o tempo necessário desde a última checagem ──────────
-function verificarSeDeveChecar() {
+function verificarSeDeveChecar(diasIntervalo) {
     chrome.storage.local.get(['ultimaVerificacaoAtualizacao'], (result) => {
         const ultima = result.ultimaVerificacaoAtualizacao || 0;
         const agora = Date.now();
         const diferencaHoras = (agora - ultima) / (1000 * 60 * 60);
+        const checkIntervalHoras = diasIntervalo * 24;
 
-        if (diferencaHoras >= CHECK_INTERVAL_HORAS) {
-            console.log("Background: Mais de 24h desde a última checagem. Verificando agora...");
+        if (diferencaHoras >= checkIntervalHoras) {
+            console.log(`Background: Mais de ${checkIntervalHoras}h desde a última checagem. Verificando agora...`);
             verificarAtualizacao(false);
         } else {
-            console.log(`Background: Última checagem foi há ${Math.round(diferencaHoras)}h. Nenhuma ação necessária.`);
+            console.log(`Background: Última checagem foi há ${Math.round(diferencaHoras)}h. Intervalo configurado é de ${checkIntervalHoras}h. Nenhuma ação necessária.`);
         }
     });
 }
