@@ -32,6 +32,52 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         sendResponse({ isProjector: isProjector });
     }
 
+    // Fim de vídeo: avança a playlist diretamente no background (funciona mesmo com popup fechado)
+    if (request.action === "videoEnded") {
+        chrome.storage.session.get(['ytPlaylist', 'ytPlaylistIndex'], (data) => {
+            const playlist = data.ytPlaylist || [];
+            const currentIdx = (data.ytPlaylistIndex !== undefined) ? data.ytPlaylistIndex : -1;
+
+            if (playlist.length === 0 || currentIdx < 0) {
+                // Sem playlist ativa — só repassa para o popup atualizar a UI se estiver aberto
+                chrome.runtime.sendMessage({ action: "videoEnded" }, () => { void chrome.runtime.lastError; });
+                sendResponse({ ok: true });
+                return;
+            }
+
+            const nextIdx = currentIdx + 1;
+            if (nextIdx >= playlist.length) {
+                // Era o último item — não faz nada
+                sendResponse({ ok: true });
+                return;
+            }
+
+            const nextItem = playlist[nextIdx];
+            const watchUrl = `https://www.youtube.com/watch?v=${nextItem.id}`;
+
+            // Atualiza o índice na sessão ANTES de navegar
+            chrome.storage.session.set({ ytPlaylistIndex: nextIdx }, () => {
+                // Navega a aba do projetor para o próximo vídeo
+                chrome.storage.local.get(['projetorTabId'], (result) => {
+                    const tabId = result.projetorTabId;
+                    if (tabId) {
+                        chrome.tabs.update(tabId, { url: watchUrl }, () => {
+                            if (chrome.runtime.lastError) {
+                                console.log("Background: Erro ao navegar para o próximo item:", chrome.runtime.lastError.message);
+                            }
+                        });
+                    }
+                    // Notifica o popup para re-renderizar a lista (se estiver aberto)
+                    chrome.runtime.sendMessage({ action: "playlistAdvanced", newIndex: nextIdx }, () => {
+                        void chrome.runtime.lastError;
+                    });
+                });
+            });
+        });
+        sendResponse({ ok: true });
+        return true; // async
+    }
+
     // Verificação manual disparada pelo popup (Tela Sobre)
     if (request.action === "verificarAtualizacaoManual") {
         verificarAtualizacao(true).then((resultado) => {

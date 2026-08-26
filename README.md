@@ -25,9 +25,10 @@ Uma extensão para navegadores baseados em Chromium (Google Chrome, Edge, Brave)
 
 ### 🔴 Módulo YouTube
 - **Limpeza de Interface:** Oculta completamente barra de pesquisa, comentários, vídeos sugeridos, chat ao vivo e o título do vídeo.
-- **Controle Remoto Sincronizado:** Play/Pause, Stop (escurece a tela e reinicia o tempo), Tela Cheia e Controle de Volume (com botão Mute).
-- **Acompanhamento de Status:** Barra de progresso visível no popup mostrando o tempo decorrido do vídeo.
+- **Controle Remoto Sincronizado:** Play/Pause, Stop (escurece a tela e reinicia o tempo), Tela Cheia e Controle de Volume (com botão Mute), todos opcionalmente configuráveis nas preferências.
+- **Acompanhamento de Status:** Barra de progresso visível no popup mostrando o tempo decorrido e o título do vídeo atual.
 - **Modo Blackout (Pós-Culto):** Quando o vídeo termina, a tela escurece e bloqueia o autoplay nativo do YouTube, evitando vídeos surpresas.
+- **🆕 Lista de Reprodução:** Monte uma fila de vídeos do YouTube diretamente no popup. Ao terminar um vídeo, a extensão avança automaticamente para o próximo da lista — na ordem correta — mesmo com o popup fechado. Reordene itens, remova individualmente ou toque qualquer vídeo da fila com um clique.
 
 ### 🖼️ Módulo Mídia (Imagens)
 - **Seleção Flexível:** Carregue arquivos de imagem individuais ou selecione uma pasta inteira de uma vez.
@@ -41,10 +42,11 @@ Uma extensão para navegadores baseados em Chromium (Google Chrome, Edge, Brave)
 - **Ajustes Rápidos:** Possibilidade de ajustar o Zoom rapidamente de dentro do próprio painel para melhorar a legibilidade no telão.
 
 ## 🚀 Recursos Principais
-- **Gerenciamento Inteligente de Abas e Telas:** Botão para abrir o telão em uma janela limpa, que detecta automaticamente seu monitor secundário e pode iniciar já em Fullscreen.
-- **Menu de Preferências (Global):** Personalize sua extensão ativando/desativando botões, definindo a resolução da janela, cor da fonte e níveis de zoom padrão para a Bíblia.
-- **Armazenamento Seguro:** As imagens carregadas na mídia ficam seguras no seu armazenamento local, permitindo o carregamento de várias imagens em alta resolução.
-- **Notificação Inteligente de Atualização:** A extensão verifica novidades e exibe uma notificação direto na sua tela, permitindo ver as melhorias e baixar a versão com um clique!
+- **Gerenciamento Inteligente de Telão:** Botão para abrir o telão em uma janela limpa, com detecção automática do monitor secundário e opção de iniciar já em Fullscreen. A extensão **impede a abertura de múltiplos telões** — se o telão já estiver aberto, ela exibe um aviso e coloca a janela existente em foco.
+- **Layout Adaptativo:** A interface do popup se ajusta automaticamente com base nos recursos habilitados nas preferências. Quando muitos itens estão visíveis ao mesmo tempo, um modo compacto é ativado para evitar barras de rolagem desnecessárias.
+- **Menu de Preferências (Global):** Personalize a extensão ativando/desativando botões e recursos individualmente — incluindo a Lista de Reprodução — além de configurar resolução da janela, cor da fonte e zoom padrão para a Bíblia.
+- **Armazenamento Seguro:** As imagens carregadas na mídia ficam salvas no armazenamento local, permitindo carregar várias imagens em alta resolução sem perda de dados entre sessões.
+- **Notificação Inteligente de Atualização:** A extensão verifica novidades e exibe uma notificação diretamente na tela, permitindo ver as melhorias e baixar a nova versão com um clique.
 
 ## 📦 Como Instalar a Extensão
 
@@ -65,10 +67,11 @@ Uma extensão para navegadores baseados em Chromium (Google Chrome, Edge, Brave)
 
 1. Clique no ícone da extensão na barra superior para abrir o popup.
 2. Clique no botão **"Abrir Telão"**. Uma tela escura se abrirá no seu segundo monitor (projetor).
-3. **Para YouTube:** No seu navegador, abra um vídeo no YouTube, selecione a aba 🔴 YouTube no popup e clique em "Projetar Vídeo Atual".
+3. **Para YouTube:** No seu navegador, abra um vídeo no YouTube, selecione a aba 🔴 YouTube no popup e clique em **"Projetar Atual"**.
+   - Para montar uma fila, após projetar o primeiro vídeo, clique em **"Adicionar à Lista"** para cada vídeo que quiser enfileirar. A extensão avançará automaticamente na ordem.
 4. **Para Mídia:** Selecione a aba 🖼️ Mídia, carregue as imagens que vai usar no culto e clique na imagem desejada para enviá-la ao telão instantaneamente.
 5. **Para Bíblia:** Selecione a aba 📖 Bíblia, escolha o texto, os ajustes de formatação e clique em "Projetar". Navegue pelos versículos com os botões de Avançar/Voltar.
-6. **(Dica)** Você pode clicar no ícone de "Engrenagem" ⚙️ para abrir as Preferências e deixar a extensão do seu jeito!
+6. **(Dica)** Clique no ícone de "Engrenagem" ⚙️ para abrir as Preferências e deixar a extensão do seu jeito!
 
 ## 📄 Licença
 

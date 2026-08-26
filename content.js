@@ -140,6 +140,11 @@ function setupPostVideoLogic() {
         if (autoNavBtn && autoNavBtn.getAttribute('aria-checked') === 'true') {
             autoNavBtn.click();
         }
+
+        // Notifica o popup para avançar a playlist (se houver)
+        chrome.runtime.sendMessage({ action: 'videoEnded' }, () => {
+            void chrome.runtime.lastError;
+        });
     });
 }
 
