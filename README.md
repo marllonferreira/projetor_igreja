@@ -91,15 +91,16 @@ Uma extensão para navegadores baseados em Chromium (Google Chrome, Edge, Brave)
 Se o **Projetor Igreja** tem ajudado no ministério de multimídia da sua igreja e facilitado a transmissão/projeção dos cultos, considere fazer uma doação para apoiar o desenvolvimento contínuo e a manutenção do projeto!
 
 <div align="center">
-
-### 💚 Faça uma Doação via Pix
-
-<img src="doc/pix_qrcode.png" width="230" alt="QR Code Pix Doação"><br><br>
-
-**Chave Pix (Aleatória):**  
-
-<pre><code>e48668fe-55d7-4a33-96a3-d7c283f82565</code></pre>
-
+  <h3>💚 Faça uma Doação via Pix</h3>
+  <table>
+    <tr>
+      <td align="center">
+        <img src="doc/pix_qrcode.png" width="220" alt="QR Code Pix Doação"><br><br>
+        <b>Chave Pix (Aleatória):</b><br><br>
+        <code>e48668fe-55d7-4a33-96a3-d7c283f82565</code>
+      </td>
+    </tr>
+  </table>
 </div>
 
 ---
