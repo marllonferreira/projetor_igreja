@@ -95,10 +95,10 @@ Se o **Projetor Igreja** tem ajudado no ministério de multimídia da sua igreja
 ### 💚 Faça uma Doação via Pix
 
 <img src="doc/pix_qrcode.png" width="230" alt="QR Code Pix Doação"><br><br>
+
 **Chave Pix (Aleatória):**  
-```pix
-e48668fe-55d7-4a33-96a3-d7c283f82565
-```
+
+<pre><code>e48668fe-55d7-4a33-96a3-d7c283f82565</code></pre>
 
 </div>
 
