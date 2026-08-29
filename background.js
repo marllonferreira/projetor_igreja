@@ -101,7 +101,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         return true;
     }
 
-    return true; // Mantém o canal de mensagem aberto para respostas assíncronas
+    // Não retorna true globalmente para evitar o erro de canal fechado
 });
 
 // ── Limpa o ID se a aba for fechada ──────────────────────────────────────────

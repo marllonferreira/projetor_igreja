@@ -15,7 +15,10 @@ let currentSettings = {
     bibliaGlobalCor: '#ffffff',
     bibliaGlobalZoom: 100,
     prefMemorizarMidia: true,
-    prefFrequenciaAtualizacao: 3
+    prefFrequenciaAtualizacao: 3,
+    timeGlobalCor: '#ffffff',
+    timeGlobalTamanho: 8,
+    timeGlobalAlinhamento: 'center'
 };
 
 function aplicarVisibilidadeControles() {
@@ -81,6 +84,12 @@ chrome.storage.local.get(["projetorSettings"], (result) => {
         if (document.getElementById('bibliaCor')) {
             document.getElementById('bibliaCor').value = currentSettings.bibliaGlobalCor;
             document.getElementById('bibliaZoom').value = currentSettings.bibliaGlobalZoom;
+        }
+
+        if (document.getElementById('timeCor')) {
+            document.getElementById('timeCor').value = currentSettings.timeGlobalCor || '#ffffff';
+            document.getElementById('timeTamanho').value = currentSettings.timeGlobalTamanho || 8;
+            document.getElementById('timeAlinhamento').value = currentSettings.timeGlobalAlinhamento || 'center';
         }
 
         if (document.getElementById('prefMemorizarMidia')) {
@@ -309,6 +318,12 @@ if (document.getElementById('btnSaveSettings')) {
 
         if (document.getElementById('configFrequenciaUpdate')) {
             currentSettings.prefFrequenciaAtualizacao = parseInt(document.getElementById('configFrequenciaUpdate').value) || 3;
+        }
+
+        if (document.getElementById('timeCor')) {
+            currentSettings.timeGlobalCor = document.getElementById('timeCor').value;
+            currentSettings.timeGlobalTamanho = parseFloat(document.getElementById('timeTamanho').value) || 8;
+            currentSettings.timeGlobalAlinhamento = document.getElementById('timeAlinhamento').value;
         }
 
         chrome.storage.local.set({ "projetorSettings": currentSettings });
@@ -1871,6 +1886,291 @@ function abrirNovaMidiaTab(url, onReady) {
                 } else {
                     selectedDisplay = displays.find(d => d.id === currentSettings.targetMonitor) || displays[0];
                 }
+                if (selectedDisplay) {
+                    createData.left = selectedDisplay.bounds.left;
+                    createData.top = selectedDisplay.bounds.top;
+                    if (!currentSettings.openFullscreen && selectedDisplay.workArea) {
+                        createData.width = Math.min(width, selectedDisplay.workArea.width);
+                        createData.height = Math.min(height, selectedDisplay.workArea.height);
+                    }
+                }
+            }
+            chrome.windows.create(createData, onWindowCreated);
+        });
+    } else {
+        chrome.windows.create(createData, onWindowCreated);
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// Módulo Time (Relógio/Cronômetro)
+// ═══════════════════════════════════════════════════════════════
+
+let timeIsPlaying = false;
+
+function updateTimePlayPauseBtn() {
+    const icon = document.getElementById('iconTimePlayPause');
+    const text = document.getElementById('textTimePlayPause');
+    if (!icon || !text) return;
+    if (timeIsPlaying) {
+        icon.textContent = '⏸';
+        text.textContent = 'Pausar';
+    } else {
+        icon.textContent = '▶';
+        text.textContent = 'Iniciar';
+    }
+}
+
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+    if (message.action === 'timeTick') {
+        const display = document.getElementById('timeFeedbackDisplay');
+        if (display) display.textContent = message.timeStr;
+    }
+});
+
+function saveTimeState() {
+    const estadoTime = {
+        exibirRelogio: document.getElementById('timeExibirRelogio') ? document.getElementById('timeExibirRelogio').checked : true,
+        modo: document.getElementById('timeModo') ? document.getElementById('timeModo').value : 'nenhum',
+        minutos: document.getElementById('timeMinutos') ? document.getElementById('timeMinutos').value : 5,
+        segundos: document.getElementById('timeSegundos') ? document.getElementById('timeSegundos').value : 0,
+        textoLivre: document.getElementById('timeTextoLivre') ? document.getElementById('timeTextoLivre').value : '',
+        isPlaying: timeIsPlaying
+    };
+    chrome.storage.session.set({ estadoTime: estadoTime });
+}
+
+chrome.storage.session.get(['estadoTime'], (result) => {
+    if (result.estadoTime) {
+        if (document.getElementById('timeExibirRelogio')) document.getElementById('timeExibirRelogio').checked = result.estadoTime.exibirRelogio;
+        if (document.getElementById('timeModo')) {
+            document.getElementById('timeModo').value = result.estadoTime.modo;
+            const timerGroup = document.getElementById('timeTimerGroup');
+            const controlsGrid = document.getElementById('timeControlsGrid');
+            if (result.estadoTime.modo === 'timer') {
+                if (timerGroup) timerGroup.style.display = 'flex';
+            } else {
+                if (timerGroup) timerGroup.style.display = 'none';
+            }
+            if (result.estadoTime.modo !== 'nenhum') {
+                if (controlsGrid) controlsGrid.style.display = 'flex';
+            } else {
+                if (controlsGrid) controlsGrid.style.display = 'none';
+            }
+        }
+        if (document.getElementById('timeMinutos')) document.getElementById('timeMinutos').value = result.estadoTime.minutos;
+        if (document.getElementById('timeSegundos')) document.getElementById('timeSegundos').value = result.estadoTime.segundos;
+        if (document.getElementById('timeTextoLivre')) document.getElementById('timeTextoLivre').value = result.estadoTime.textoLivre;
+        timeIsPlaying = result.estadoTime.isPlaying || false;
+        updateTimePlayPauseBtn();
+    }
+});
+
+if (document.getElementById('timeExibirRelogio')) {
+    document.getElementById('timeExibirRelogio').addEventListener('change', saveTimeState);
+}
+if (document.getElementById('timeMinutos')) {
+    document.getElementById('timeMinutos').addEventListener('input', saveTimeState);
+}
+if (document.getElementById('timeSegundos')) {
+    document.getElementById('timeSegundos').addEventListener('input', saveTimeState);
+}
+if (document.getElementById('timeTextoLivre')) {
+    document.getElementById('timeTextoLivre').addEventListener('input', saveTimeState);
+}
+if (document.getElementById('timeModo')) {
+    document.getElementById('timeModo').addEventListener('change', (e) => {
+        const timerGroup = document.getElementById('timeTimerGroup');
+        const controlsGrid = document.getElementById('timeControlsGrid');
+        if (e.target.value === 'timer') {
+            if (timerGroup) timerGroup.style.display = 'flex';
+        } else {
+            if (timerGroup) timerGroup.style.display = 'none';
+        }
+        if (e.target.value !== 'nenhum') {
+            if (controlsGrid) controlsGrid.style.display = 'flex';
+        } else {
+            if (controlsGrid) controlsGrid.style.display = 'none';
+        }
+        timeIsPlaying = false;
+        updateTimePlayPauseBtn();
+        saveTimeState();
+    });
+}
+
+if (document.getElementById('btnTimePlayPause')) {
+    document.getElementById('btnTimePlayPause').addEventListener('click', () => {
+        timeIsPlaying = !timeIsPlaying;
+        updateTimePlayPauseBtn();
+        saveTimeState();
+        chrome.storage.local.get(['projetorTabId'], (result) => {
+            const tabId = result.projetorTabId;
+            if (tabId) {
+                chrome.tabs.sendMessage(tabId, { action: timeIsPlaying ? 'playTime' : 'pauseTime' }, () => { void chrome.runtime.lastError; });
+            }
+        });
+    });
+}
+
+if (document.getElementById('btnTimeReset')) {
+    document.getElementById('btnTimeReset').addEventListener('click', () => {
+        timeIsPlaying = false;
+        updateTimePlayPauseBtn();
+        saveTimeState();
+        chrome.storage.local.get(['projetorTabId'], (result) => {
+            const tabId = result.projetorTabId;
+            if (tabId) {
+                chrome.tabs.sendMessage(tabId, { action: 'resetTime' }, () => { void chrome.runtime.lastError; });
+            }
+        });
+    });
+}
+
+if (document.getElementById('projetarTime')) {
+    document.getElementById('projetarTime').addEventListener('click', () => {
+        const exibirRelogio = document.getElementById('timeExibirRelogio').checked;
+        const modo = document.getElementById('timeModo').value;
+        const minutos = document.getElementById('timeMinutos').value;
+        const segundos = document.getElementById('timeSegundos').value;
+        const textoLivre = document.getElementById('timeTextoLivre').value;
+        
+        const cor = currentSettings.timeGlobalCor || '#ffffff';
+        const tamanho = currentSettings.timeGlobalTamanho || 8;
+        const alinhamento = currentSettings.timeGlobalAlinhamento || 'center';
+        
+        const config = {
+            action: 'showTime',
+            exibirRelogio,
+            modo,
+            minutos,
+            segundos,
+            textoLivre,
+            cor,
+            tamanho,
+            alinhamento,
+            iniciarDoZero: true
+        };
+        
+        timeIsPlaying = false;
+        updateTimePlayPauseBtn();
+        saveTimeState();
+        
+        projetarConfigTime(config);
+    });
+}
+
+if (document.getElementById('encerrarTime')) {
+    document.getElementById('encerrarTime').addEventListener('click', () => {
+        chrome.storage.local.get(['projetorTabId'], (result) => {
+            const tabId = result.projetorTabId;
+            if (tabId) {
+                chrome.tabs.sendMessage(tabId, { action: 'encerrarTime' }, () => { void chrome.runtime.lastError; });
+            }
+        });
+    });
+}
+
+if (document.getElementById('btnResetTime')) {
+    document.getElementById('btnResetTime').addEventListener('click', () => {
+        document.getElementById('timeCor').value = '#ffffff';
+        document.getElementById('timeTamanho').value = 8;
+        document.getElementById('timeAlinhamento').value = 'center';
+        
+        currentSettings.timeGlobalCor = '#ffffff';
+        currentSettings.timeGlobalTamanho = 8;
+        currentSettings.timeGlobalAlinhamento = 'center';
+        chrome.storage.local.set({ "projetorSettings": currentSettings });
+        
+        // Atualizar telão se estiver aberto
+        chrome.storage.local.get(['projetorTabId'], (result) => {
+            const tabId = result.projetorTabId;
+            if (tabId) {
+                const config = {
+                    action: 'showTime',
+                    exibirRelogio: document.getElementById('timeExibirRelogio').checked,
+                    modo: document.getElementById('timeModo').value,
+                    minutos: document.getElementById('timeMinutos').value,
+                    segundos: document.getElementById('timeSegundos').value,
+                    textoLivre: document.getElementById('timeTextoLivre').value,
+                    cor: currentSettings.timeGlobalCor,
+                    tamanho: currentSettings.timeGlobalTamanho,
+                    alinhamento: currentSettings.timeGlobalAlinhamento,
+                    iniciarDoZero: false
+                };
+                chrome.tabs.sendMessage(tabId, config, () => { void chrome.runtime.lastError; });
+            }
+        });
+    });
+}
+
+function projetarConfigTime(config) {
+    const urlTime = chrome.runtime.getURL('projetor_time.html');
+    
+    chrome.storage.local.get(["projetorTabId"], (result) => {
+        const tabId = result.projetorTabId;
+        
+        if (tabId) {
+            chrome.tabs.get(tabId, (tab) => {
+                if (chrome.runtime.lastError || !tab) {
+                    abrirNovaJanelaTime(urlTime, config);
+                    return;
+                }
+                
+                if (!tab.url.includes('projetor_time.html')) {
+                    chrome.tabs.update(tabId, { url: urlTime }, (updatedTab) => {
+                        chrome.tabs.onUpdated.addListener(function listener(tId, changeInfo) {
+                            if (tId === tabId && changeInfo.status === 'complete') {
+                                chrome.tabs.onUpdated.removeListener(listener);
+                                chrome.tabs.sendMessage(tabId, config);
+                            }
+                        });
+                    });
+                } else {
+                    chrome.tabs.sendMessage(tabId, config);
+                }
+            });
+        } else {
+            abrirNovaJanelaTime(urlTime, config);
+        }
+    });
+}
+
+function abrirNovaJanelaTime(url, config) {
+    let [width, height] = currentSettings.windowSize.split('x').map(Number);
+    if (!width) width = 1280;
+    if (!height) height = 720;
+
+    let createData = { url: url, type: 'popup', width: width, height: height };
+
+    const onWindowCreated = (window) => {
+        if (chrome.runtime.lastError) return;
+        if (window && window.tabs && window.tabs.length > 0) {
+            const tabId = window.tabs[0].id;
+            chrome.storage.local.set({ "projetorTabId": tabId });
+            
+            if (currentSettings.openFullscreen) {
+                chrome.windows.update(window.id, { state: "fullscreen" });
+            }
+            
+            chrome.tabs.onUpdated.addListener(function listener(tId, changeInfo) {
+                if (tId === tabId && changeInfo.status === 'complete') {
+                    chrome.tabs.onUpdated.removeListener(listener);
+                    chrome.tabs.sendMessage(tabId, config);
+                }
+            });
+        }
+    };
+
+    if (chrome.system && chrome.system.display) {
+        chrome.system.display.getInfo((displays) => {
+            if (displays && displays.length > 0) {
+                let selectedDisplay = null;
+                if (currentSettings.targetMonitor === 'auto') {
+                    selectedDisplay = displays.find(d => !d.isPrimary) || displays[1] || displays[0];
+                } else {
+                    selectedDisplay = displays.find(d => d.id === currentSettings.targetMonitor) || displays[0];
+                }
+
                 if (selectedDisplay) {
                     createData.left = selectedDisplay.bounds.left;
                     createData.top = selectedDisplay.bounds.top;

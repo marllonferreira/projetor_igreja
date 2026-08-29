@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <title>PROJEÇÃO - TIME</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0e0e14;
+            --text-main: #ffffff;
+            --accent: #7c5cbf;
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            background: var(--bg);
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Inter', sans-serif;
+            color: var(--text-main);
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1600px;
+            display: flex;
+            flex-direction: column;
+            gap: 2vw;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+
+        .container.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .time-block {
+            font-weight: 800;
+            line-height: 1.1;
+            text-shadow: 0 4px 20px rgba(0,0,0,0.8);
+            margin: 0;
+            display: none;
+        }
+
+        .text-block {
+            font-weight: 600;
+            line-height: 1.4;
+            text-shadow: 0 4px 20px rgba(0,0,0,0.8);
+            margin: 0;
+            display: none;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container" id="conteudoTime">
+        <div class="time-block" id="relogio-alvo"></div>
+        <div class="time-block" id="contador-alvo"></div>
+        <div class="text-block" id="texto-alvo"></div>
+    </div>
+
+    <script src="projetor_time.js"></script>
+</body>
+
+</html>

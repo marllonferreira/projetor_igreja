@@ -17,7 +17,8 @@
 
 html {
     color-scheme: dark;
-    overflow: hidden; /* Impede scroll na janela do popup */
+    overflow: hidden;
+    /* Impede scroll na janela do popup */
 }
 
 /* Remove setas dos inputs numéricos */
@@ -38,14 +39,16 @@ input[type=number] {
 }
 
 body {
-    width: 280px;
+    width: 300px;
     padding: 8px 12px;
     font-family: 'Inter', sans-serif;
     background: var(--bg);
     color: var(--text);
     user-select: none;
-    overflow: hidden; /* Scroll só dentro dos elementos internos, nunca no popup todo */
+    overflow: hidden;
+    /* Scroll só dentro dos elementos internos, nunca no popup todo */
 }
+
 body.compact-mode {
     padding: 6px 10px;
 }
@@ -59,6 +62,7 @@ body.compact-mode {
     padding-bottom: 8px;
     border-bottom: 1px solid var(--border);
 }
+
 body.compact-mode .header {
     margin-bottom: 6px;
     padding-bottom: 6px;
@@ -100,6 +104,7 @@ body.compact-mode .header {
     text-transform: uppercase;
     margin-bottom: 7px;
 }
+
 body.compact-mode .section-label {
     margin-bottom: 5px;
 }
@@ -107,6 +112,7 @@ body.compact-mode .section-label {
 .section {
     margin-bottom: 8px;
 }
+
 body.compact-mode .section {
     margin-bottom: 6px;
 }
@@ -131,6 +137,7 @@ body.compact-mode .section {
     text-align: left;
     margin-bottom: 6px;
 }
+
 body.compact-mode .btn {
     padding: 6px 8px;
     margin-bottom: 5px;
@@ -138,11 +145,13 @@ body.compact-mode .btn {
 
 .flex-row {
     display: flex;
-    align-items: stretch; /* garante mesma altura para todos os filhos */
+    align-items: stretch;
+    /* garante mesma altura para todos os filhos */
     gap: 6px;
     width: 100%;
     margin-bottom: 6px;
 }
+
 body.compact-mode .flex-row {
     margin-bottom: 5px;
 }
@@ -152,12 +161,15 @@ body.compact-mode .flex-row {
     flex: 1;
     padding: 7px 8px;
 }
+
 .flex-row .btn.btn-solo {
     padding: 10px 8px;
 }
+
 body.compact-mode .flex-row .btn {
     padding: 6px 8px;
 }
+
 body.compact-mode .flex-row .btn.btn-solo {
     padding: 9px 8px;
 }
@@ -188,12 +200,17 @@ body.compact-mode .flex-row .btn.btn-solo {
     gap: 6px;
     margin-bottom: 10px;
 }
+
 body.compact-mode .tabs {
     margin-bottom: 6px;
 }
 
 .tab-btn {
     flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
     padding: 8px;
     background: var(--surface);
     border: 1px solid var(--border);
@@ -204,6 +221,7 @@ body.compact-mode .tabs {
     cursor: pointer;
     transition: all 0.2s;
 }
+
 body.compact-mode .tab-btn {
     padding: 6px;
 }
@@ -260,6 +278,7 @@ body.compact-mode .tab-btn {
 #setupFlexRow .btn {
     padding: 10px 8px;
 }
+
 body.compact-mode #setupFlexRow .btn {
     padding: 9px 8px;
 }
@@ -271,6 +290,7 @@ body.compact-mode #setupFlexRow .btn {
     width: 100%;
     margin-bottom: 8px;
 }
+
 body.compact-mode .controls-grid {
     margin-bottom: 6px;
 }
@@ -295,6 +315,7 @@ body.compact-mode .controls-grid {
     cursor: pointer;
     transition: all 0.18s ease;
 }
+
 body.compact-mode .btn-control {
     padding: 6px 4px;
 }
@@ -353,7 +374,8 @@ body.compact-mode .btn-control {
 
 /* No modo volume (uma linha só), o header vira parte do mesmo row */
 #volumeSection .volume-header {
-    display: none; /* título/label migrados para o volume-row */
+    display: none;
+    /* título/label migrados para o volume-row */
 }
 
 /* Progresso mantém o header separado */
@@ -520,6 +542,14 @@ body.compact-mode .btn-control {
     color: var(--text);
     border-radius: 6px;
     font-size: 11px;
+    transition: all 0.2s ease;
+    color-scheme: dark;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: #00cec9; /* Azulzinho/Ciano claro */
+    box-shadow: 0 0 0 2px rgba(0, 206, 201, 0.25);
 }
 
 .form-control:disabled {
@@ -612,7 +642,7 @@ body.compact-mode .btn-control {
 .midia-gallery .gallery-item.active {
     border-color: #2ecc71;
     border-width: 3px;
-    box-shadow: 0 0 0 2px #2ecc71, 0 0 18px rgba(46,204,113,0.7);
+    box-shadow: 0 0 0 2px #2ecc71, 0 0 18px rgba(46, 204, 113, 0.7);
     transform: scale(1.05);
 }
 
@@ -629,7 +659,7 @@ body.compact-mode .btn-control {
     right: 2px;
     width: 16px;
     height: 16px;
-    background: rgba(0,0,0,0.7);
+    background: rgba(0, 0, 0, 0.7);
     border: none;
     border-radius: 50%;
     color: #fff;
@@ -792,7 +822,7 @@ body.compact-mode .btn-control {
 
 .sobre-versao-pill {
     display: inline-block;
-    background: linear-gradient(135deg, rgba(124,92,191,0.25), rgba(91,63,160,0.25));
+    background: linear-gradient(135deg, rgba(124, 92, 191, 0.25), rgba(91, 63, 160, 0.25));
     border: 1px solid var(--accent);
     color: #c7aeff;
     font-size: 10px;
@@ -808,7 +838,7 @@ body.compact-mode .btn-control {
     justify-content: space-between;
     align-items: center;
     padding: 7px 0;
-    border-bottom: 1px solid rgba(42,42,56,0.5);
+    border-bottom: 1px solid rgba(42, 42, 56, 0.5);
     font-size: 11px;
 }
 
@@ -850,25 +880,32 @@ body.compact-mode .btn-control {
 }
 
 @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(-4px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(-4px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .sobre-result.atualizado {
-    background: rgba(39,174,96,0.1);
-    border: 1px solid rgba(39,174,96,0.3);
+    background: rgba(39, 174, 96, 0.1);
+    border: 1px solid rgba(39, 174, 96, 0.3);
     color: #2ecc71;
 }
 
 .sobre-result.tem-update {
-    background: rgba(124,92,191,0.1);
-    border: 1px solid rgba(124,92,191,0.4);
+    background: rgba(124, 92, 191, 0.1);
+    border: 1px solid rgba(124, 92, 191, 0.4);
     color: var(--text);
 }
 
 .sobre-result.erro {
-    background: rgba(231,76,60,0.1);
-    border: 1px solid rgba(231,76,60,0.3);
+    background: rgba(231, 76, 60, 0.1);
+    border: 1px solid rgba(231, 76, 60, 0.3);
     color: #e74c3c;
 }
 
@@ -910,7 +947,11 @@ body.compact-mode .btn-control {
     animation: spin 0.8s linear infinite;
 }
 
-@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
 
 /* ── Playlist YouTube ── */
 #btnAdicionarPlaylist {
@@ -922,7 +963,7 @@ body.compact-mode .btn-control {
 }
 
 #btnAdicionarPlaylist:hover {
-    box-shadow: 0 4px 14px rgba(39,174,96,0.35);
+    box-shadow: 0 4px 14px rgba(39, 174, 96, 0.35);
     border-color: #2ecc71;
 }
 
@@ -958,7 +999,8 @@ body.compact-mode .btn-control {
 
 #playlistList {
     list-style: none;
-    max-height: 105px; /* Acomoda 3 itens (aprox 99px) sem scroll */
+    max-height: 105px;
+    /* Acomoda 3 itens (aprox 99px) sem scroll */
     overflow-y: auto;
     overflow-x: hidden;
     padding-right: 2px;
@@ -994,7 +1036,7 @@ body.compact-mode .btn-control {
 }
 
 .playlist-item:hover {
-    background: rgba(255,255,255,0.04);
+    background: rgba(255, 255, 255, 0.04);
 }
 
 .playlist-item.playing {
@@ -1044,16 +1086,17 @@ body.compact-mode .btn-control {
 .playlist-item:hover .playlist-item-actions,
 .playlist-item.playing .playlist-item-actions {
     opacity: 1;
-    max-width: 96px; /* espaço para os 4 botões de 20px + gaps */
+    max-width: 96px;
+    /* espaço para os 4 botões de 20px + gaps */
 }
 
 .pl-btn {
     width: 20px;
     height: 20px;
-    border: 1px solid rgba(255,255,255,0.12);
+    border: 1px solid rgba(255, 255, 255, 0.12);
     border-radius: 5px;
-    background: rgba(255,255,255,0.07);
-    color: rgba(255,255,255,0.60);
+    background: rgba(255, 255, 255, 0.07);
+    color: rgba(255, 255, 255, 0.60);
     font-size: 11px;
     cursor: pointer;
     display: flex;
@@ -1067,18 +1110,37 @@ body.compact-mode .btn-control {
 
 /* Botões no item tocando: um pouco mais destaque */
 .playlist-item.playing .pl-btn {
-    border-color: rgba(46,204,113,0.25);
-    background: rgba(46,204,113,0.10);
-    color: rgba(255,255,255,0.75);
+    border-color: rgba(46, 204, 113, 0.25);
+    background: rgba(46, 204, 113, 0.10);
+    color: rgba(255, 255, 255, 0.75);
 }
 
 .pl-btn:hover {
-    background: rgba(255,255,255,0.15);
-    border-color: rgba(255,255,255,0.30);
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.30);
     color: #fff;
 }
 
-.pl-btn.pl-play:hover  { background: rgba(46,204,113,0.20);  border-color: rgba(46,204,113,0.50);  color: #2ecc71; }
-.pl-btn.pl-up:hover    { background: rgba(124,92,191,0.20);   border-color: rgba(124,92,191,0.50);   color: var(--accent-hover); }
-.pl-btn.pl-down:hover  { background: rgba(124,92,191,0.20);   border-color: rgba(124,92,191,0.50);   color: var(--accent-hover); }
-.pl-btn.pl-del:hover   { background: rgba(207,102,121,0.20);  border-color: rgba(207,102,121,0.50);  color: var(--red); }
+.pl-btn.pl-play:hover {
+    background: rgba(46, 204, 113, 0.20);
+    border-color: rgba(46, 204, 113, 0.50);
+    color: #2ecc71;
+}
+
+.pl-btn.pl-up:hover {
+    background: rgba(124, 92, 191, 0.20);
+    border-color: rgba(124, 92, 191, 0.50);
+    color: var(--accent-hover);
+}
+
+.pl-btn.pl-down:hover {
+    background: rgba(124, 92, 191, 0.20);
+    border-color: rgba(124, 92, 191, 0.50);
+    color: var(--accent-hover);
+}
+
+.pl-btn.pl-del:hover {
+    background: rgba(207, 102, 121, 0.20);
+    border-color: rgba(207, 102, 121, 0.50);
+    color: var(--red);
+}
