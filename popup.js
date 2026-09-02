@@ -18,8 +18,65 @@ let currentSettings = {
     prefFrequenciaAtualizacao: 3,
     timeGlobalCor: '#ffffff',
     timeGlobalTamanho: 8,
-    timeGlobalAlinhamento: 'center'
+    timeGlobalAlinhamento: 'center',
+    themeMode: 'auto'
 };
+
+// ── Sistema de Temas ──
+/**
+ * Aplica o tema no elemento <html>.
+ * @param {'auto'|'light'|'dark'} mode
+ */
+function aplicarTema(mode) {
+    const html = document.documentElement;
+    if (mode === 'dark') {
+        html.setAttribute('data-theme', 'dark');
+    } else if (mode === 'light') {
+        html.setAttribute('data-theme', 'light');
+    } else {
+        // auto: remove atributo, deixa o @media query cuidar
+        html.removeAttribute('data-theme');
+    }
+}
+
+// Quando o tema do sistema muda e o modo é automático, re-aplica
+window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+    if (currentSettings.themeMode === 'auto') aplicarTema('auto');
+});
+
+/** Sincroniza os radio buttons de tema com o valor atual de currentSettings.themeMode */
+function sincronizarRadioTema() {
+    const modeAtual = currentSettings.themeMode || 'auto';
+    ['themeAuto', 'themeLight', 'themeDark'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.checked = (el.value === modeAtual);
+    });
+    // Atualiza a classe CSS active nos labels
+    ['themeOptAuto', 'themeOptLight', 'themeOptDark'].forEach(id => {
+        const label = document.getElementById(id);
+        if (label) {
+            const radio = label.querySelector('input[type="radio"]');
+            if (radio) label.classList.toggle('active', radio.checked);
+        }
+    });
+}
+
+// Listener nos radio buttons para aplicar o tema em tempo real
+document.querySelectorAll('input[name="themeMode"]').forEach(radio => {
+    radio.addEventListener('change', () => {
+        if (radio.checked) {
+            aplicarTema(radio.value);
+            // Atualiza classe active nos labels visualmente
+            ['themeOptAuto', 'themeOptLight', 'themeOptDark'].forEach(id => {
+                const label = document.getElementById(id);
+                if (label) {
+                    const r = label.querySelector('input[type="radio"]');
+                    if (r) label.classList.toggle('active', r.checked);
+                }
+            });
+        }
+    });
+});
 
 function aplicarVisibilidadeControles() {
     const btnClose = document.getElementById('fecharProjetor');
@@ -57,6 +114,9 @@ chrome.storage.local.get(["projetorSettings"], (result) => {
     if (result.projetorSettings) {
         currentSettings = { ...currentSettings, ...result.projetorSettings };
     }
+
+    // Aplica o tema salvo imediatamente (antes de qualquer render) para evitar flash
+    aplicarTema(currentSettings.themeMode || 'auto');
     
     // Aplica estado imediato para evitar delay/piscada visual
     if (typeof atualizarBotaoPlay === 'function') {
@@ -99,6 +159,9 @@ chrome.storage.local.get(["projetorSettings"], (result) => {
         if (document.getElementById('configFrequenciaUpdate')) {
             document.getElementById('configFrequenciaUpdate').value = currentSettings.prefFrequenciaAtualizacao || 3;
         }
+
+        // Sincroniza os radio buttons de tema
+        sincronizarRadioTema();
     }
     
     aplicarVisibilidadeControles();
@@ -118,6 +181,9 @@ if (document.getElementById('btnSettings')) {
             // Garante que "Sobre" esteja fechado
             document.getElementById('sobreView').style.display = 'none';
 
+            // Sincroniza radio buttons de tema ao abrir
+            sincronizarRadioTema();
+
             const monitorSelect = document.getElementById('configMonitor');
             monitorSelect.innerHTML = '<option value="auto">Automático (Secundário)</option>';
             
@@ -135,7 +201,10 @@ if (document.getElementById('btnSettings')) {
                 });
             }
         } else {
-            // Fechar configurações (Cancelar)
+            // Fechar configurações (Cancelar) — restaura o tema salvo
+            aplicarTema(currentSettings.themeMode || 'auto');
+            sincronizarRadioTema();
+
             btnSettings.textContent = '⚙️';
             btnSettings.title = 'Configurações';
             
@@ -324,6 +393,13 @@ if (document.getElementById('btnSaveSettings')) {
             currentSettings.timeGlobalCor = document.getElementById('timeCor').value;
             currentSettings.timeGlobalTamanho = parseFloat(document.getElementById('timeTamanho').value) || 8;
             currentSettings.timeGlobalAlinhamento = document.getElementById('timeAlinhamento').value;
+        }
+
+        // Salva o tema selecionado
+        const themeRadio = document.querySelector('input[name="themeMode"]:checked');
+        if (themeRadio) {
+            currentSettings.themeMode = themeRadio.value;
+            aplicarTema(currentSettings.themeMode);
         }
 
         chrome.storage.local.set({ "projetorSettings": currentSettings });
@@ -1337,10 +1413,40 @@ if (document.getElementById('midiaSelectFolder')) {
     });
 }
 
+// Função auxiliar de confirmação customizada
+function showConfirm(title, message, onConfirm) {
+    const overlay = document.getElementById('confirmModalOverlay');
+    if (!overlay) {
+        if (confirm(message)) onConfirm();
+        return;
+    }
+    const titleEl = document.getElementById('confirmModalTitle');
+    const msgEl = document.getElementById('confirmModalMessage');
+    const btnCancel = document.getElementById('btnConfirmCancel');
+    const btnOk = document.getElementById('btnConfirmOk');
+
+    titleEl.textContent = title;
+    msgEl.textContent = message;
+    
+    // Cleanup de listeners anteriores clonando os botões
+    const newBtnCancel = btnCancel.cloneNode(true);
+    const newBtnOk = btnOk.cloneNode(true);
+    btnCancel.parentNode.replaceChild(newBtnCancel, btnCancel);
+    btnOk.parentNode.replaceChild(newBtnOk, btnOk);
+
+    newBtnCancel.addEventListener('click', () => overlay.style.display = 'none');
+    newBtnOk.addEventListener('click', () => {
+        overlay.style.display = 'none';
+        if (onConfirm) onConfirm();
+    });
+
+    overlay.style.display = 'flex';
+}
+
 // Botão: Limpar Todas as Imagens
 if (document.getElementById('midiaLimparTudo')) {
     document.getElementById('midiaLimparTudo').addEventListener('click', () => {
-        if (confirm("Tem certeza que deseja limpar todas as imagens carregadas?")) {
+        showConfirm("Limpar Imagens", "Tem certeza que deseja limpar todas as imagens carregadas?", () => {
             midiaList = [];
             midiaCurrentIndex = -1;
             document.getElementById('midiaGallery').innerHTML = '';
@@ -1352,7 +1458,7 @@ if (document.getElementById('midiaLimparTudo')) {
                     chrome.tabs.sendMessage(tabId, { action: 'encerrarMidia' }, () => { void chrome.runtime.lastError; });
                 }
             });
-        }
+        });
     });
 }
 

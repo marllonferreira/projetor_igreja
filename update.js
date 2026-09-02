@@ -3,6 +3,15 @@
 // Lógica da tela de detalhes de atualização
 // ============================================================
 
+// Carrega tema dinamicamente
+chrome.storage.local.get(["projetorSettings"], (result) => {
+    if (result.projetorSettings && result.projetorSettings.themeMode) {
+        const mode = result.projetorSettings.themeMode;
+        if (mode === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
+        else if (mode === 'light') document.documentElement.setAttribute('data-theme', 'light');
+    }
+});
+
 document.addEventListener('DOMContentLoaded', () => {
     carregarDadosAtualizacao();
 });

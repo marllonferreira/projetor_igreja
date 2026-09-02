@@ -2,7 +2,7 @@
 
 <div align="center">
   <p>
-    <img src="https://img.shields.io/badge/vers%C3%A3o-3.2-blue.svg" alt="Versão">
+    <img src="https://img.shields.io/badge/vers%C3%A3o-3.3-blue.svg" alt="Versão">
     <img src="https://img.shields.io/badge/plataforma-Chrome%20Extension-4285F4.svg" alt="Plataforma">
     <img src="https://img.shields.io/badge/HTML5%20|%20CSS3%20|%20JS-Vanilla-F7DF1E.svg" alt="Tecnologias">
     <a href="LICENSE"><img src="https://img.shields.io/badge/licen%C3%A7a-MIT-green.svg" alt="Licença"></a>
@@ -49,10 +49,11 @@ Uma extensão para navegadores baseados em Chromium (Google Chrome, Edge, Brave)
 - **Controle Preciso:** Envie a configuração para a tela e dispare a contagem no momento exato (com opções de Iniciar, Pausar e Zerar), acompanhando tudo por um display de feedback dentro da própria extensão.
 
 ## 🚀 Recursos Principais
-- **Gerenciamento Inteligente de Telão:** Botão para abrir o telão em uma janela limpa, com detecção automática do monitor secundário e opção de iniciar já em Fullscreen. A extensão **impede a abertura de múltiplos telões** — se o telão já estiver aberto, ela exibe um aviso e coloca a janela existente em foco.
+- **🎨 Sistema Completo de Temas:** A interface suporta os modos Claro, Escuro e Automático (baseado no sistema operacional), oferecendo conforto visual perfeito seja em ambientes muito iluminados ou escuros.
+- **Gerenciamento Inteligente de Telão:** Botão para abrir o telão em uma janela limpa, com detecção automática do monitor secundário e opção de iniciar já em Fullscreen. A extensão **impede a abertura de múltiplos telões** se o telão já estiver aberto, ela exibe um aviso e coloca a janela existente em foco.
 - **Layout Adaptativo:** A interface do popup se ajusta automaticamente com base nos recursos habilitados nas preferências. Quando muitos itens estão visíveis ao mesmo tempo, um modo compacto é ativado para evitar barras de rolagem desnecessárias.
 - **Menu de Preferências Centralizado:** Personalize a extensão profundamente através da tela de configurações, dividida por módulos:
-  - **Geral:** Escolha o monitor alvo (automático ou manual), defina a frequência de busca de atualizações (3 a 30 dias), opte por abrir em Tela Cheia, exibir ou ocultar o botão de fechar e configure a resolução padrão.
+  - **Geral:** Escolha o tema da interface (Auto, Claro, Escuro), o monitor alvo (automático ou manual), defina a frequência de busca de atualizações (3 a 30 dias), opte por abrir em Tela Cheia, exibir ou ocultar o botão de fechar e configure a resolução padrão.
   - **YouTube:** Ative ou desative itens da interface de controle (Botão Parar, Tela Cheia, Controles de Volume, Barra de Progresso e a Lista de Reprodução).
   - **Bíblia:** Defina a cor padrão do texto e o nível de zoom inicial.
   - **Mídia:** Ative a memorização das imagens importadas para não perdê-las ao fechar o navegador.
