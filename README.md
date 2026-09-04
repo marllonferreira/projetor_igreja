@@ -2,7 +2,7 @@
 
 <div align="center">
   <p>
-    <img src="https://img.shields.io/badge/vers%C3%A3o-3.3-blue.svg" alt="Versão">
+    <img src="https://img.shields.io/badge/vers%C3%A3o-3.4-blue.svg" alt="Versão">
     <img src="https://img.shields.io/badge/plataforma-Chrome%20Extension-4285F4.svg" alt="Plataforma">
     <img src="https://img.shields.io/badge/HTML5%20|%20CSS3%20|%20JS-Vanilla-F7DF1E.svg" alt="Tecnologias">
     <a href="LICENSE"><img src="https://img.shields.io/badge/licen%C3%A7a-MIT-green.svg" alt="Licença"></a>
@@ -59,7 +59,9 @@ Uma extensão para navegadores baseados em Chromium (Google Chrome, Edge, Brave)
   - **Mídia:** Ative a memorização das imagens importadas para não perdê-las ao fechar o navegador.
   - **Time:** Configure a cor do texto, o tamanho da fonte e o alinhamento da tela de cronômetro/relógio.
 - **Armazenamento Seguro:** As imagens carregadas na mídia ficam salvas no armazenamento local, permitindo carregar várias imagens em alta resolução sem perda de dados entre sessões.
-- **Notificação Inteligente de Atualização:** A extensão verifica novidades e exibe uma notificação diretamente na tela, permitindo ver as melhorias e baixar a nova versão com um clique.
+- **🔔 Notificação Inteligente de Atualização:** O sistema de atualização funciona em duas camadas complementares:
+  - **Toast na página:** Quando o agendamento detecta uma nova versão, um aviso flutuante e elegante aparece diretamente na página que você está navegando (ex: YouTube), compatível com o tema Claro e Escuro do sistema.
+  - **Badge no Popup:** A cada vez que a extensão é aberta, o sistema compara a versão instalada com a versão remota já salva localmente. Se houver atualização, uma **bolinha vermelha pulsante** aparece sobre o ícone de informações (ℹ️) e o aviso com o botão "Ver Detalhes" já é exibido automaticamente na aba **Sobre**, sem precisar clicar em "Verificar". Ao atualizar a extensão, o badge desaparece automaticamente.
 
 ## 📦 Como Instalar a Extensão
 
@@ -71,10 +73,12 @@ Uma extensão para navegadores baseados em Chromium (Google Chrome, Edge, Brave)
 6. **Fixe o ícone!** A extensão aparecerá na lista. Clique no ícone de "quebra-cabeça" 🧩 na barra do navegador e **fixe (pin)** o Projetor Igreja.
 
 ### 🔄 Como Atualizar a Extensão
-1. Quando houver uma nova versão, a extensão enviará uma notificação no seu navegador avisando da atualização.
-2. Clique no botão **Saiba Mais** na notificação para ver o que mudou e clique no botão de download.
+1. Quando houver uma nova versão, a extensão pode avisá-lo de duas formas:
+   - Um **aviso flutuante (Toast)** aparecerá na página que você está navegando.
+   - Uma **bolinha vermelha** aparecerá sobre o ícone ℹ️ na barra superior da extensão. Ao clicar nele (aba **Sobre**), o aviso com o botão de download já estará lá esperando.
+2. Clique em **Ver Detalhes e Baixar** para ver o que mudou e baixar o novo pacote.
 3. Extraia o conteúdo do novo arquivo `projetor_igreja.zip`, substituindo os arquivos na mesma pasta que você usou para a instalação.
-4. Vá em `chrome://extensions/` e clique no botão de **Recarregar (seta circular)** no card do Projetor Igreja. Pronto! A extensão já estará atualizada.
+4. Vá em `chrome://extensions/` e clique no botão de **Recarregar (seta circular)** no card do Projetor Igreja. Pronto! O badge sumirá automaticamente.
 
 ## 💻 Como Usar
 

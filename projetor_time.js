@@ -76,73 +76,84 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         
         if (!container) return;
 
-        // Configurar Exibição do Relógio
-        if (message.exibirRelogio) {
-            relogioEl.style.display = 'block';
-            updateRelogio();
-            if (!relogioInterval) relogioInterval = setInterval(updateRelogio, 1000);
+        const isVisible = container.classList.contains('show');
+
+        const updateContent = () => {
+            // Configurar Exibição do Relógio
+            if (message.exibirRelogio) {
+                relogioEl.style.display = 'block';
+                updateRelogio();
+                if (!relogioInterval) relogioInterval = setInterval(updateRelogio, 1000);
+            } else {
+                relogioEl.style.display = 'none';
+                if (relogioInterval) {
+                    clearInterval(relogioInterval);
+                    relogioInterval = null;
+                }
+            }
+            
+            // Configurar Contador (Cronômetro / Timer)
+            if (message.iniciarDoZero) {
+                currentModo = message.modo || 'nenhum';
+                isContando = false;
+                if (currentModo === 'timer') {
+                    totalSegundosConfig = (parseInt(message.minutos) || 0) * 60 + (parseInt(message.segundos) || 0);
+                    tempoAtualSegundos = totalSegundosConfig;
+                } else if (currentModo === 'cronometro') {
+                    tempoAtualSegundos = 0;
+                }
+            }
+            
+            if (currentModo === 'nenhum') {
+                contadorEl.style.display = 'none';
+                if (contadorInterval) {
+                    clearInterval(contadorInterval);
+                    contadorInterval = null;
+                }
+            } else {
+                contadorEl.style.display = 'block';
+                if (!contadorInterval) {
+                    lastTickTime = Date.now();
+                    contadorInterval = setInterval(updateContador, 200);
+                }
+                updateContador(); // atualiza imediato
+            }
+            
+            // Configurar Texto Livre
+            if (message.textoLivre && message.textoLivre.trim() !== '') {
+                textoEl.style.display = 'block';
+                textoEl.textContent = message.textoLivre;
+            } else {
+                textoEl.style.display = 'none';
+            }
+            
+            // Aplicar Formatação
+            const cor = message.cor || '#ffffff';
+            const tamanho = message.tamanho || 8; // vw
+            const alinhamento = message.alinhamento || 'center';
+            
+            container.style.textAlign = alinhamento;
+            container.style.alignItems = alinhamento === 'center' ? 'center' : (alinhamento === 'left' ? 'flex-start' : 'flex-end');
+            
+            relogioEl.style.color = cor;
+            contadorEl.style.color = cor;
+            textoEl.style.color = cor;
+            
+            // Relógio e Contador ficam um pouco maiores que o texto livre
+            relogioEl.style.fontSize = `${tamanho}vw`;
+            contadorEl.style.fontSize = `${tamanho}vw`;
+            textoEl.style.fontSize = `${tamanho * 0.7}vw`;
+            
+            // Mostrar
+            setTimeout(() => container.classList.add('show'), 50);
+        };
+
+        if (isVisible) {
+            container.classList.remove('show');
+            setTimeout(updateContent, 400); // 400ms do CSS
         } else {
-            relogioEl.style.display = 'none';
-            if (relogioInterval) {
-                clearInterval(relogioInterval);
-                relogioInterval = null;
-            }
+            updateContent();
         }
-        
-        // Configurar Contador (Cronômetro / Timer)
-        if (message.iniciarDoZero) {
-            currentModo = message.modo || 'nenhum';
-            isContando = false;
-            if (currentModo === 'timer') {
-                totalSegundosConfig = (parseInt(message.minutos) || 0) * 60 + (parseInt(message.segundos) || 0);
-                tempoAtualSegundos = totalSegundosConfig;
-            } else if (currentModo === 'cronometro') {
-                tempoAtualSegundos = 0;
-            }
-        }
-        
-        if (currentModo === 'nenhum') {
-            contadorEl.style.display = 'none';
-            if (contadorInterval) {
-                clearInterval(contadorInterval);
-                contadorInterval = null;
-            }
-        } else {
-            contadorEl.style.display = 'block';
-            if (!contadorInterval) {
-                lastTickTime = Date.now();
-                contadorInterval = setInterval(updateContador, 200);
-            }
-            updateContador(); // atualiza imediato
-        }
-        
-        // Configurar Texto Livre
-        if (message.textoLivre && message.textoLivre.trim() !== '') {
-            textoEl.style.display = 'block';
-            textoEl.textContent = message.textoLivre;
-        } else {
-            textoEl.style.display = 'none';
-        }
-        
-        // Aplicar Formatação
-        const cor = message.cor || '#ffffff';
-        const tamanho = message.tamanho || 8; // vw
-        const alinhamento = message.alinhamento || 'center';
-        
-        container.style.textAlign = alinhamento;
-        container.style.alignItems = alinhamento === 'center' ? 'center' : (alinhamento === 'left' ? 'flex-start' : 'flex-end');
-        
-        relogioEl.style.color = cor;
-        contadorEl.style.color = cor;
-        textoEl.style.color = cor;
-        
-        // Relógio e Contador ficam um pouco maiores que o texto livre
-        relogioEl.style.fontSize = `${tamanho}vw`;
-        contadorEl.style.fontSize = `${tamanho}vw`;
-        textoEl.style.fontSize = `${tamanho * 0.7}vw`;
-        
-        // Mostrar
-        setTimeout(() => container.classList.add('show'), 50);
         
         sendResponse({ ok: true });
     }

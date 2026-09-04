@@ -335,6 +335,41 @@ async function injetarToastNaAbaAtiva(versaoNova, nomeRelease) {
                     browserName = 'Firefox';
                 }
 
+                // Detecta o tema do sistema operacional
+                const isLight = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches;
+
+                // Paleta para tema escuro
+                const dark = {
+                    bg:         'linear-gradient(135deg, #17171f, #1e1e2e)',
+                    border:     '#7c5cbf',
+                    shadow:     '0 8px 32px rgba(124, 92, 191, 0.45), 0 2px 8px rgba(0,0,0,0.6)',
+                    color:      '#e8e8f0',
+                    titleColor: '#e8e8f0',
+                    subColor:   '#9b9bbb',
+                    closeBg:    'transparent',
+                    closeBorder:'#2a2a38',
+                    closeColor: '#6b6b82',
+                    closeHover: '#444',
+                    closeHoverColor: '#aaa',
+                };
+
+                // Paleta para tema claro
+                const light = {
+                    bg:         'linear-gradient(135deg, #f4f4f8, #ffffff)',
+                    border:     '#9b75d4',
+                    shadow:     '0 8px 32px rgba(107, 70, 193, 0.2), 0 2px 8px rgba(0,0,0,0.12)',
+                    color:      '#1a1a2e',
+                    titleColor: '#1a1a2e',
+                    subColor:   '#5a5a72',
+                    closeBg:    'transparent',
+                    closeBorder:'#d8d8e8',
+                    closeColor: '#7a7a92',
+                    closeHover: '#b0b0cc',
+                    closeHoverColor: '#333344',
+                };
+
+                const t = isLight ? light : dark;
+
                 const toast = document.createElement('div');
                 toast.id = 'projetor-igreja-update-toast';
                 toast.style.cssText = `
@@ -342,14 +377,14 @@ async function injetarToastNaAbaAtiva(versaoNova, nomeRelease) {
                     bottom: 24px;
                     right: 24px;
                     z-index: 2147483647;
-                    background: linear-gradient(135deg, #17171f, #1e1e2e);
-                    border: 1px solid #7c5cbf;
+                    background: ${t.bg};
+                    border: 1px solid ${t.border};
                     border-radius: 14px;
                     padding: 16px 18px;
                     width: 320px;
-                    box-shadow: 0 8px 32px rgba(124, 92, 191, 0.45), 0 2px 8px rgba(0,0,0,0.6);
+                    box-shadow: ${t.shadow};
                     font-family: 'Inter', system-ui, -apple-system, sans-serif;
-                    color: #e8e8f0;
+                    color: ${t.color};
                     animation: projetorSlideIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
                     cursor: default;
                 `;
@@ -380,13 +415,13 @@ async function injetarToastNaAbaAtiva(versaoNova, nomeRelease) {
                         #projetor-igreja-update-toast .pi-toast-title {
                             font-size: 13px;
                             font-weight: 700;
-                            color: #e8e8f0;
+                            color: ${t.titleColor};
                             margin-bottom: 4px;
                             line-height: 1.3;
                         }
                         #projetor-igreja-update-toast .pi-toast-sub {
                             font-size: 11px;
-                            color: #9b9bbb;
+                            color: ${t.subColor};
                             margin-bottom: 12px;
                             line-height: 1.4;
                         }
@@ -417,18 +452,18 @@ async function injetarToastNaAbaAtiva(versaoNova, nomeRelease) {
                         }
                         #projetor-igreja-update-toast .pi-toast-btn-close {
                             padding: 8px 10px;
-                            background: transparent;
-                            border: 1px solid #2a2a38;
+                            background: ${t.closeBg};
+                            border: 1px solid ${t.closeBorder};
                             border-radius: 8px;
-                            color: #6b6b82;
+                            color: ${t.closeColor};
                             font-size: 13px;
                             cursor: pointer;
                             transition: all 0.18s ease;
                             line-height: 1;
                         }
                         #projetor-igreja-update-toast .pi-toast-btn-close:hover {
-                            border-color: #444;
-                            color: #aaa;
+                            border-color: ${t.closeHover};
+                            color: ${t.closeHoverColor};
                         }
                     </style>
                     <div class="pi-toast-badge">🔔 Atualização de Extensão</div>

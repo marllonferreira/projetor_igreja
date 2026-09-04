@@ -12,7 +12,8 @@
     --green-glow: rgba(39, 174, 96, 0.35);
     --mute: #0e8fa1;
     --text: #e8e8f0;
-    --muted: #6b6b82;
+    --muted: #9494a8; /* Texto explicativo mais visível */
+    --tab-text: #6b6b82; /* Mantém as abas escuras */
     --radius: 10px;
     /* Variáveis auxiliares — tema escuro */
     --border-hover: #3a3a50;
@@ -63,6 +64,7 @@
     --mute: #0e8fa1;
     --text: #1a1a2e;
     --muted: #5a5a72;
+    --tab-text: #5a5a72;
     /* Variáveis auxiliares — tema claro */
     --border-hover: #b0b0cc;
     --surface-elevated: #eaeaf4;
@@ -113,6 +115,7 @@
         --mute: #0e8fa1;
         --text: #1a1a2e;
         --muted: #5a5a72;
+        --tab-text: #5a5a72;
         --border-hover: #b0b0cc;
         --surface-elevated: #eaeaf4;
         --surface-hover: #e0e0ee;
@@ -353,7 +356,7 @@ body.compact-mode .tabs {
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: var(--radius);
-    color: var(--muted);
+    color: var(--tab-text, var(--muted));
     font-size: 11px;
     font-weight: 600;
     cursor: pointer;
@@ -635,6 +638,24 @@ body.compact-mode .btn-control {
 .settings-icon:hover {
     opacity: 1;
     transform: scale(1.15);
+}
+
+.badge-dot {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--red, #e74c3c);
+    border: 1.5px solid var(--bg);
+    box-shadow: 0 0 5px var(--red-glow, rgba(231, 76, 60, 0.5));
+    animation: badgePulse 2s ease-in-out infinite;
+}
+
+@keyframes badgePulse {
+    0%, 100% { box-shadow: 0 0 4px var(--red-glow, rgba(231, 76, 60, 0.5)); }
+    50%       { box-shadow: 0 0 9px var(--red-glow, rgba(231, 76, 60, 0.7)); }
 }
 
 .toast {
@@ -1398,4 +1419,29 @@ body.compact-mode .btn-control {
     flex: 0 1 auto;
     padding: 8px 16px;
     font-size: 11px;
+}
+
+/* ── Tooltip Info ── */
+.info-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--surface-hover);
+    color: var(--text-secondary);
+    font-size: 10px;
+    font-weight: bold;
+    margin-left: 6px;
+    cursor: help;
+    border: 1px solid var(--border);
+    vertical-align: middle;
+    transition: all 0.2s ease;
+}
+
+.info-icon:hover {
+    background: var(--accent);
+    color: #fff;
+    border-color: var(--accent);
 }

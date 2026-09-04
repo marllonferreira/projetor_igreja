@@ -5,10 +5,9 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         const referenciaAlvo = document.getElementById('referencia-alvo');
         const versaoAlvo = document.getElementById('versao-alvo');
 
-        // Esconde suavemente
-        container.classList.remove('show');
-        
-        setTimeout(() => {
+        const isVisible = container.classList.contains('show');
+
+        const updateContent = () => {
             // Atualiza os dados
             textoAlvo.innerHTML = request.htmlContent;
             referenciaAlvo.textContent = request.referencia;
@@ -32,8 +31,15 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             textoAlvo.style.color = request.cor || '#ffffff';
 
             // Mostra suavemente
-            container.classList.add('show');
-        }, 400); // tempo para o fade out (metade da transition)
+            setTimeout(() => container.classList.add('show'), 50);
+        };
+
+        if (isVisible) {
+            container.classList.remove('show');
+            setTimeout(updateContent, 400); // Aguarda o fade out
+        } else {
+            updateContent();
+        }
     }
 
     if (request.action === "encerrarBiblia") {

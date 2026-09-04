@@ -18,7 +18,10 @@
             <h1>Projetor Igreja</h1>
             <p>Controle de Projeção</p>
         </div>
-        <div class="settings-icon" id="btnSobre" title="Sobre / Versão" style="font-size:14px; margin-right: 2px;">ℹ️</div>
+        <div class="settings-icon" id="btnSobre" title="Sobre / Versão"
+            style="font-size:14px; margin-right: 2px; position: relative;">ℹ️<div class="badge-dot" id="badgeSobre"
+                style="display: none;"></div>
+        </div>
         <div class="settings-icon" id="btnSettings" title="Configurações">⚙️</div>
     </div>
 
@@ -42,7 +45,8 @@
 
         <!-- Abas Principais -->
         <div class="tabs">
-            <div class="tab-btn main-tab-btn active" data-target="youtubeView"><span style="color: #e74c3c; margin-right: 2px;">▶</span> YouTube</div>
+            <div class="tab-btn main-tab-btn active" data-target="youtubeView"><span
+                    style="color: #e74c3c; margin-right: 2px;">▶</span> YouTube</div>
             <div class="tab-btn main-tab-btn" data-target="midiaView">🖼️ Mídia</div>
             <div class="tab-btn main-tab-btn" data-target="bibliaView">📖 Bíblia</div>
             <div class="tab-btn main-tab-btn" data-target="timeView">⏰ Time</div>
@@ -56,7 +60,8 @@
                     <span class="btn-icon" style="color: #fff;">▶</span>
                     <span>Projetar Atual</span>
                 </button>
-                <button class="btn" id="btnAdicionarPlaylist" style="display: none; background: linear-gradient(135deg, #1a6b3c, #145a32); border-color: #1e8449; color: #fff;">
+                <button class="btn" id="btnAdicionarPlaylist"
+                    style="display: none; background: linear-gradient(135deg, #1a6b3c, #145a32); border-color: #1e8449; color: #fff;">
                     <span class="btn-icon">➕</span>
                     <span>Adicionar à Lista</span>
                 </button>
@@ -150,7 +155,8 @@
                 </div>
                 <div class="form-group" style="flex: 1; margin-bottom: 0;">
                     <label for="bibliaZoomRapido">Zoom %:</label>
-                    <input type="number" id="bibliaZoomRapido" class="form-control" value="100" min="50" max="400" step="10">
+                    <input type="number" id="bibliaZoomRapido" class="form-control" value="100" min="50" max="400"
+                        step="10">
                 </div>
             </div>
             <div class="flex-row" style="margin-top: 12px; margin-bottom: 0;">
@@ -192,16 +198,19 @@
 
             <!-- Botões de Seleção -->
             <div class="midia-toolbar">
-                <button class="btn btn-enviar" id="midiaSelectFiles" style="flex: 1; margin-bottom: 0; background: linear-gradient(135deg, #8e44ad, #6c3483); border-color: #8e44ad;">
+                <button class="btn btn-enviar" id="midiaSelectFiles"
+                    style="flex: 1; margin-bottom: 0; background: linear-gradient(135deg, #8e44ad, #6c3483); border-color: #8e44ad;">
                     <span class="btn-icon">🖼️</span>
                     <span>Imagem(ns)</span>
                 </button>
-                <button class="btn btn-enviar" id="midiaSelectFolder" style="flex: 1; margin-bottom: 0; background: linear-gradient(135deg, #5b3fa0, #3d2b7a); border-color: #5b3fa0;">
+                <button class="btn btn-enviar" id="midiaSelectFolder"
+                    style="flex: 1; margin-bottom: 0; background: linear-gradient(135deg, #5b3fa0, #3d2b7a); border-color: #5b3fa0;">
                     <span class="btn-icon">📁</span>
                     <span>Pasta</span>
                 </button>
             </div>
-            <button class="btn btn-enviar" id="midiaLimparTudo" style="width: 100%; padding: 6px; font-size: 11px; margin-bottom: 10px; background: linear-gradient(135deg, #c0392b, #922b21); border-color: #922b21; margin-top: -4px;">
+            <button class="btn btn-enviar" id="midiaLimparTudo"
+                style="width: 100%; padding: 6px; font-size: 11px; margin-bottom: 10px; background: linear-gradient(135deg, #c0392b, #922b21); border-color: #922b21; margin-top: -4px;">
                 <span class="btn-icon">🗑️</span>
                 <span>Limpar Todas as Imagens</span>
             </button>
@@ -220,14 +229,16 @@
                     <span class="ctrl-label">Nav.</span>
                     <button class="btn-midia-ctrl" id="midiaAnterior" title="Imagem Anterior">◀</button>
                     <button class="btn-midia-ctrl" id="midiaProximo" title="Próxima Imagem">▶</button>
-                    <button class="btn-midia-ctrl btn-encerrar" id="midiaRemoverTelao" title="Encerrar Apresentação" style="font-size: 10px; font-weight: 600; letter-spacing: 0.3px;">⏹ Encerrar</button>
+                    <button class="btn-midia-ctrl btn-encerrar" id="midiaRemoverTelao" title="Encerrar Apresentação"
+                        style="font-size: 10px; font-weight: 600; letter-spacing: 0.3px;">⏹ Encerrar</button>
                 </div>
                 <!-- Giro -->
                 <div class="ctrl-row">
                     <span class="ctrl-label">Giro</span>
                     <button class="btn-midia-ctrl" id="midiaGirarEsq" title="Girar 90° à Esquerda">↩️</button>
                     <button class="btn-midia-ctrl" id="midiaGirarDir" title="Girar 90° à Direita">↪️</button>
-                    <button class="btn-midia-ctrl" id="midiaResetTransform" title="Resetar Zoom e Rotação" style="font-size: 11px;">Reset</button>
+                    <button class="btn-midia-ctrl" id="midiaResetTransform" title="Resetar Zoom e Rotação"
+                        style="font-size: 11px;">Reset</button>
                 </div>
                 <!-- Zoom -->
                 <div class="ctrl-row">
@@ -264,8 +275,9 @@
                     <input type="number" id="timeSegundos" class="form-control" value="0" min="0" max="59">
                 </div>
             </div>
-            
-            <div class="controls-grid" id="timeControlsGrid" style="display: none; margin-bottom: 12px; align-items: center;">
+
+            <div class="controls-grid" id="timeControlsGrid"
+                style="display: none; margin-bottom: 12px; align-items: center;">
                 <button class="btn-control" id="btnTimePlayPause" title="Iniciar / Pausar">
                     <span class="icon" id="iconTimePlayPause">▶</span>
                     <span id="textTimePlayPause">Iniciar</span>
@@ -274,13 +286,16 @@
                     <span class="icon">⏮</span>
                     <span>Zerar</span>
                 </button>
-                <div id="timeFeedbackDisplay" style="flex: 1; text-align: center; font-size: 14px; font-weight: 700; color: var(--accent); font-family: monospace; letter-spacing: 1px;">00:00</div>
+                <div id="timeFeedbackDisplay"
+                    style="flex: 1; text-align: center; font-size: 14px; font-weight: 700; color: var(--accent); font-family: monospace; letter-spacing: 1px;">
+                    00:00</div>
             </div>
             <div class="form-group" style="margin-bottom: 12px;">
                 <label for="timeTextoLivre">Texto Livre (Opcional):</label>
-                <textarea id="timeTextoLivre" class="form-control" rows="2" placeholder="Digite uma mensagem..."></textarea>
+                <textarea id="timeTextoLivre" class="form-control" rows="2"
+                    placeholder="Digite uma mensagem..."></textarea>
             </div>
-            
+
             <div class="flex-row" style="margin-top: 12px; margin-bottom: 0;">
                 <button class="btn btn-enviar" id="projetarTime"
                     style="flex: 2; margin-bottom: 0; background: linear-gradient(135deg, #196f3d, #229954); border-color: #196f3d;">
@@ -337,12 +352,14 @@
 
         <div class="checkbox-label" style="margin-bottom: 8px;">
             <input type="checkbox" id="configFullscreen">
-            <span>Tela Cheia ao abrir</span>
+            <span>Tela Cheia ao abrir <span class="info-icon"
+                    title="Abre a tela de projeção automaticamente ocupando toda a tela (F11) ao ser iniciada.">?</span></span>
         </div>
 
         <div class="checkbox-label" style="margin-bottom: 8px;">
             <input type="checkbox" id="prefShowClose">
-            <span>Botão Fechar Telão</span>
+            <span>Botão Fechar Telão <span class="info-icon"
+                    title="Exibe o de fechar no painel principal, útil para fechar a tela de projeção rapidamente.">?</span></span>
         </div>
 
         <div class="form-group" style="margin-top: 8px;">
@@ -364,27 +381,39 @@
 
         <div id="config-youtube" class="tab-content active config-tab-content"
             style="padding-top: 12px; margin-bottom: 16px;">
-            <div class="checkbox-label"><input type="checkbox" id="prefShowStop"> <span>Botão Parar (Tela Preta)</span>
+            <div class="checkbox-label"><input type="checkbox" id="prefShowStop"> <span>Botão Parar (Tela Preta) <span
+                        class="info-icon"
+                        title="Exibe um botão para interromper o vídeo e deixar o telão com fundo preto.">?</span></span>
             </div>
-            <div class="checkbox-label"><input type="checkbox" id="prefShowFullscreen"> <span>Botão Tela Cheia</span>
+            <div class="checkbox-label"><input type="checkbox" id="prefShowFullscreen"> <span>Botão Tela Cheia <span
+                        class="info-icon"
+                        title="Exibe um botão para forçar o vídeo do YouTube a preencher toda a tela de projeção.">?</span></span>
             </div>
-            <div class="checkbox-label"><input type="checkbox" id="prefShowVolume"> <span>Controles de Volume</span>
+            <div class="checkbox-label"><input type="checkbox" id="prefShowVolume"> <span>Controles de Volume <span
+                        class="info-icon"
+                        title="Mostra os botões de controle de volume e silenciar na aba do YouTube.">?</span></span>
             </div>
-            <div class="checkbox-label"><input type="checkbox" id="prefShowProgress"> <span>Barra de Progresso</span>
+            <div class="checkbox-label"><input type="checkbox" id="prefShowProgress"> <span>Barra de Progresso <span
+                        class="info-icon"
+                        title="Mostra a barra de tempo (timeline) na aba do YouTube, permitindo acompanhar o andamento da música.">?</span></span>
             </div>
-            <div class="checkbox-label"><input type="checkbox" id="prefShowPlaylist"> <span>Lista de Reprodução</span>
+            <div class="checkbox-label"><input type="checkbox" id="prefShowPlaylist"> <span>Lista de Reprodução <span
+                        class="info-icon"
+                        title="Ativa o botão para adiciona musica a fila de reprodução na aba do YouTube.">?</span></span>
             </div>
         </div>
 
         <div id="config-biblia" class="tab-content config-tab-content" style="padding-top: 12px; margin-bottom: 16px;">
             <div class="flex-row">
                 <div class="form-group" style="flex: 1; margin-bottom: 0;">
-                    <label for="bibliaCor">Cor do Texto:</label>
+                    <label for="bibliaCor">Cor do Texto: <span class="info-icon"
+                            title="Cor que será aplicada na fonte do versículo exibido no telão.">?</span></label>
                     <input type="color" id="bibliaCor" class="form-control" value="#ffffff"
                         style="padding: 0; height: 30px; cursor: pointer;">
                 </div>
                 <div class="form-group" style="flex: 1; margin-bottom: 0;">
-                    <label for="bibliaZoom">Zoom (%):</label>
+                    <label for="bibliaZoom">Zoom (%): <span class="info-icon"
+                            title="Ajusta o tamanho geral da fonte na tela de Bíblia. Valores maiores aumentam o texto.">?</span></label>
                     <input type="number" id="bibliaZoom" class="form-control" value="100" min="50" max="400" step="10">
                 </div>
             </div>
@@ -397,26 +426,31 @@
         <div id="config-midia" class="tab-content config-tab-content" style="padding-top: 12px; margin-bottom: 16px;">
             <div class="checkbox-label">
                 <input type="checkbox" id="prefMemorizarMidia" checked>
-                <span>Memorizar imagens ao fechar o navegador</span>
+                <span>Memorizar imagens ao fechar o navegador <span class="info-icon"
+                        title="Salva os caminhos das imagens e vídeos locais para que ainda estejam na lista quando você abrir o Chrome novamente.">?</span></span>
             </div>
             <div style="font-size: 11px; color: var(--muted); margin-top: 8px;">
-                *O navegador sempre abre a última pasta usada por padrão ao selecionar arquivos, conforme diretriz de segurança do Windows/Navegador.
+                *O navegador sempre abre a última pasta usada por padrão ao selecionar arquivos, conforme diretriz de
+                segurança do Windows/Navegador.
             </div>
         </div>
 
         <div id="config-time" class="tab-content config-tab-content" style="padding-top: 12px; margin-bottom: 16px;">
             <div class="flex-row">
                 <div class="form-group" style="flex: 1; margin-bottom: 0;">
-                    <label for="timeCor">Cor do Texto:</label>
+                    <label for="timeCor">Cor do Texto: <span class="info-icon"
+                            title="Define a cor dos cronômetros e do texto livre.">?</span></label>
                     <input type="color" id="timeCor" class="form-control" value="#ffffff"
                         style="padding: 0; height: 30px; cursor: pointer;">
                 </div>
                 <div class="form-group" style="flex: 1; margin-bottom: 0;">
-                    <label for="timeTamanho">Tamanho (vw):</label>
+                    <label for="timeTamanho">Tamanho (vw): <span class="info-icon"
+                            title="Ajusta a proporção do conteúdo na tela. Medida baseada na largura (viewport width).">?</span></label>
                     <input type="number" id="timeTamanho" class="form-control" value="8" min="2" max="30" step="0.5">
                 </div>
                 <div class="form-group" style="flex: 1; margin-bottom: 0;">
-                    <label for="timeAlinhamento">Alinhar:</label>
+                    <label for="timeAlinhamento">Alinhar: <span class="info-icon"
+                            title="Alinhamento horizontal do conteúdo.">?</span></label>
                     <select id="timeAlinhamento" class="form-control">
                         <option value="left">Esq.</option>
                         <option value="center" selected>Centro</option>
@@ -474,7 +508,8 @@
             <p id="confirmModalMessage">Tem certeza?</p>
             <div class="modal-actions">
                 <button class="btn btn-encerrar" id="btnConfirmCancel">Cancelar</button>
-                <button class="btn btn-abrir" id="btnConfirmOk" style="background: var(--red); border-color: var(--red); color: #fff;">Limpar</button>
+                <button class="btn btn-abrir" id="btnConfirmOk"
+                    style="background: var(--red); border-color: var(--red); color: #fff;">Limpar</button>
             </div>
         </div>
     </div>

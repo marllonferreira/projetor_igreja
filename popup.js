@@ -166,6 +166,9 @@ chrome.storage.local.get(["projetorSettings"], (result) => {
     
     aplicarVisibilidadeControles();
     if (typeof atualizarVisibilidadePlaylist === 'function') atualizarVisibilidadePlaylist();
+    
+    // Avalia silenciosamente se há atualização pendente no storage
+    evaluateUpdateStatus();
 });
 
 if (document.getElementById('btnSettings')) {
@@ -278,15 +281,86 @@ function fecharSobre() {
         btnSobre.style.opacity = '';
     }
     document.getElementById('mainView').style.display = 'block';
-    // Reseta o resultado da verificação
+    // Reseta o resultado da verificação, mas preserva se houver update automático pendente
     const resultEl = document.getElementById('sobreResult');
-    if (resultEl) { resultEl.style.display = 'none'; resultEl.className = 'sobre-result'; }
+    if (resultEl && !resultEl.classList.contains('tem-update')) {
+        resultEl.style.display = 'none';
+        resultEl.className = 'sobre-result';
+    }
     const iconEl = document.getElementById('verificarIcon');
     const textoEl = document.getElementById('verificarTexto');
     if (iconEl) iconEl.textContent = '🔍';
     if (textoEl) textoEl.textContent = 'Verificar Atualizações';
     const btnVer = document.getElementById('btnVerificarAtualizacao');
     if (btnVer) btnVer.disabled = false;
+}
+
+// ── Avaliação leve de status de atualização ao abrir popup ─────────────────────
+/**
+ * Compara a versão instalada com a versão remota salva no storage.
+ * Exibe ou oculta o badge sem fazer nenhuma requisição de rede.
+ */
+function evaluateUpdateStatus() {
+    const versaoAtual = chrome.runtime.getManifest().version;
+    const badge = document.getElementById('badgeSobre');
+    const resultEl = document.getElementById('sobreResult');
+
+    chrome.storage.local.get(['dadosAtualizacao'], (result) => {
+        const dados = result.dadosAtualizacao;
+
+        if (!dados || !dados.versaoNova) {
+            if (badge) badge.style.display = 'none';
+            return;
+        }
+
+        const temUpdate = compararVersoesUI(dados.versaoNova, versaoAtual) > 0;
+
+        if (temUpdate) {
+            // Exibe a bolinha de notificação no ícone Sobre
+            if (badge) badge.style.display = 'block';
+
+            // Preenche automaticamente o painel Sobre com o aviso (se o sobreResult já existe no DOM)
+            if (resultEl) {
+                const updateUrl = chrome.runtime.getURL('update.html');
+                const notasPreview = dados.notas
+                    ? dados.notas.substring(0, 200) + (dados.notas.length > 200 ? '...' : '')
+                    : '';
+                resultEl.className = 'sobre-result tem-update';
+                resultEl.innerHTML = `
+                    <div class="sobre-result-title">✨ Nova versão v${dados.versaoNova} disponível!</div>
+                    ${notasPreview ? `<div class="sobre-result-notas">${notasPreview}</div>` : ''}
+                    <button class="btn-saiba-mais" id="sobreSaibaMaisAuto">📋 Ver Detalhes e Baixar</button>
+                `;
+                resultEl.style.display = 'block';
+
+                const btnSaibaMaisAuto = document.getElementById('sobreSaibaMaisAuto');
+                if (btnSaibaMaisAuto) {
+                    btnSaibaMaisAuto.addEventListener('click', () => {
+                        chrome.tabs.create({ url: updateUrl });
+                    });
+                }
+            }
+        } else {
+            // Versão já atualizada: oculta badge e limpa flag se necessário
+            if (badge) badge.style.display = 'none';
+            if (dados.temAtualizacao) {
+                // Atualiza o storage para refletir que não há mais atualização pendente
+                chrome.storage.local.set({ dadosAtualizacao: { ...dados, temAtualizacao: false } });
+            }
+        }
+    });
+}
+
+// Função auxiliar de comparação de versões (para uso no popup, independente do background)
+function compararVersoesUI(a, b) {
+    const partes = (v) => String(v).split('.').map(n => parseInt(n) || 0);
+    const pa = partes(a), pb = partes(b);
+    const len = Math.max(pa.length, pb.length);
+    for (let i = 0; i < len; i++) {
+        if ((pa[i] || 0) > (pb[i] || 0)) return 1;
+        if ((pa[i] || 0) < (pb[i] || 0)) return -1;
+    }
+    return 0;
 }
 
 // Botão "Verificar Atualizações" dentro do Sobre

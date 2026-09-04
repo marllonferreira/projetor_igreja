@@ -20,9 +20,21 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         currentZoom = message.zoom || 1.0;
         currentRotation = message.rotation || 0;
 
-        img.style.opacity = '1';
-        img.src = message.dataUrl;
-        aplicarTransformacao();
+        const updateImage = () => {
+            img.src = message.dataUrl;
+            aplicarTransformacao();
+            setTimeout(() => {
+                img.style.opacity = '1';
+            }, 50);
+        };
+
+        if (img.style.opacity === '1') {
+            img.style.opacity = '0';
+            setTimeout(updateImage, 400); // aguarda o fade out do CSS
+        } else {
+            updateImage();
+        }
+
         sendResponse({ ok: true });
     }
 
