@@ -8,10 +8,6 @@ let currentSettings = {
     showVolume: true,
     showProgress: true,
     showPlaylist: true,
-    lastPlayingState: true,
-    lastCurrentTime: 0,
-    lastDuration: 0,
-    lastVideoTitle: "",
     bibliaGlobalCor: '#ffffff',
     bibliaGlobalZoom: 100,
     prefMemorizarMidia: true,
@@ -21,6 +17,72 @@ let currentSettings = {
     timeGlobalAlinhamento: 'center',
     themeMode: 'auto'
 };
+
+// ═══════════════════════════════════════════════════════════════
+// Módulo de Playlist do YouTube (Declaração no Topo para Render Imediato)
+// ═══════════════════════════════════════════════════════════════
+
+// Estado em memória (sincronizado com chrome.storage.session)
+let ytPlaylist = [];         // Array de { id, title }
+let ytPlaylistIndex = -1;    // Índice do vídeo em reprodução (-1 = nenhum)
+let ytPlaylistAtivo = false; // true após o 1.º vídeo ser projetado
+
+/** Salva o estado atual da playlist na sessão do navegador */
+function salvarPlaylistSession() {
+    chrome.storage.session.set({
+        ytPlaylist: ytPlaylist,
+        ytPlaylistIndex: ytPlaylistIndex,
+        ytPlaylistAtivo: ytPlaylistAtivo
+    });
+}
+
+/** Atualiza a contagem e visibilidade do bloco da playlist */
+function atualizarVisibilidadePlaylist() {
+    const container = document.getElementById('playlistContainer');
+    const count = document.getElementById('playlistCount');
+    const btnAdicionar = document.getElementById('btnAdicionarPlaylist');
+    const btnProjetar = document.getElementById('enviarVideo');
+
+    if (currentSettings.showPlaylist === false) {
+        if (container) container.style.display = 'none';
+        if (btnAdicionar) btnAdicionar.style.display = 'none';
+        if (btnProjetar) btnProjetar.classList.add('btn-solo');
+        return;
+    }
+    
+    // Se a configuração permite e o projetor foi ativado
+    if (btnAdicionar && ytPlaylistAtivo) {
+        btnAdicionar.style.display = 'flex';
+        if (btnProjetar) btnProjetar.classList.remove('btn-solo');
+    } else {
+        if (btnAdicionar) btnAdicionar.style.display = 'none';
+        if (btnProjetar) btnProjetar.classList.add('btn-solo');
+    }
+
+    if (!container) return;
+
+    if (ytPlaylist.length > 0) {
+        container.style.display = 'block';
+        if (count) count.textContent = `${ytPlaylist.length} item${ytPlaylist.length > 1 ? 's' : ''}`;
+    } else {
+        container.style.display = 'none';
+    }
+}
+
+/** Restaura estado da sessão da playlist imediatamente ao abrir o popup */
+function carregarPlaylistSessao() {
+    chrome.storage.session.get(['ytPlaylist', 'ytPlaylistIndex', 'ytPlaylistAtivo'], (result) => {
+        if (result.ytPlaylist) ytPlaylist = result.ytPlaylist;
+        if (result.ytPlaylistIndex !== undefined) ytPlaylistIndex = result.ytPlaylistIndex;
+        if (result.ytPlaylistAtivo !== undefined) ytPlaylistAtivo = result.ytPlaylistAtivo;
+
+        atualizarVisibilidadePlaylist();
+        if (typeof renderizarPlaylist === 'function') renderizarPlaylist();
+    });
+}
+
+// Carregamento instantâneo do estado da playlist da sessão
+carregarPlaylistSessao();
 
 // ── Sistema de Temas ──
 /**
@@ -112,19 +174,17 @@ function autoajusteLayout() {
 
 chrome.storage.local.get(["projetorSettings"], (result) => {
     if (result.projetorSettings) {
+        // Remove resíduos legados de sessões anteriores que possam ter sido persistidos
+        delete result.projetorSettings.lastPlayingState;
+        delete result.projetorSettings.lastCurrentTime;
+        delete result.projetorSettings.lastDuration;
+        delete result.projetorSettings.lastVideoTitle;
         currentSettings = { ...currentSettings, ...result.projetorSettings };
+        chrome.storage.local.set({ "projetorSettings": currentSettings });
     }
 
     // Aplica o tema salvo imediatamente (antes de qualquer render) para evitar flash
     aplicarTema(currentSettings.themeMode || 'auto');
-    
-    // Aplica estado imediato para evitar delay/piscada visual
-    if (typeof atualizarBotaoPlay === 'function') {
-        atualizarBotaoPlay(currentSettings.lastPlayingState);
-    }
-    if (typeof atualizarProgresso === 'function') {
-        atualizarProgresso(currentSettings.lastCurrentTime, currentSettings.lastDuration, currentSettings.lastVideoTitle, true);
-    }
     
     if (document.getElementById('configFullscreen')) {
         document.getElementById('configFullscreen').checked = currentSettings.openFullscreen;
@@ -253,13 +313,26 @@ if (document.getElementById('btnSobre')) {
             if (pillVersao) pillVersao.textContent = `Versão ${versaoAtual}`;
 
             // Mostra última checagem salva se existir
-            chrome.storage.local.get(['dadosAtualizacao'], (result) => {
+            chrome.storage.local.get(['dadosAtualizacao', 'adLogs'], (result) => {
                 const dados = result.dadosAtualizacao;
                 if (dados && dados.ultimaChecagem) {
                     const rowChecagem = document.getElementById('sobreUltimaChecagem');
                     const valChecagem = document.getElementById('sobreChecagemValor');
                     if (rowChecagem) rowChecagem.style.display = 'flex';
                     if (valChecagem) valChecagem.textContent = dados.ultimaChecagem;
+                }
+
+                // Preenche a contagem de anúncios bloqueados
+                const logsAd = result.adLogs || [];
+                const rowAd = document.getElementById('sobreAdLogsRow');
+                const valAd = document.getElementById('sobreAdLogsValor');
+                if (rowAd && valAd) {
+                    if (logsAd.length > 0) {
+                        valAd.textContent = logsAd.length;
+                        rowAd.style.display = 'flex';
+                    } else {
+                        rowAd.style.display = 'none';
+                    }
                 }
             });
 
@@ -533,7 +606,8 @@ if (document.getElementById('fecharProjetor')) {
                 chrome.tabs.remove(tabId, () => {
                     if (chrome.runtime.lastError) console.log("Janela já estava fechada.");
                 });
-                chrome.storage.local.remove("projetorTabId");
+                chrome.storage.local.remove(["projetorTabId", "adLogs"]);
+                // Playlist preservada intencionalmente: só apaga ao fechar o navegador
                 alternarEstadoControles(false);
             }
         });
@@ -772,10 +846,25 @@ document.getElementById('btnMute').addEventListener('click', () => {
 const slider = document.getElementById('volumeSlider');
 const label = document.getElementById('volumeLabel');
 
+// Recupera a preferência de volume salva ao abrir o popup
+chrome.storage.local.get(['ytVolumeLevel'], (res) => {
+    if (res && typeof res.ytVolumeLevel === 'number') {
+        const volPct = Math.round(res.ytVolumeLevel * 100);
+        if (slider && label) {
+            slider.value = volPct;
+            label.textContent = volPct + '%';
+        }
+    }
+});
+
 slider.addEventListener('input', () => {
     const vol = parseInt(slider.value);
     label.textContent = vol + '%';
     if (vol > 0) atualizarIconeMute(false);
+    
+    // Salva a preferência de volume imediatamente no storage
+    chrome.storage.local.set({ ytVolumeLevel: vol / 100 });
+
     chrome.storage.local.get(["projetorTabId"], (result) => {
         const tabId = result.projetorTabId;
         if (tabId) {
@@ -807,12 +896,6 @@ function atualizarBotaoPlay(playing) {
     const icon = btn.querySelector('.icon');
     const label = btn.querySelector('span:last-child');
     videoPlayando = playing;
-    
-    // Salva estado para a próxima vez que abrir não piscar
-    if (currentSettings.lastPlayingState !== playing) {
-        currentSettings.lastPlayingState = playing;
-        chrome.storage.local.set({ "projetorSettings": currentSettings });
-    }
 
     if (playing) {
         icon.textContent = '⏸';
@@ -848,10 +931,24 @@ function alternarEstadoControles(ativo) {
         videoPlayando = false;
         atualizarBotaoPlay(false);
         atualizarBotaoFullscreen(false);
-        document.getElementById('volumeSlider').value = 100;
-        document.getElementById('volumeLabel').textContent = '100%';
+        const vSlider = document.getElementById('volumeSlider');
+        if (vSlider) vSlider.value = 100;
+        const vLabel = document.getElementById('volumeLabel');
+        if (vLabel) vLabel.textContent = '100%';
         atualizarIconeMute(false);
-        atualizarProgresso(0, 0);
+        atualizarProgresso(0, 0, "");
+
+        // Renderiza mantendo os itens atuais da sessão
+        if (typeof carregarPlaylistSessao === 'function') {
+            carregarPlaylistSessao();
+        } else if (typeof renderizarPlaylist === 'function') {
+            renderizarPlaylist();
+        }
+
+        if (pollInterval) {
+            clearInterval(pollInterval);
+            pollInterval = null;
+        }
     }
 }
 
@@ -870,11 +967,16 @@ function atualizarProgresso(currentTime, duration, title = "", isInitialLoad = f
     const label = document.getElementById('progressLabel');
     const titleLabel = document.getElementById('videoTitleLabel');
     
-    if (titleLabel && title) {
-        // Remove numerações iniciais do título (ex: "01 - ", "(3) ") igual à playlist
-        const tituloLimpo = title.replace(/^\s*[\(\[]?\d{1,3}[\)\]]?\s*[-–—\.:]?\s*/u, '').trim() || title;
-        titleLabel.textContent = tituloLimpo;
-        titleLabel.title = tituloLimpo; // tooltip com nome completo limpo
+    if (titleLabel) {
+        if (title) {
+            // Remove numerações iniciais do título (ex: "01 - ", "(3) ") igual à playlist
+            const tituloLimpo = title.replace(/^\s*[\(\[]?\d{1,3}[\)\]]?\s*[-–—\.:]?\s*/u, '').trim() || title;
+            titleLabel.textContent = tituloLimpo;
+            titleLabel.title = tituloLimpo; // tooltip com nome completo limpo
+        } else if (!currentTime && !duration) {
+            titleLabel.textContent = 'Nenhum vídeo carregado';
+            titleLabel.title = '';
+        }
     }
 
     if (slider && label) {
@@ -885,13 +987,6 @@ function atualizarProgresso(currentTime, duration, title = "", isInitialLoad = f
             slider.value = 0;
             label.textContent = `00:00 / 00:00`;
         }
-    }
-    
-    if (!isInitialLoad && (currentSettings.lastCurrentTime !== currentTime || currentSettings.lastDuration !== duration || currentSettings.lastVideoTitle !== title)) {
-        currentSettings.lastCurrentTime = currentTime;
-        currentSettings.lastDuration = duration;
-        if (title) currentSettings.lastVideoTitle = title;
-        chrome.storage.local.set({ "projetorSettings": currentSettings });
     }
 }
 
@@ -919,46 +1014,58 @@ function carregarEstadoProjetor(tentativa) {
     chrome.storage.local.get(["projetorTabId"], (result) => {
         const tabId = result.projetorTabId;
         if (!tabId) {
+            // Sem telão ativo: desativa controles mas carrega playlist da sessão
             alternarEstadoControles(false);
+            if (typeof carregarPlaylistSessao === 'function') carregarPlaylistSessao();
             return;
         }
 
         chrome.tabs.get(tabId, (tab) => {
             if (chrome.runtime.lastError || !tab) {
-                chrome.storage.local.remove("projetorTabId");
+                // Aba não encontrada: limpa apenas o ID, preserva playlist
+                chrome.storage.local.remove(["projetorTabId", "adLogs"]);
                 alternarEstadoControles(false);
                 return;
             }
 
-            chrome.tabs.sendMessage(
-                tabId,
-                { action: "controlVideo", command: "getVideoState" },
-                (resp) => {
-                    if (chrome.runtime.lastError || !resp) {
-                        // Se falhou e ainda temos tentativas, aguarda e tenta novamente
-                        if (tentativa < 4) {
-                            setTimeout(() => carregarEstadoProjetor(tentativa + 1), 400);
-                        } else {
-                            alternarEstadoControles(false);
+            // Verifica se a aba ativa do projetor é do YouTube
+            if (tab.url && (tab.url.includes("youtube.com") || tab.url.includes("youtu.be"))) {
+                chrome.tabs.sendMessage(
+                    tabId,
+                    { action: "controlVideo", command: "getVideoState" },
+                    (resp) => {
+                        if (chrome.runtime.lastError || !resp) {
+                            // Se falhou e ainda temos tentativas, aguarda e tenta novamente
+                            if (tentativa < 4) {
+                                setTimeout(() => carregarEstadoProjetor(tentativa + 1), 400);
+                            } else {
+                                alternarEstadoControles(false);
+                            }
+                            return;
                         }
-                        return;
+                        
+                        alternarEstadoControles(true);
+                        const vol = Math.round(resp.volume * 100);
+                        const slider = document.getElementById('volumeSlider');
+                        const label = document.getElementById('volumeLabel');
+                        if (slider && label) {
+                            slider.value = vol;
+                            label.textContent = vol + '%';
+                        }
+                        atualizarIconeMute(resp.muted);
+                        atualizarBotaoPlay(resp.playing);
+                        atualizarProgresso(resp.currentTime, resp.duration, resp.title);
+                        
+                        // Restaura playlist apenas na sessão ativa
+                        if (typeof carregarPlaylistSessao === 'function') carregarPlaylistSessao();
+
+                        if (!pollInterval) iniciarPollingDeProgresso();
                     }
-                    
-                    alternarEstadoControles(true);
-                    const vol = Math.round(resp.volume * 100);
-                    const slider = document.getElementById('volumeSlider');
-                    const label = document.getElementById('volumeLabel');
-                    if (slider && label) {
-                        slider.value = vol;
-                        label.textContent = vol + '%';
-                    }
-                    atualizarIconeMute(resp.muted);
-                    atualizarBotaoPlay(resp.playing);
-                    atualizarProgresso(resp.currentTime, resp.duration, resp.title);
-                    
-                    if (!pollInterval) iniciarPollingDeProgresso();
-                }
-            );
+                );
+            } else {
+                // Aba aberta com Bíblia, Mídia ou outro módulo
+                alternarEstadoControles(false);
+            }
         });
     });
 }
@@ -969,7 +1076,8 @@ setTimeout(() => carregarEstadoProjetor(1), 150);
 chrome.tabs.onRemoved.addListener((closedTabId) => {
     chrome.storage.local.get(["projetorTabId"], (result) => {
         if (result.projetorTabId === closedTabId) {
-            chrome.storage.local.remove("projetorTabId");
+            // Remove apenas o ID do telão e logs de anúncio; preserva a playlist da sessão
+            chrome.storage.local.remove(["projetorTabId", "adLogs"]);
             alternarEstadoControles(false);
         }
     });
@@ -1714,62 +1822,14 @@ function projetarMidiaAtual() {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// Módulo de Playlist do YouTube
+// Módulo de Playlist do YouTube (Renderização e Ações)
 // ═══════════════════════════════════════════════════════════════
-
-// Estado em memória (sincronizado com chrome.storage.session)
-let ytPlaylist = [];         // Array de { id, title }
-let ytPlaylistIndex = -1;    // Índice do vídeo em reprodução (-1 = nenhum)
-let ytPlaylistAtivo = false; // true após o 1.º vídeo ser projetado
-
-// ── Utilitários ────────────────────────────────────────────────
 
 /** Remove numerações comuns no início do título (ex: "01. ", "(3) ", "03 - ") */
 function limparTituloVideo(titulo) {
     return titulo
         .replace(/^\s*[\(\[]?\d{1,3}[\)\]]?\s*[-–—\.:]?\s*/u, '') // "01 - " / "(1) " etc.
         .trim();
-}
-
-/** Salva o estado atual da playlist na sessão do navegador */
-function salvarPlaylistSession() {
-    chrome.storage.session.set({
-        ytPlaylist: ytPlaylist,
-        ytPlaylistIndex: ytPlaylistIndex,
-        ytPlaylistAtivo: ytPlaylistAtivo
-    });
-}
-
-/** Atualiza a contagem e visibilidade do bloco da playlist */
-function atualizarVisibilidadePlaylist() {
-    const container = document.getElementById('playlistContainer');
-    const count = document.getElementById('playlistCount');
-    const btnAdicionar = document.getElementById('btnAdicionarPlaylist');
-    const btnProjetar = document.getElementById('enviarVideo');
-
-    if (currentSettings.showPlaylist === false) {
-        if (container) container.style.display = 'none';
-        if (btnAdicionar) btnAdicionar.style.display = 'none';
-        if (btnProjetar) btnProjetar.classList.add('btn-solo');
-        return;
-    }
-    
-    // Se a configuração permite e o projetor foi ativado
-    if (btnAdicionar && ytPlaylistAtivo) {
-        btnAdicionar.style.display = 'flex';
-        if (btnProjetar) btnProjetar.classList.remove('btn-solo');
-    } else {
-        if (btnProjetar) btnProjetar.classList.add('btn-solo');
-    }
-
-    if (!container) return;
-
-    if (ytPlaylist.length > 0) {
-        container.style.display = 'block';
-        if (count) count.textContent = `${ytPlaylist.length} item${ytPlaylist.length > 1 ? 's' : ''}`;
-    } else {
-        container.style.display = 'none';
-    }
 }
 
 /** Renderiza todos os itens da lista no HTML */
@@ -1918,9 +1978,8 @@ async function adicionarVideoPlaylist() {
                     if (jaExiste >= 0) {
                         ytPlaylistIndex = jaExiste;
                     } else {
-                        const projTitulo = limparTituloVideo(
-                            (currentSettings.lastVideoTitle || projVideoId).replace(/ - YouTube$/, '').trim()
-                        );
+                        const rawProjTitle = projetorTab.title ? projetorTab.title.replace(/ - YouTube$/, '').trim() : projVideoId;
+                        const projTitulo = limparTituloVideo(rawProjTitle);
                         ytPlaylist.push({ id: projVideoId, title: projTitulo });
                         ytPlaylistIndex = ytPlaylist.length - 1;
                     }
@@ -1986,18 +2045,8 @@ function avancarPlaylist() {
     // Se era o último, não faz nada — a lista permanece visível
 }
 
-// ── Inicialização: restaura estado da sessão ───────────────────
-
-chrome.storage.session.get(['ytPlaylist', 'ytPlaylistIndex', 'ytPlaylistAtivo'], (result) => {
-    if (result.ytPlaylist) ytPlaylist = result.ytPlaylist;
-    if (result.ytPlaylistIndex !== undefined) ytPlaylistIndex = result.ytPlaylistIndex;
-    if (result.ytPlaylistAtivo !== undefined) ytPlaylistAtivo = result.ytPlaylistAtivo;
-
-    atualizarVisibilidadePlaylist();
-
-    // Reconstrói a lista se houver itens na sessão
-    renderizarPlaylist();
-});
+// ── Restaura estado da sessão da playlist quando o telão estiver ativo ───────────
+// (Definida no topo do arquivo para garantir inicialização imediata)
 
 // ── Botão: Adicionar à Playlist ────────────────────────────────
 
@@ -2019,7 +2068,7 @@ if (_btnEnviarVideo) {
     });
 }
 
-// ── Escuta confirmação de avanço de playlist vinda do background ─────
+// ── Escuta confirmação de avanço de playlist e mudanças de estado do vídeo ─────
 chrome.runtime.onMessage.addListener((request) => {
     if (request.action === 'playlistAdvanced') {
         // O background já atualizou o índice na session e navegou o vídeo.
@@ -2027,8 +2076,43 @@ chrome.runtime.onMessage.addListener((request) => {
         ytPlaylistIndex = request.newIndex;
         renderizarPlaylist();
     }
-    // videoEnded ainda pode chegar quando não há playlist ativa (background o repassa)
-    // — nesse caso não há nada a fazer no popup.
+    if (request.action === 'videoEnded') {
+        // Atualiza a interface para refletir que o vídeo parou
+        if (typeof atualizarBotaoPlay === 'function') {
+            atualizarBotaoPlay(false);
+        }
+    }
+    if (request.action === 'videoStateChanged') {
+        // Atualização reativa vinda diretamente do telão do YouTube
+        alternarEstadoControles(true);
+        if (typeof atualizarBotaoPlay === 'function') {
+            atualizarBotaoPlay(request.playing);
+        }
+        if (typeof atualizarProgresso === 'function') {
+            atualizarProgresso(request.currentTime, request.duration, request.title);
+        }
+        if (request.volume !== undefined) {
+            const vol = Math.round(request.volume * 100);
+            const slider = document.getElementById('volumeSlider');
+            const label = document.getElementById('volumeLabel');
+            if (slider && label) {
+                slider.value = vol;
+                label.textContent = vol + '%';
+            }
+        }
+        if (request.muted !== undefined && typeof atualizarIconeMute === 'function') {
+            atualizarIconeMute(request.muted);
+        }
+        if (request.playing && !pollInterval) {
+            iniciarPollingDeProgresso();
+        }
+        // Garante que o estado da playlist seja sincronizado com a sessão.
+        // Necessário pois este evento reativo não passa pelo carregarEstadoProjetor,
+        // que é quem normalmente chama carregarPlaylistSessao().
+        if (typeof carregarPlaylistSessao === 'function') {
+            carregarPlaylistSessao();
+        }
+    }
 });
 
 // ── FIM do Módulo de Playlist ──────────────────────────────────
@@ -2366,3 +2450,28 @@ function abrirNovaJanelaTime(url, config) {
         chrome.windows.create(createData, onWindowCreated);
     }
 }
+
+// ── Botão de Download de Logs de Anúncios na aba Sobre ──
+if (document.getElementById('sobreAdLogsValor')) {
+    document.getElementById('sobreAdLogsValor').addEventListener('click', () => {
+        chrome.storage.local.get(['adLogs'], (result) => {
+            const logs = result.adLogs || [];
+            if (logs.length === 0) return; // Não faz nada se não houver logs
+            
+            // Adiciona um cabeçalho bonitinho no TXT
+            const cabecalho = "=== HISTÓRICO DE ANÚNCIOS PULADOS (SESSÃO ATUAL) ===\n\n";
+            const conteudo = cabecalho + logs.join('\n');
+            
+            const blob = new Blob([conteudo], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            
+            chrome.downloads.download({
+                url: url,
+                filename: 'projetor_igreja_ads_log.txt',
+                saveAs: true
+            }, () => {
+                mostrarAviso("✅ Logs baixados com sucesso!");
+            });
+        });
+    });
+}

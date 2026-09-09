@@ -104,17 +104,23 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     // Não retorna true globalmente para evitar o erro de canal fechado
 });
 
-// ── Limpa o ID se a aba for fechada ──────────────────────────────────────────
+// ── Limpa o ID e dados de sessão se a aba for fechada ─────────────────────────
 chrome.tabs.onRemoved.addListener((tabId) => {
     if (tabId === projetorTabId) {
         projetorTabId = null;
-        chrome.storage.local.remove("projetorTabId");
-        console.log("Background: Aba do projetor fechada. ID removido.");
+        chrome.storage.local.remove(["projetorTabId", "adLogs"]);
+        // Playlist preservada intencionalmente na sessão; apagada apenas ao fechar o navegador.
+        chrome.storage.session.set({ ytPlaylistAtivo: false });
+        console.log("Background: Aba do projetor fechada. ID e Logs de Anúncios removidos. Playlist preservada.");
     }
 });
 
-// ── Limpa estado da mídia ao reiniciar o navegador, se configurado ─────────
+// ── Limpa estado da sessão ao reiniciar o navegador ────────────────────────
 chrome.runtime.onStartup.addListener(() => {
+    projetorTabId = null;
+    chrome.storage.local.remove(["projetorTabId", "adLogs"]);
+    chrome.storage.session.clear();
+
     chrome.storage.local.get(["projetorSettings"], (result) => {
         const settings = result.projetorSettings || {};
         // Se a opção não existir, assumimos true (padrão)
@@ -128,8 +134,11 @@ chrome.runtime.onStartup.addListener(() => {
     agendarVerificacaoDiaria();
 });
 
-// ── Instala alarme diário na primeira vez / reinsatação ───────────────────────
+// ── Instala alarme diário na primeira vez / reinstalação e limpa sessão ──────
 chrome.runtime.onInstalled.addListener(() => {
+    projetorTabId = null;
+    chrome.storage.local.remove(["projetorTabId", "adLogs"]);
+    chrome.storage.session.clear();
     agendarVerificacaoDiaria();
 });
 

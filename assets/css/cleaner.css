@@ -27,6 +27,24 @@
     visibility: hidden !important;
 }
 
+/* Oculta legendas automáticas ou ativadas na tela de projeção */
+.extensao-igreja-projector-active .ytp-caption-window-container,
+.extensao-igreja-projector-active .caption-window,
+.extensao-igreja-projector-active #ytp-caption-window-container {
+    display: none !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+}
+
+/* Oculta overlays de anúncios e banners visuais no telão */
+.extensao-igreja-projector-active .ytp-ad-overlay-container,
+.extensao-igreja-projector-active .ytp-ad-message-container,
+.extensao-igreja-projector-active .ytp-ad-player-overlay-flyout-cta {
+    display: none !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+}
+
 /* Ajusta o container do vídeo para ocupar a tela toda */
 .extensao-igreja-projector-active ytd-watch-flexy {
     padding: 0 !important;

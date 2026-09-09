@@ -2,7 +2,7 @@
 
 <div align="center">
   <p>
-    <img src="https://img.shields.io/badge/vers%C3%A3o-3.4-blue.svg" alt="Versão">
+    <img src="https://img.shields.io/badge/vers%C3%A3o-3.5-blue.svg" alt="Versão">
     <img src="https://img.shields.io/badge/plataforma-Chrome%20Extension-4285F4.svg" alt="Plataforma">
     <img src="https://img.shields.io/badge/HTML5%20|%20CSS3%20|%20JS-Vanilla-F7DF1E.svg" alt="Tecnologias">
     <a href="LICENSE"><img src="https://img.shields.io/badge/licen%C3%A7a-MIT-green.svg" alt="Licença"></a>
@@ -26,10 +26,13 @@ Uma extensão para navegadores baseados em Chromium (Google Chrome, Edge, Brave)
 
 ### 🔴 Módulo YouTube
 - **Limpeza de Interface:** Oculta completamente barra de pesquisa, comentários, vídeos sugeridos, chat ao vivo e o título do vídeo.
-- **Controle Remoto Sincronizado:** Play/Pause, Stop (escurece a tela e reinicia o tempo), Tela Cheia e Controle de Volume (com botão Mute), todos opcionalmente configuráveis nas preferências.
+- **🛡️ Bloqueio e Aceleração Silenciosa de Anúncios:** Sistema automático que intercepta propagandas na tela de projeção. O áudio do anúncio é silenciado preventivamente, a reprodução é acelerada para 16x ou avançada imediatamente para o final, e botões de pular ("Pular Anúncio") são clicados no mesmo instante em que surgem, evitando constrangimentos sonoros ou visuais durante o culto.
+- **Controle Remoto Sincronizado em Tempo Real:** Play/Pause, Stop (escurece a tela e reinicia o tempo), Tela Cheia e Controle de Volume (com botão Mute) atualizados em tempo real via sincronização reativa, sem necessidade de reabrir o popup.
 - **Acompanhamento de Status:** Barra de progresso visível no popup mostrando o tempo decorrido e o título do vídeo atual.
 - **Modo Blackout (Pós-Culto):** Quando o vídeo termina, a tela escurece e bloqueia o autoplay nativo do YouTube, evitando vídeos surpresas.
-- **🆕 Lista de Reprodução:** Monte uma fila de vídeos do YouTube diretamente no popup. Ao terminar um vídeo, a extensão avança automaticamente para o próximo da lista — na ordem correta — mesmo com o popup fechado. Reordene itens, remova individualmente ou toque qualquer vídeo da fila com um clique.
+- **Bloqueio Automático de Legendas e Autoplay:** Desativação contínua e universal de legendas sobrepostas e do autoplay do YouTube na janela de projeção, compatível com Chrome e Microsoft Edge.
+- **🔊 Transição Suave de Áudio (Fade In / Fade Out):** Ao pausar (Pause) ou parar (Stop) o vídeo, o volume diminui gradativamente em uma fração de segundo (~800ms) antes da interrupção, eliminando cortes secos. Ao retomar o Play (despausar), o áudio realiza uma entrada suave (Fade In) subindo gradualmente até o volume configurado, garantindo uma experiência sonora agradável e profissional no ambiente da igreja sem sustos ou picos acústicos.
+- **🆕 Lista de Reprodução Inteligente:** Monte uma fila de vídeos do YouTube diretamente no popup. Ao terminar um vídeo, a extensão avança automaticamente para o próximo da lista — na ordem correta — mesmo com o popup fechado. A fila é preservada durante toda a sessão (mesmo se o telão for fechado acidentalmente) e pode ser reordenada ou limpa a qualquer momento.
 
 ### 🖼️ Módulo Mídia (Imagens)
 - **Seleção Flexível:** Carregue arquivos de imagem individuais ou selecione uma pasta inteira de uma vez.
