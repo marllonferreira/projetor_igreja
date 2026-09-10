@@ -66,7 +66,49 @@ Uma extensão para navegadores baseados em Chromium (Google Chrome, Edge, Brave)
   - **Toast na página:** Quando o agendamento detecta uma nova versão, um aviso flutuante e elegante aparece diretamente na página que você está navegando (ex: YouTube), compatível com o tema Claro e Escuro do sistema.
   - **Badge no Popup:** A cada vez que a extensão é aberta, o sistema compara a versão instalada com a versão remota já salva localmente. Se houver atualização, uma **bolinha vermelha pulsante** aparece sobre o ícone de informações (ℹ️) e o aviso com o botão "Ver Detalhes" já é exibido automaticamente na aba **Sobre**, sem precisar clicar em "Verificar". Ao atualizar a extensão, o badge desaparece automaticamente.
 
+---
+
+## 🎬 Vídeos
+
+> Já conhece a extensão? Agora assista aos vídeos tutoriais antes de instalar — é rápido e vai te poupar tempo!
+
+<div align="center">
+  <table>
+    <tr>
+      <td align="center" width="33%">
+        <a href="https://youtu.be/hCt7P8F9ORo" target="_blank">
+          <img src="https://img.youtube.com/vi/hCt7P8F9ORo/mqdefault.jpg" width="260" alt="Apresentação do Projetor Igreja"><br>
+          <b>📺 Apresentação</b>
+        </a><br>
+        <sub>Conheça o projeto e veja como ele funciona</sub>
+      </td>
+      <td align="center" width="33%">
+        <a href="https://youtu.be/UQUzIZWk8N4" target="_blank">
+          <img src="https://img.youtube.com/vi/UQUzIZWk8N4/mqdefault.jpg" width="260" alt="Como Instalar o Projetor Igreja"><br>
+          <b>⚙️ Como Instalar</b>
+        </a><br>
+        <sub>Passo a passo completo de instalação</sub>
+      </td>
+      <td align="center" width="33%">
+        <a href="https://youtu.be/VrGopnWD7Bc" target="_blank">
+          <img src="https://img.youtube.com/vi/VrGopnWD7Bc/mqdefault.jpg" width="260" alt="Como Atualizar o Projetor Igreja"><br>
+          <b>🔄 Como Atualizar</b>
+        </a><br>
+        <sub>Saiba como manter a extensão atualizada</sub>
+      </td>
+    </tr>
+  </table>
+  <br>
+  <a href="https://www.youtube.com/playlist?list=PLQTYxYYTCs1E" target="_blank">
+    <img src="https://img.shields.io/badge/▶%20Ver%20Playlist%20Completa-FF0000?style=for-the-badge&logo=youtube&logoColor=white" alt="Ver Playlist Completa no YouTube">
+  </a>
+</div>
+
+---
+
 ## 📦 Como Instalar a Extensão
+
+> 🎥 Prefere assistir? Veja o [**vídeo de instalação completo**](https://youtu.be/UQUzIZWk8N4) no YouTube.
 
 1. **Baixe os arquivos:** Na lateral direita da página, procure pela seção **Releases**. Clique na versão mais recente. Role até o final da página e faça o download do arquivo `projetor_igreja.zip`. Após baixar, extraia os arquivos no seu computador.
 2. **Acesse as Extensões:** Abra o seu navegador (Chrome/Edge/Brave), digite na barra de endereços `chrome://extensions/` e pressione **Enter**.
@@ -76,6 +118,8 @@ Uma extensão para navegadores baseados em Chromium (Google Chrome, Edge, Brave)
 6. **Fixe o ícone!** A extensão aparecerá na lista. Clique no ícone de "quebra-cabeça" 🧩 na barra do navegador e **fixe (pin)** o Projetor Igreja.
 
 ### 🔄 Como Atualizar a Extensão
+
+> 🎥 Prefere assistir? Veja o [**vídeo de atualização completo**](https://youtu.be/VrGopnWD7Bc) no YouTube.
 1. Quando houver uma nova versão, a extensão pode avisá-lo de duas formas:
    - Um **aviso flutuante (Toast)** aparecerá na página que você está navegando.
    - Uma **bolinha vermelha** aparecerá sobre o ícone ℹ️ na barra superior da extensão. Ao clicar nele (aba **Sobre**), o aviso com o botão de download já estará lá esperando.
