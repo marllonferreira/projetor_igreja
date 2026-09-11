@@ -1,6 +1,9 @@
 Como Instalar a Extensão
 =========================
 
+Prefere assistir? Veja o video de instalação completo no YouTube:
+→ https://youtu.be/UQUzIZWk8N4
+
 Como a extensão será instalada de forma local, siga o passo a passo seguro abaixo:
 
 1. Baixe os arquivos: Faça o download do código-fonte ou clone este repositório no seu computador e extraia os arquivos para uma pasta segura de sua escolha.
@@ -11,7 +14,11 @@ Como a extensão será instalada de forma local, siga o passo a passo seguro aba
 6. Tudo pronto! A extensão Projetor Igreja aparecerá na sua lista. Para facilitar o uso, clique no ícone de "quebra-cabeça" na barra superior do navegador e fixe (pin) o ícone da extensão para que ele fique sempre visível.
 
 Como Atualizar a Extensão
-----------------------------------------
+--------------------------
+
+Prefere assistir? Veja o video de atualização completo no YouTube:
+→ https://youtu.be/VrGopnWD7Bc
+
 1. A extensão possui um sistema de Atualização Automática Inteligente. Quando houver uma nova versão, ela exibirá uma notificação direto na sua tela!
 2. Clique no botão "Saiba Mais" na notificação para ver o que mudou e faça o download da nova versão (arquivo .zip).
 3. Extraia o conteúdo do novo arquivo .zip por cima dos arquivos antigos, substituindo-os na mesma pasta usada para a instalação.
@@ -20,6 +27,9 @@ Como Atualizar a Extensão
 
 Como Usar
 =========
+
+Quer ver o projeto funcionando antes de começar? Assista à apresentação:
+→ https://youtu.be/hCt7P8F9ORo
 
 1. Clique no ícone da extensão na sua barra superior.
 2. Clique no botão "Abrir Telão". Isso abrirá uma janela limpa, que você pode arrastar para o seu segundo monitor (telão).
