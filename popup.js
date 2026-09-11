@@ -1297,11 +1297,17 @@ if (document.getElementById('btnVersiculoAnterior')) {
 }
 
 // Quando o usuário muda a cor ou o zoom na UI e já tem algo projetando
+// Debounce: aguarda 600ms após a última tecla para evitar projetar com valor incompleto
+// (ex: digitar "80" rápido disparava zoom "8" antes de completar o número)
+let bibliaZoomDebounceTimer = null;
 if (document.getElementById('bibliaZoomRapido')) {
     document.getElementById('bibliaZoomRapido').addEventListener('input', () => {
-        estadoBiblia.zoomRapido = document.getElementById('bibliaZoomRapido').value;
-        chrome.storage.session.set({ estadoBiblia: estadoBiblia });
-        if (bibliaVersesList.length > 0) enviarVersiculoAtualParaProjetor();
+        clearTimeout(bibliaZoomDebounceTimer);
+        bibliaZoomDebounceTimer = setTimeout(() => {
+            estadoBiblia.zoomRapido = document.getElementById('bibliaZoomRapido').value;
+            chrome.storage.session.set({ estadoBiblia: estadoBiblia });
+            if (bibliaVersesList.length > 0) enviarVersiculoAtualParaProjetor();
+        }, 600);
     });
 }
 
