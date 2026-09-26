@@ -45,6 +45,27 @@
     visibility: hidden !important;
 }
 
+/* Oculta Sugestões de Fim de Vídeo (Endscreen), Info Cards e Banners Relacionados */
+.extensao-igreja-projector-active .ytp-endscreen-content,
+.extensao-igreja-projector-active .html5-endscreen,
+.extensao-igreja-projector-active .ytp-ce-element,
+.extensao-igreja-projector-active .iv-branding,
+.extensao-igreja-projector-active .ytp-cards-button,
+.extensao-igreja-projector-active .ytp-cards-teaser,
+.extensao-igreja-projector-active .ytp-pause-overlay-container,
+.extensao-igreja-projector-active .ytp-related-video-overlay,
+.extensao-igreja-projector-active .ytp-upnext,
+.extensao-igreja-projector-active .ytp-upnext-overlay,
+.extensao-igreja-projector-active .ytp-autonav-endscreen-upnext-container {
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+    position: absolute !important;
+    top: -9999px !important;
+    transform: scale(0) !important;
+    z-index: -1 !important;
+}
+
 /* Ajusta o container do vídeo para ocupar a tela toda */
 .extensao-igreja-projector-active ytd-watch-flexy {
     padding: 0 !important;

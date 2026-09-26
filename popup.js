@@ -8,6 +8,8 @@ let currentSettings = {
     showVolume: true,
     showProgress: true,
     showPlaylist: true,
+    ytMudoAutoMain: false,
+    ytAutoplayBlockMain: false,
     bibliaGlobalCor: '#ffffff',
     bibliaGlobalZoom: 100,
     prefMemorizarMidia: true,
@@ -200,6 +202,12 @@ chrome.storage.local.get(["projetorSettings"], (result) => {
         if (document.getElementById('prefShowPlaylist')) {
             document.getElementById('prefShowPlaylist').checked = currentSettings.showPlaylist !== false;
         }
+        if (document.getElementById('prefMudoAutoMain')) {
+            document.getElementById('prefMudoAutoMain').checked = currentSettings.ytMudoAutoMain === true;
+        }
+        if (document.getElementById('prefAutoplayBlockMain')) {
+            document.getElementById('prefAutoplayBlockMain').checked = currentSettings.ytAutoplayBlockMain === true;
+        }
         
         if (document.getElementById('bibliaCor')) {
             document.getElementById('bibliaCor').value = currentSettings.bibliaGlobalCor;
@@ -313,7 +321,7 @@ if (document.getElementById('btnSobre')) {
             if (pillVersao) pillVersao.textContent = `Versão ${versaoAtual}`;
 
             // Mostra última checagem salva se existir
-            chrome.storage.local.get(['dadosAtualizacao', 'adLogs'], (result) => {
+            chrome.storage.local.get(['dadosAtualizacao', 'adLogs', 'adCount'], (result) => {
                 const dados = result.dadosAtualizacao;
                 if (dados && dados.ultimaChecagem) {
                     const rowChecagem = document.getElementById('sobreUltimaChecagem');
@@ -322,13 +330,13 @@ if (document.getElementById('btnSobre')) {
                     if (valChecagem) valChecagem.textContent = dados.ultimaChecagem;
                 }
 
-                // Preenche a contagem de anúncios bloqueados
-                const logsAd = result.adLogs || [];
+                // Preenche a contagem de anúncios reais bloqueados/pulados
+                const adCount = (typeof result.adCount === 'number') ? result.adCount : ((result.adLogs && result.adLogs.length > 0) ? 1 : 0);
                 const rowAd = document.getElementById('sobreAdLogsRow');
                 const valAd = document.getElementById('sobreAdLogsValor');
                 if (rowAd && valAd) {
-                    if (logsAd.length > 0) {
-                        valAd.textContent = logsAd.length;
+                    if (adCount > 0) {
+                        valAd.textContent = adCount;
                         rowAd.style.display = 'flex';
                     } else {
                         rowAd.style.display = 'none';
@@ -436,6 +444,15 @@ function compararVersoesUI(a, b) {
     return 0;
 }
 
+// Botão "Notas da Versão" — abre update.html no modo leitura
+if (document.getElementById('btnNotasVersao')) {
+    document.getElementById('btnNotasVersao').addEventListener('click', (e) => {
+        e.preventDefault();
+        const notasUrl = chrome.runtime.getURL('update.html') + '?modo=notas';
+        chrome.tabs.create({ url: notasUrl });
+    });
+}
+
 // Botão "Verificar Atualizações" dentro do Sobre
 if (document.getElementById('btnVerificarAtualizacao')) {
     document.getElementById('btnVerificarAtualizacao').addEventListener('click', () => {
@@ -522,6 +539,12 @@ if (document.getElementById('btnSaveSettings')) {
         if (document.getElementById('prefShowPlaylist')) {
             currentSettings.showPlaylist = document.getElementById('prefShowPlaylist').checked;
         }
+        if (document.getElementById('prefMudoAutoMain')) {
+            currentSettings.ytMudoAutoMain = document.getElementById('prefMudoAutoMain').checked;
+        }
+        if (document.getElementById('prefAutoplayBlockMain')) {
+            currentSettings.ytAutoplayBlockMain = document.getElementById('prefAutoplayBlockMain').checked;
+        }
         
         if (document.getElementById('bibliaCor')) {
             currentSettings.bibliaGlobalCor = document.getElementById('bibliaCor').value;
@@ -606,7 +629,7 @@ if (document.getElementById('fecharProjetor')) {
                 chrome.tabs.remove(tabId, () => {
                     if (chrome.runtime.lastError) console.log("Janela já estava fechada.");
                 });
-                chrome.storage.local.remove(["projetorTabId", "adLogs"]);
+                chrome.storage.local.remove(["projetorTabId", "adLogs", "adCount"]);
                 // Playlist preservada intencionalmente: só apaga ao fechar o navegador
                 alternarEstadoControles(false);
             }
@@ -1023,7 +1046,7 @@ function carregarEstadoProjetor(tentativa) {
         chrome.tabs.get(tabId, (tab) => {
             if (chrome.runtime.lastError || !tab) {
                 // Aba não encontrada: limpa apenas o ID, preserva playlist
-                chrome.storage.local.remove(["projetorTabId", "adLogs"]);
+                chrome.storage.local.remove(["projetorTabId", "adLogs", "adCount"]);
                 alternarEstadoControles(false);
                 return;
             }
@@ -1077,7 +1100,7 @@ chrome.tabs.onRemoved.addListener((closedTabId) => {
     chrome.storage.local.get(["projetorTabId"], (result) => {
         if (result.projetorTabId === closedTabId) {
             // Remove apenas o ID do telão e logs de anúncio; preserva a playlist da sessão
-            chrome.storage.local.remove(["projetorTabId", "adLogs"]);
+            chrome.storage.local.remove(["projetorTabId", "adLogs", "adCount"]);
             alternarEstadoControles(false);
         }
     });
@@ -1087,7 +1110,9 @@ function enviarComandoProjetor(comando) {
     chrome.storage.local.get(["projetorTabId"], (result) => {
         const tabId = result.projetorTabId;
         if (tabId) {
-            chrome.tabs.sendMessage(tabId, { action: "controlVideo", command: comando });
+            chrome.tabs.sendMessage(tabId, { action: "controlVideo", command: comando }, () => {
+                void chrome.runtime.lastError;
+            });
         }
     });
 }
@@ -1409,6 +1434,8 @@ function enviarDadosBiblia(tabId, htmlContent, referencia, versao, cor, zoom) {
         versao: versao,
         cor: cor,
         zoom: zoom
+    }, () => {
+        void chrome.runtime.lastError;
     });
 }
 
@@ -1424,6 +1451,7 @@ function abrirNovaJanelaBiblia(url, htmlContent, referencia, versao, cor, zoom) 
         if (window && window.tabs && window.tabs.length > 0) {
             const tabId = window.tabs[0].id;
             chrome.storage.local.set({ "projetorTabId": tabId });
+            chrome.runtime.sendMessage({ action: "setProjectorTabId", tabId: tabId });
             
             if (currentSettings.openFullscreen) {
                 chrome.windows.update(window.id, { state: "fullscreen" });
@@ -2134,6 +2162,7 @@ function abrirNovaMidiaTab(url, onReady) {
         if (chrome.runtime.lastError || !window || !window.tabs || window.tabs.length === 0) return;
         const tabId = window.tabs[0].id;
         chrome.storage.local.set({ 'projetorTabId': tabId });
+        chrome.runtime.sendMessage({ action: "setProjectorTabId", tabId: tabId });
 
         if (currentSettings.openFullscreen) {
             chrome.windows.update(window.id, { state: 'fullscreen' });
@@ -2417,6 +2446,7 @@ function abrirNovaJanelaTime(url, config) {
         if (window && window.tabs && window.tabs.length > 0) {
             const tabId = window.tabs[0].id;
             chrome.storage.local.set({ "projetorTabId": tabId });
+            chrome.runtime.sendMessage({ action: "setProjectorTabId", tabId: tabId });
             
             if (currentSettings.openFullscreen) {
                 chrome.windows.update(window.id, { state: "fullscreen" });
@@ -2460,12 +2490,13 @@ function abrirNovaJanelaTime(url, config) {
 // ── Botão de Download de Logs de Anúncios na aba Sobre ──
 if (document.getElementById('sobreAdLogsValor')) {
     document.getElementById('sobreAdLogsValor').addEventListener('click', () => {
-        chrome.storage.local.get(['adLogs'], (result) => {
+        chrome.storage.local.get(['adLogs', 'adCount'], (result) => {
             const logs = result.adLogs || [];
-            if (logs.length === 0) return; // Não faz nada se não houver logs
+            const count = (typeof result.adCount === 'number') ? result.adCount : ((logs.length > 0) ? 1 : 0);
+            if (logs.length === 0 && count === 0) return; // Não faz nada se não houver registros
             
             // Adiciona um cabeçalho bonitinho no TXT
-            const cabecalho = "=== HISTÓRICO DE ANÚNCIOS PULADOS (SESSÃO ATUAL) ===\n\n";
+            const cabecalho = `=== HISTÓRICO DE ANÚNCIOS PULADOS (SESSÃO ATUAL) ===\nTotal de anúncios reais interceptados: ${count}\n\n`;
             const conteudo = cabecalho + logs.join('\n');
             
             const blob = new Blob([conteudo], { type: 'text/plain' });

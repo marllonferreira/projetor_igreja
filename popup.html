@@ -13,14 +13,14 @@
 
     <!-- Header -->
     <div class="header">
-        <div class="header-icon">🎬</div>
+        <div class="header-icon"><img src="assets/images/48.png"
+                style="width: 39px; height: 39px; display: block; object-fit: cover;"></div>
         <div class="header-text" style="flex: 1;">
             <h1>Projetor Igreja</h1>
             <p>Controle de Projeção</p>
         </div>
-        <div class="settings-icon" id="btnSobre" title="Sobre / Versão"
-            style="font-size:14px; margin-right: 2px; position: relative;">ℹ️<div class="badge-dot" id="badgeSobre"
-                style="display: none;"></div>
+        <div class="settings-icon" id="btnSobre" title="Sobre / Versão" style="position: relative; font-size: 18px;">ⓘ
+            <div class="badge-dot" id="badgeSobre" style="display: none;"></div>
         </div>
         <div class="settings-icon" id="btnSettings" title="Configurações">⚙️</div>
     </div>
@@ -313,11 +313,11 @@
     </div> <!-- Fim Main View -->
 
     <!-- Settings View (hidden) -->
-    <div id="settingsView" style="display: none; padding: 16px;">
+    <div id="settingsView" style="display: none; padding: 10px 14px;">
         <div class="section-label">Configurações Globais</div>
 
         <!-- Seletor de Tema -->
-        <div class="form-group" style="margin-bottom: 12px;">
+        <div class="form-group" style="margin-bottom: 6px;">
             <label>Tema da Interface:</label>
             <div class="theme-selector" id="themeSelectorGroup">
                 <label class="theme-option active" id="themeOptAuto" for="themeAuto" title="Segue o tema do sistema">
@@ -335,12 +335,12 @@
             </div>
         </div>
 
-        <div class="form-group" style="margin-bottom: 8px;">
+        <div class="form-group" style="margin-bottom: 4px;">
             <label for="configMonitor">Monitor Alvo:</label>
             <select id="configMonitor" class="form-control"></select>
         </div>
 
-        <div class="form-group" style="margin-bottom: 12px;">
+        <div class="form-group" style="margin-bottom: 6px;">
             <label for="configFrequenciaUpdate">Notificar atualizações a cada:</label>
             <select id="configFrequenciaUpdate" class="form-control">
                 <option value="3">3 dias</option>
@@ -350,19 +350,19 @@
             </select>
         </div>
 
-        <div class="checkbox-label" style="margin-bottom: 8px;">
+        <div class="checkbox-label" style="margin-bottom: 4px;">
             <input type="checkbox" id="configFullscreen">
             <span>Tela Cheia ao abrir <span class="info-icon"
                     title="Abre a tela de projeção automaticamente ocupando toda a tela (F11) ao ser iniciada.">?</span></span>
         </div>
 
-        <div class="checkbox-label" style="margin-bottom: 8px;">
+        <div class="checkbox-label" style="margin-bottom: 4px;">
             <input type="checkbox" id="prefShowClose">
             <span>Botão Fechar Telão <span class="info-icon"
                     title="Exibe o de fechar no painel principal, útil para fechar a tela de projeção rapidamente.">?</span></span>
         </div>
 
-        <div class="form-group" style="margin-top: 8px;">
+        <div class="form-group" style="margin-top: 4px;">
             <label for="configWindowSize">Resolução (se não for Tela Cheia):</label>
             <select id="configWindowSize" class="form-control" disabled>
                 <option value="1920x1080">1920 x 1080</option>
@@ -372,7 +372,7 @@
             </select>
         </div>
 
-        <div class="tabs" style="margin-top: 20px;">
+        <div class="tabs" style="margin-top: 10px;">
             <div class="tab-btn active config-tab-btn" data-target="config-youtube">YouTube</div>
             <div class="tab-btn config-tab-btn" data-target="config-biblia">Bíblia</div>
             <div class="tab-btn config-tab-btn" data-target="config-midia">Mídia</div>
@@ -380,7 +380,7 @@
         </div>
 
         <div id="config-youtube" class="tab-content active config-tab-content"
-            style="padding-top: 12px; margin-bottom: 16px;">
+            style="padding-top: 6px; margin-bottom: 6px;">
             <div class="checkbox-label"><input type="checkbox" id="prefShowStop"> <span>Botão Parar (Tela Preta) <span
                         class="info-icon"
                         title="Exibe um botão para interromper o vídeo e deixar o telão com fundo preto.">?</span></span>
@@ -400,6 +400,14 @@
             <div class="checkbox-label"><input type="checkbox" id="prefShowPlaylist"> <span>Lista de Reprodução <span
                         class="info-icon"
                         title="Ativa o botão para adiciona musica a fila de reprodução na aba do YouTube.">?</span></span>
+            </div>
+            <div class="checkbox-label"><input type="checkbox" id="prefMudoAutoMain" style="accent-color: #e74c3c;">
+                <span>Mutar (Tela Principal) <span class="info-icon"
+                        title="Silencia os vídeos do YouTube na sua tela automaticamente enquanto o telão estiver aberto.">?</span></span>
+            </div>
+            <div class="checkbox-label"><input type="checkbox" id="prefAutoplayBlockMain"
+                    style="accent-color: #e74c3c;"> <span>Pausar (Tela Principal) <span class="info-icon"
+                        title="Pausa automaticamente o vídeo ao ser aberto na sua tela, impedindo o autoplay enquanto o telão estiver aberto.">?</span></span>
             </div>
         </div>
 
@@ -473,7 +481,8 @@
     <!-- ── Tela Sobre ── -->
     <div id="sobreView">
         <div class="sobre-header">
-            <div class="sobre-logo">🎬</div>
+            <div class="sobre-logo"><img src="assets/images/128.png"
+                    style="width: 100%; height: 100%; object-fit: contain; border-radius: 20%;"></div>
             <div class="sobre-nome">Projetor Igreja</div>
             <div class="sobre-desc">Sistema de Projeção para Igrejas</div>
             <div class="sobre-versao-pill" id="sobreVersaoAtual">Versão ...</div>
@@ -485,7 +494,8 @@
         </div>
         <div class="sobre-info-row">
             <span class="sobre-info-label">Repositório</span>
-            <span class="sobre-info-value" style="color: var(--accent);">GitHub</span>
+            <a href="https://github.com/marllonferreira/projetor_igreja" target="_blank"
+                class="sobre-info-value sobre-link-repo">GitHub ↗</a>
         </div>
         <div class="sobre-info-row" id="sobreUltimaChecagem" style="display:none;">
             <span class="sobre-info-label">Última verificação</span>
@@ -493,11 +503,24 @@
         </div>
 
         <div class="sobre-info-row" id="sobreAdLogsRow" style="display:none;">
-            <span class="sobre-info-label" title="Total de anúncios interceptados durante o uso do telão">Anúncios pulados nesta sessão</span>
-            <span class="sobre-info-value" id="sobreAdLogsValor" style="color: var(--accent); cursor: pointer; text-decoration: underline;" title="Clique para baixar o histórico">0</span>
+            <span class="sobre-info-label" title="Total de anúncios interceptados durante o uso do telão">Anúncios
+                pulados nesta sessão</span>
+            <span class="sobre-info-value" id="sobreAdLogsValor"
+                style="color: var(--accent); cursor: pointer; text-decoration: underline;"
+                title="Clique para baixar o histórico">0</span>
         </div>
 
-        <button class="btn btn-verificar" id="btnVerificarAtualizacao">
+        <div style="display: flex; gap: 8px; margin-top: 12px;">
+            <a id="btnNotasVersao" href="#" class="sobre-link-btn">
+                <span>📋 Ver Notas</span>
+            </a>
+            <a href="https://github.com/marllonferreira/projetor_igreja" target="_blank" id="btnGitHub"
+                class="sobre-link-btn">
+                <span>🔗 Documentação</span>
+            </a>
+        </div>
+
+        <button class="btn btn-verificar" id="btnVerificarAtualizacao" style="margin-top: 8px;">
             <span id="verificarIcon">🔍</span>
             <span id="verificarTexto">Verificar Atualizações</span>
         </button>

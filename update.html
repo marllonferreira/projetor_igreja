@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -56,11 +57,23 @@
             }
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
 
-        html { color-scheme: light dark; }
-        html[data-theme="dark"] { color-scheme: dark; }
-        html[data-theme="light"] { color-scheme: light; }
+        html {
+            color-scheme: light dark;
+        }
+
+        html[data-theme="dark"] {
+            color-scheme: dark;
+        }
+
+        html[data-theme="light"] {
+            color-scheme: light;
+        }
 
         body {
             font-family: 'Inter', system-ui, sans-serif;
@@ -101,16 +114,15 @@
         }
 
         .logo-box {
-            width: 56px;
-            height: 56px;
-            background: linear-gradient(135deg, #7c5cbf, #5b3fa0);
-            border-radius: 16px;
+            width: 60px;
+            height: 60px;
+            background: transparent;
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 26px;
             flex-shrink: 0;
-            box-shadow: 0 0 28px var(--accent-glow);
+            overflow: hidden;
         }
 
         .page-header-text h1 {
@@ -205,8 +217,13 @@
             word-break: break-word;
         }
 
-        .changelog strong { color: var(--text); }
-        .changelog > *:first-child { margin-top: 0; }
+        .changelog strong {
+            color: var(--text);
+        }
+
+        .changelog>*:first-child {
+            margin-top: 0;
+        }
 
         /* Parsing de markdown básico do GitHub */
         .changelog .ch-h2 {
@@ -319,7 +336,9 @@
             margin-top: 12px;
         }
 
-        .download-status.show { display: flex; }
+        .download-status.show {
+            display: flex;
+        }
 
         .download-status.error {
             background: rgba(231, 76, 60, 0.08);
@@ -346,7 +365,11 @@
             animation: spin 0.8s linear infinite;
         }
 
-        @keyframes spin { to { transform: rotate(360deg); } }
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
 
         .loading-state p {
             font-size: 13px;
@@ -364,7 +387,9 @@
             text-align: center;
         }
 
-        .up-to-date.show { display: flex; }
+        .up-to-date.show {
+            display: flex;
+        }
 
         .up-to-date .big-icon {
             font-size: 48px;
@@ -394,15 +419,19 @@
             text-decoration: none;
         }
 
-        .page-footer a:hover { text-decoration: underline; }
+        .page-footer a:hover {
+            text-decoration: underline;
+        }
     </style>
 </head>
+
 <body>
     <div class="container">
 
         <!-- Header -->
         <div class="page-header">
-            <div class="logo-box">🎬</div>
+            <div class="logo-box"><img src="assets/images/128.png"
+                    style="width: 100%; height: 100%; object-fit: contain; border-radius: 20%;"></div>
             <div class="page-header-text">
                 <h1>Projetor Igreja</h1>
                 <p id="pageSubtitle">Carregando informações de atualização...</p>
@@ -419,9 +448,11 @@
 
         <!-- Rodapé -->
         <div class="page-footer">
-            Projetor Igreja &mdash; Desenvolvido por <a href="https://github.com/marllonferreira/projetor_igreja" target="_blank">Marllon Ferreira</a>
+            Projetor Igreja &mdash; Desenvolvido por <a href="https://github.com/marllonferreira/projetor_igreja"
+                target="_blank">Marllon Ferreira</a>
         </div>
 
-    <script src="update.js"></script>
+        <script src="update.js"></script>
 </body>
+
 </html>

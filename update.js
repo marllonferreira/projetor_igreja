@@ -13,8 +13,106 @@ chrome.storage.local.get(["projetorSettings"], (result) => {
 });
 
 document.addEventListener('DOMContentLoaded', () => {
-    carregarDadosAtualizacao();
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('modo') === 'notas') {
+        carregarNotasAtuais();
+    } else {
+        carregarDadosAtualizacao();
+    }
 });
+
+// ── Modo Leitura: Notas da Versão Atual ───────────────────────────────────────
+async function carregarNotasAtuais() {
+    const versaoAtual = chrome.runtime.getManifest().version;
+    const subtitle = document.getElementById('pageSubtitle');
+    const mainContent = document.getElementById('mainContent');
+
+    // Atualiza título da aba e subtítulo
+    document.title = `Projetor Igreja — Notas da Versão v${versaoAtual}`;
+    subtitle.textContent = `Notas da versão v${versaoAtual} instalada`;
+
+    try {
+        const resp = await fetch(
+            `https://api.github.com/repos/marllonferreira/projetor_igreja/releases/tags/v${versaoAtual}`,
+            { headers: { 'Accept': 'application/vnd.github.v3+json' } }
+        );
+
+        if (!resp.ok) {
+            // Release não encontrada (ex: versão em desenvolvimento ainda não publicada)
+            mainContent.innerHTML = `
+                <div class="card">
+                    <div class="up-to-date show">
+                        <div class="big-icon">🚧</div>
+                        <h2>Notas ainda não publicadas</h2>
+                        <p>A versão <strong>v${escapeHtml(versaoAtual)}</strong> ainda não possui notas de lançamento publicadas no GitHub.</p>
+                        <p style="margin-top: 8px; font-size: 12px; color: var(--muted);">
+                            Isso pode acontecer quando você está usando uma versão de desenvolvimento ou pré-lançamento.
+                        </p>
+                        <a href="https://github.com/marllonferreira/projetor_igreja/releases" target="_blank"
+                           style="margin-top: 16px; padding: 10px 20px; background: transparent;
+                                  border: 1px solid var(--border); border-radius: var(--radius);
+                                  color: var(--muted2); font-size: 13px; font-weight: 600;
+                                  text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
+                            🔗 Ver todas as releases no GitHub
+                        </a>
+                    </div>
+                </div>
+            `;
+            return;
+        }
+
+        const dados = await resp.json();
+        const notas = dados.body || '';
+
+        // Data de publicação
+        let dataFormatada = '';
+        if (dados.published_at) {
+            try {
+                dataFormatada = new Date(dados.published_at).toLocaleDateString('pt-BR', {
+                    day: '2-digit', month: 'long', year: 'numeric'
+                });
+            } catch (e) { dataFormatada = ''; }
+        }
+
+        mainContent.innerHTML = `
+            <!-- Badge de versão -->
+            <div class="version-row">
+                <span class="badge badge-current">📦 Instalada: v${escapeHtml(versaoAtual)}</span>
+                ${dataFormatada ? `<span class="badge badge-date">📅 Lançado em: ${dataFormatada}</span>` : ''}
+            </div>
+
+            <!-- Card: Notas de lançamento -->
+            <div class="card">
+                <div class="card-title">📋 Novidades desta versão</div>
+                <div class="changelog" id="changelog">
+                    ${renderizarChangelog(notas)}
+                </div>
+            </div>
+
+            <!-- Ação: somente link para o GitHub (sem download) -->
+            <div class="actions">
+                <a class="btn-secondary"
+                   href="https://github.com/marllonferreira/projetor_igreja/releases/tag/v${escapeHtml(versaoAtual)}"
+                   target="_blank">
+                    🔗 Ver esta release no GitHub
+                </a>
+            </div>
+        `;
+
+    } catch (e) {
+        mainContent.innerHTML = `
+            <div class="card">
+                <div class="up-to-date show">
+                    <div class="big-icon">⚠️</div>
+                    <h2>Sem conexão com a internet</h2>
+                    <p>Não foi possível buscar as notas da versão v${escapeHtml(versaoAtual)} no GitHub.</p>
+                    <p style="margin-top: 8px; font-size: 12px; color: var(--muted);">Verifique sua conexão e tente novamente.</p>
+                </div>
+            </div>
+        `;
+    }
+}
+
 
 async function carregarDadosAtualizacao() {
     chrome.storage.local.get(['dadosAtualizacao'], (result) => {
@@ -93,7 +191,7 @@ function renderizarTela(dados) {
             <span class="badge badge-current">📦 Atual: v${escapeHtml(dados.versaoAtual)}</span>
             <span class="badge-arrow">→</span>
             <span class="badge badge-new">✨ Nova: v${escapeHtml(dados.versaoNova)}</span>
-            ${dataFormatada ? `<span class="badge badge-date">📅 ${dataFormatada}</span>` : ''}
+            ${dataFormatada ? `<span class="badge badge-date">📅 Lançado em: ${dataFormatada}</span>` : ''}
         </div>
 
         <!-- Card: Notas de lançamento -->
