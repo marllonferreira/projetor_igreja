@@ -1,3 +1,380 @@
+// ═══════════════════════════════════════════════════════════════════════════════
+// PROJETOR IGREJA - MÓDULO DE CORTE DE ANÚNCIOS & CORTINA (PRIORIDADE MÁXIMA)
+// ═══════════════════════════════════════════════════════════════════════════════
+let modoDimmingAdsAtivo = true;
+let isUltimoEstadoAdAtivo = false;
+let isAnuncioDeFimDeVideo = false;
+let tempoMaximoAtingidoVideoPrincipal = 0;
+let duracaoVideoPrincipal = 0;
+let adMutedOriginalState = null;
+let adLogadoDeteccao = false;
+let adLogadoSkip = false;
+let adLogadoRestauracao = false;
+let adMutationObserver = null;
+
+// Carrega a preferência de escurecimento de anúncios (Modo Cortina)
+chrome.storage.local.get(['projetorSettings'], (res) => {
+    if (res && res.projetorSettings && typeof res.projetorSettings.prefDimmingAds === 'boolean') {
+        modoDimmingAdsAtivo = res.projetorSettings.prefDimmingAds;
+    }
+});
+
+// Ouve alterações nas configurações em tempo real
+chrome.storage.onChanged.addListener((changes, area) => {
+    if (area === 'local' && changes.projetorSettings) {
+        const novosSettings = changes.projetorSettings.newValue || {};
+        if (typeof novosSettings.prefDimmingAds === 'boolean') {
+            modoDimmingAdsAtivo = novosSettings.prefDimmingAds;
+            if (!modoDimmingAdsAtivo) {
+                aplicarVisualCortina(false);
+            } else if (isUltimoEstadoAdAtivo) {
+                aplicarVisualCortina(true);
+            }
+        }
+    }
+});
+
+function registrarLogAd(acao) {
+    const data = new Date();
+    const timestamp = data.toLocaleDateString('pt-BR') + ' ' + data.toLocaleTimeString('pt-BR');
+    const msg = `[${timestamp}] Ação: ${acao}`;
+    console.log("Projetor Igreja Log:", msg);
+    
+    chrome.storage.local.get(['adLogs'], (result) => {
+        let logs = result.adLogs || [];
+        logs.push(msg);
+        if (logs.length > 100) logs.shift(); // Mantém apenas os últimos 100
+        chrome.storage.local.set({ adLogs: logs });
+    });
+}
+
+function verificarSeHaAnuncio() {
+    const player = document.querySelector('.html5-video-player') || document.getElementById('movie_player');
+    if (!player) return false;
+    return player.classList.contains('ad-showing') || player.classList.contains('ad-interrupting');
+}
+
+// Corta o áudio com prioridade máxima durante anúncios
+function cortarAudioAnuncioImediato() {
+    if (!document.documentElement.classList.contains('extensao-igreja-projector-active')) return;
+    const video = document.querySelector('video');
+    if (video) {
+        if (!video.muted) {
+            video.muted = true;
+        }
+        if (video.volume > 0) {
+            video.volume = 0;
+        }
+    }
+}
+
+let vigilanciaPosAnuncioTimer = null;
+
+// Verifica se o botão nativo de som do YouTube está exibindo o estado "MUDO"
+// (o rótulo exibe 'Ativar som' / 'Unmute' quando está mudo)
+function isBotaoMuteDoYouTubeAtivo() {
+    const muteBtn = document.querySelector('.ytp-mute-button');
+    if (!muteBtn) return false;
+    const label = (muteBtn.getAttribute('data-title-no-tooltip') || 
+                   muteBtn.getAttribute('title') || 
+                   muteBtn.getAttribute('aria-label') || '').toLowerCase();
+    return label.includes('ativar') || label.includes('unmute');
+}
+
+// Aciona o clique no botão nativo do YouTube se estiver mutado (por label ou estado do vídeo)
+function desmutarPlayerNativoYouTubeSeNecessario(video) {
+    if (!video) video = document.querySelector('video');
+    const muteBtn = document.querySelector('.ytp-mute-button');
+    if (!muteBtn) {
+        if (video) video.muted = false;
+        return false;
+    }
+
+    const estaMudoPorLabel = isBotaoMuteDoYouTubeAtivo();
+    const estaMudoPorVideo = video && video.muted;
+
+    if (estaMudoPorLabel || estaMudoPorVideo) {
+        muteBtn.click();
+        return true;
+    }
+    return false;
+}
+
+// Sincroniza e reseta o volume e o estado mudo gravados internamente pelo YouTube no localStorage
+function sincronizarStorageYouTube(volumeDesejado) {
+    try {
+        const rawVol = localStorage.getItem('yt-player-volume');
+        let parsed = rawVol ? JSON.parse(rawVol) : null;
+        if (!parsed || typeof parsed !== 'object') {
+            parsed = { data: {} };
+        }
+        let data = typeof parsed.data === 'string' ? JSON.parse(parsed.data) : (parsed.data || {});
+        data.muted = false;
+        if (typeof volumeDesejado === 'number') {
+            data.volume = Math.round(volumeDesejado * 100);
+        }
+        parsed.data = JSON.stringify(data);
+        localStorage.setItem('yt-player-volume', JSON.stringify(parsed));
+    } catch (e) {
+        // Silencioso em caso de restrição de segurança
+    }
+}
+
+// Limpa qualquer valor mudo salvo no localStorage do YouTube para não herdar mudo entre vídeos/abas
+function limparMudoStorageYouTube() {
+    sincronizarStorageYouTube(ultimoVolumeConfigurado);
+}
+
+// Sincroniza e desmuta com garantia tanto o elemento <video> quanto a interface interna do YouTube
+function sincronizarEDesmutarPlayerTelao(video) {
+    if (!video) video = document.querySelector('video');
+    if (!video) return;
+    if (estaEmFade || document.documentElement.classList.contains('video-finalizado')) return;
+
+    // 1. Aciona o clique nativo se o botão ou vídeo estiver mudo
+    const clicouParaDesmutar = desmutarPlayerNativoYouTubeSeNecessario(video);
+
+    // 2. Garante o elemento HTML5 desmutado
+    if (video.muted) {
+        video.muted = false;
+    }
+
+    // 3. Aplica o volume configurado
+    const vol = (typeof ultimoVolumeConfigurado === 'number' && ultimoVolumeConfigurado > 0) ? ultimoVolumeConfigurado : 1.0;
+    video.volume = vol;
+
+    // 4. Sincroniza com a API nativa do player do YouTube se disponível
+    const player = document.querySelector('.html5-video-player') || document.getElementById('movie_player');
+    if (player) {
+        if (typeof player.setVolume === 'function') {
+            try { player.setVolume(Math.round(vol * 100)); } catch (e) {}
+        }
+        if (typeof player.unMute === 'function') {
+            try { player.unMute(); } catch (e) {}
+        }
+    }
+
+    // 5. Limpa storage local do YouTube
+    sincronizarStorageYouTube(vol);
+
+    // Se o clique no botão nativo foi acionado, o script interno do YouTube processa o clique
+    // assincronamente e tenta impor o volume padrão de fábrica dele (~53%).
+    // Reforçamos nos instantes seguintes para garantir que o volume do operador prevaleça sempre.
+    if (clicouParaDesmutar) {
+        [60, 150, 300].forEach(delay => {
+            setTimeout(() => {
+                if (video && !estaEmFade && !verificarSeHaAnuncio() && !isUltimoEstadoAdAtivo) {
+                    video.volume = vol;
+                    if (player && typeof player.setVolume === 'function') {
+                        try { player.setVolume(Math.round(vol * 100)); } catch (e) {}
+                    }
+                    sincronizarStorageYouTube(vol);
+                }
+            }, delay);
+        });
+    }
+}
+
+// Sentinela persistente pós-anúncio: monitora por até 2.25s e garante que o áudio não seja revertido pelo YouTube
+function iniciarVigilanciaPosAnuncio() {
+    if (vigilanciaPosAnuncioTimer) {
+        clearInterval(vigilanciaPosAnuncioTimer);
+        vigilanciaPosAnuncioTimer = null;
+    }
+
+    let ciclo = 0;
+    const maxCiclos = 15; // 15 * 150ms = 2.25 segundos de garantia persistente
+
+    const executarTick = () => {
+        ciclo++;
+        if (verificarSeHaAnuncio() || isUltimoEstadoAdAtivo) {
+            clearInterval(vigilanciaPosAnuncioTimer);
+            vigilanciaPosAnuncioTimer = null;
+            return;
+        }
+
+        const video = document.querySelector('video');
+        if (video) {
+            sincronizarEDesmutarPlayerTelao(video);
+
+            // Se o áudio já está ativo e o botão nativo do YouTube não está mais com ícone de mudo
+            if (!video.muted && video.volume > 0.05 && !isBotaoMuteDoYouTubeAtivo() && ciclo >= 2) {
+                clearInterval(vigilanciaPosAnuncioTimer);
+                vigilanciaPosAnuncioTimer = null;
+                notificarEstadoVideo({ muted: false, volume: video.volume });
+                return;
+            }
+        }
+
+        if (ciclo >= maxCiclos) {
+            clearInterval(vigilanciaPosAnuncioTimer);
+            vigilanciaPosAnuncioTimer = null;
+            notificarEstadoVideo();
+        }
+    };
+
+    executarTick();
+    vigilanciaPosAnuncioTimer = setInterval(executarTick, 150);
+}
+
+function garantirOverlayCortina() {
+    let overlay = document.getElementById('projetor-ad-cortina-overlay');
+    if (!overlay) {
+        overlay = document.createElement('div');
+        overlay.id = 'projetor-ad-cortina-overlay';
+        (document.body || document.documentElement).appendChild(overlay);
+    }
+    return overlay;
+}
+
+function aplicarVisualCortina(ativa) {
+    const overlay = garantirOverlayCortina();
+    if (ativa && modoDimmingAdsAtivo) {
+        if (!document.documentElement.classList.contains('ad-cortina-ativa')) {
+            document.documentElement.classList.add('ad-cortina-ativa');
+        }
+        if (overlay && !overlay.classList.contains('show')) {
+            overlay.classList.add('show');
+        }
+    } else {
+        document.documentElement.classList.remove('ad-cortina-ativa');
+        if (overlay) {
+            overlay.classList.remove('show');
+        }
+    }
+}
+
+// Processa anúncios em tempo real: áudio mudo instantâneo + cortina + skip rápido
+function processarAnuncios() {
+    if (!document.documentElement.classList.contains('extensao-igreja-projector-active')) {
+        aplicarVisualCortina(false);
+        isUltimoEstadoAdAtivo = false;
+        return;
+    }
+
+    const video = document.querySelector('video');
+    const isAdShowing = verificarSeHaAnuncio();
+
+    if (isAdShowing) {
+        // 1. CORTE DE ÁUDIO INSTANTÂNEO ANTES DE QUALQUER COISA
+        cortarAudioAnuncioImediato();
+
+        // 2. Aplica cortina escura
+        aplicarVisualCortina(true);
+
+        adLogadoRestauracao = false;
+
+        // 3. Notifica o popup se o estado acabou de mudar
+        if (!isUltimoEstadoAdAtivo) {
+            isUltimoEstadoAdAtivo = true;
+            notificarEstadoVideo({ isAd: true });
+
+            // Identifica se a publicidade entrou no encerramento do vídeo oficial do culto
+            if (duracaoVideoPrincipal > 5 && tempoMaximoAtingidoVideoPrincipal >= (duracaoVideoPrincipal - 3.5)) {
+                isAnuncioDeFimDeVideo = true;
+                console.log("Projetor Igreja: Anúncio de encerramento (post-roll) detectado.");
+            } else {
+                isAnuncioDeFimDeVideo = false;
+            }
+        }
+
+        // 4. Registro único de log
+        if (!adLogadoDeteccao && video) {
+            adLogadoDeteccao = true;
+            registrarLogAd("Anúncio detectado. Modo Cortina ativado, áudio mutado instantaneamente e aceleração acionada.");
+        }
+
+        // 5. Clica no botão de pular se já estiver disponível
+        const skipButtons = document.querySelectorAll('.ytp-skip-ad-button, .ytp-ad-skip-button, .ytp-ad-skip-button-modern, .ytp-ad-text.ytp-ad-skip-button-text');
+        if (skipButtons.length > 0 && !adLogadoSkip) {
+            skipButtons.forEach(btn => {
+                if (btn && typeof btn.click === 'function') btn.click();
+            });
+            adLogadoSkip = true;
+            registrarLogAd("Botão 'Pular Anúncio' encontrado e clicado.");
+        }
+
+        // 6. Para anúncios não-puláveis, acelera ao máximo e avança
+        if (video && !isNaN(video.duration) && video.currentTime < video.duration - 0.2) {
+            video.playbackRate = 16.0;
+            if (video.duration > 0) {
+                video.currentTime = video.duration - 0.1;
+            }
+        }
+    } else {
+        // Nenhum anúncio ativo
+        aplicarVisualCortina(false);
+
+        // Se estava em anúncio e agora acabou a publicidade:
+        if (isUltimoEstadoAdAtivo) {
+            isUltimoEstadoAdAtivo = false;
+            notificarEstadoVideo({ isAd: false });
+
+            // CRÍTICO: Se a propaganda que acabou estava no final do vídeo (post-roll)
+            // ou se o vídeo oficial do culto já encerrou, finaliza imediatamente e avança a playlist
+            const hasEndscreen = document.querySelector('.ytp-videowall-still, .html5-endscreen:not([style*="display: none"]), .ytp-endscreen-paginate');
+            const videoAcabou = isAnuncioDeFimDeVideo || 
+                                (video && video.ended) || 
+                                (duracaoVideoPrincipal > 5 && tempoMaximoAtingidoVideoPrincipal >= (duracaoVideoPrincipal - 3.5)) ||
+                                Boolean(hasEndscreen);
+
+            if (videoAcabou) {
+                console.log("Projetor Igreja: Anúncio pós-vídeo concluído. Finalizando vídeo e avançando playlist...");
+                isAnuncioDeFimDeVideo = false;
+                finalizarVideoEAvancarPlaylist();
+                return;
+            }
+
+            if (video) {
+                if (video.playbackRate !== 1.0) {
+                    video.playbackRate = 1.0;
+                }
+                if (!adLogadoRestauracao) {
+                    adLogadoRestauracao = true;
+                    registrarLogAd("Anúncio encerrado. Modo Cortina desativado, velocidade e áudio restaurados com sucesso.");
+                }
+                // Inicia vigilância persistente pós-anúncio para desmutar e sincronizar com o player nativo
+                iniciarVigilanciaPosAnuncio();
+            }
+        }
+
+        adLogadoDeteccao = false;
+        adLogadoSkip = false;
+    }
+
+    desativarAutoplayELegendas();
+}
+
+// Observa mutações de classe no player para interceptar anúncios no microssegundo 0
+function iniciarObservadorAnunciosDOM() {
+    const monitorar = () => {
+        const player = document.querySelector('.html5-video-player') || document.getElementById('movie_player');
+        if (player && !adMutationObserver) {
+            adMutationObserver = new MutationObserver(() => {
+                if (!document.documentElement.classList.contains('extensao-igreja-projector-active')) return;
+                if (verificarSeHaAnuncio()) {
+                    cortarAudioAnuncioImediato();
+                    aplicarVisualCortina(true);
+                    processarAnuncios();
+                } else if (isUltimoEstadoAdAtivo) {
+                    processarAnuncios();
+                } else if (player.classList.contains('ended-mode') && duracaoVideoPrincipal > 5 && tempoMaximoAtingidoVideoPrincipal >= (duracaoVideoPrincipal - 5)) {
+                    finalizarVideoEAvancarPlaylist();
+                }
+            });
+            adMutationObserver.observe(player, {
+                attributes: true,
+                attributeFilter: ['class']
+            });
+        }
+    };
+    monitorar();
+}
+
+// Inicia sentinela em frequência equilibrada (100ms)
+setInterval(processarAnuncios, 100);
+iniciarObservadorAnunciosDOM();
+
 function applyProjectorRules() {
     if (!chrome.runtime?.id) return; // Proteção contra Extension context invalidated
 
@@ -11,6 +388,12 @@ function applyProjectorRules() {
         if (response && response.isProjector) {
             console.log("Projetor Igreja: Esta aba É o projetor. Aplicando limpeza...");
             document.documentElement.classList.add('extensao-igreja-projector-active');
+            document.documentElement.classList.remove('video-finalizado');
+            videoFinalizadoProcessado = false;
+            if (response.prefDimmingAds !== undefined) {
+                modoDimmingAdsAtivo = response.prefDimmingAds;
+            }
+            garantirOverlayCortina();
 
             // Força o modo cinema se necessário
             const theater = document.querySelector('ytd-watch-flexy[theater]');
@@ -22,30 +405,24 @@ function applyProjectorRules() {
             // Desativa autoplay e legendas se estiverem ativos
             desativarAutoplayELegendas();
 
-            // Força ativar o áudio e tenta dar play
+            // Gerencia áudio e reprodução com segurança
             const video = document.querySelector('video');
             if (video) {
-                // Verifica se está mudo, e se estiver, clica no botão nativo do YouTube
-                if (video.muted) {
-                    const muteBtn = document.querySelector('.ytp-mute-button');
-                    if (muteBtn) {
-                        muteBtn.click();
-                    } else {
-                        video.muted = false;
-                    }
-                }
-                
-                // Aplica e força o volume correto (100% por padrão ou preferência salva)
-                aplicarVolumeConfigurado(video);
+                if (!verificarSeHaAnuncio() && !isUltimoEstadoAdAtivo) {
+                    sincronizarEDesmutarPlayerTelao(video);
 
-                if (video.paused) {
-                    video.play().catch(() => { });
+                    if (video.paused) {
+                        video.play().catch(() => { });
+                    }
+                } else {
+                    cortarAudioAnuncioImediato();
+                    aplicarVisualCortina(true);
                 }
             }
         } else {
             document.documentElement.classList.remove('extensao-igreja-projector-active');
-            
-            // console.log("Projetor Igreja [DEBUG]: Aba principal detectada.");
+            aplicarVisualCortina(false);
+            isUltimoEstadoAdAtivo = false;
             
             // Regras da tela principal (Mudo Automático / Pausar Automático)
             if (response && response.projectorIsOpen && (response.ytMudoAutoMain || response.ytAutoplayBlockMain)) {
@@ -63,7 +440,7 @@ function aplicarRegrasTelaPrincipal(response) {
     if (!window._projetorIgrejaMainBlockSetup) {
         window._projetorIgrejaMainBlockSetup = true;
         window._projetorIgrejaUserIntent = false;
-
+        
         // Ao clicar no player, assumimos intenção de reproduzir
         document.addEventListener('pointerdown', (e) => {
             if (e.target.closest('#movie_player')) {
@@ -84,7 +461,7 @@ function aplicarRegrasTelaPrincipal(response) {
         });
     }
 
-    // Função central de enforcement
+    // Função central de enforcement na tela principal
     function enforcar(video) {
         if (response.ytMudoAutoMain && !video.muted) {
             video.muted = true;
@@ -98,7 +475,6 @@ function aplicarRegrasTelaPrincipal(response) {
                     muteBtn.click();
                 }
             }
-            // console.log(`Projetor Igreja [DEBUG]: Mudo aplicado + botão sincronizado.`);
         }
 
         if (response.ytAutoplayBlockMain) {
@@ -168,35 +544,40 @@ function aplicarRegrasTelaPrincipal(response) {
 let ultimoVolumeConfigurado = 1.0;
 let volumeConfiguradoCarregado = false;
 
-// Carrega preventivamente a preferência ao injetar o script
-chrome.storage.local.get(['ytVolumeLevel'], (res) => {
-    if (res && typeof res.ytVolumeLevel === 'number') {
-        ultimoVolumeConfigurado = Math.max(0, Math.min(1.0, res.ytVolumeLevel));
-    }
+// Obtém o storage de sessão (descartado automaticamente ao fechar o navegador)
+function getSessionStorageVolume() {
+    return (chrome.storage && chrome.storage.session) ? chrome.storage.session : null;
+}
+
+// Carrega preventivamente a preferência ao injetar o script (apenas da sessão)
+const storSessionInit = getSessionStorageVolume();
+if (storSessionInit) {
+    storSessionInit.get(['ytVolumeLevel'], (res) => {
+        if (res && typeof res.ytVolumeLevel === 'number') {
+            ultimoVolumeConfigurado = Math.max(0, Math.min(1.0, res.ytVolumeLevel));
+        } else {
+            // Nova sessão do navegador: sempre restaura o volume no máximo (100%)
+            ultimoVolumeConfigurado = 1.0;
+            sincronizarStorageYouTube(1.0);
+        }
+        volumeConfiguradoCarregado = true;
+    });
+} else {
+    ultimoVolumeConfigurado = 1.0;
+    sincronizarStorageYouTube(1.0);
     volumeConfiguradoCarregado = true;
-});
+}
 
 function aplicarVolumeConfigurado(video) {
     if (!video) return;
-    if (isAdNoTelao()) {
-        video.muted = true;
-        video.volume = 0;
-        return;
-    }
     // Guarda contra "Extension context invalidated" (ocorre quando a extensão é recarregada
     // mas os listeners antigos ainda estão ativos na aba do YouTube)
     if (!chrome.runtime?.id) return;
 
-    // Desmuta garantidamente no telão do projetor
-    if (video.muted) {
-        video.muted = false;
-        const muteBtn = document.querySelector('.ytp-mute-button');
-        if (muteBtn) {
-            const label = (muteBtn.getAttribute('data-title-no-tooltip') || muteBtn.getAttribute('title') || '').toLowerCase();
-            if (label.includes('ativar') || label.includes('unmute')) {
-                muteBtn.click();
-            }
-        }
+    // Se for anúncio, bloqueia terminantemente e garante corte total de áudio
+    if (verificarSeHaAnuncio() || isUltimoEstadoAdAtivo) {
+        cortarAudioAnuncioImediato();
+        return;
     }
 
     // Aplicação síncrona imediata com o valor em cache (padrão 1.0 = 100%)
@@ -204,27 +585,33 @@ function aplicarVolumeConfigurado(video) {
         video.volume = ultimoVolumeConfigurado;
     }
 
-    // Validação/Sincronização assíncrona com o storage
-    chrome.storage.local.get(['ytVolumeLevel'], (res) => {
-        if (!chrome.runtime?.id) return;
-        if (isAdNoTelao()) {
-            if (video) {
-                video.muted = true;
-                video.volume = 0;
+    const player = document.querySelector('.html5-video-player') || document.getElementById('movie_player');
+    if (player && typeof player.setVolume === 'function') {
+        try { player.setVolume(Math.round(ultimoVolumeConfigurado * 100)); } catch (e) {}
+    }
+
+    // Validação/Sincronização assíncrona com o storage de sessão
+    const storSession = getSessionStorageVolume();
+    if (storSession) {
+        storSession.get(['ytVolumeLevel'], (res) => {
+            if (!chrome.runtime?.id) return;
+            if (verificarSeHaAnuncio() || isUltimoEstadoAdAtivo) {
+                cortarAudioAnuncioImediato();
+                return;
             }
-            return;
-        }
-        const volSalvo = (res && typeof res.ytVolumeLevel === 'number') ? res.ytVolumeLevel : 1.0;
-        ultimoVolumeConfigurado = Math.max(0, Math.min(1.0, volSalvo));
-        volumeConfiguradoCarregado = true;
-        if (video.muted) {
-            video.muted = false;
-        }
-        if (Math.abs(video.volume - ultimoVolumeConfigurado) > 0.01) {
-            video.volume = ultimoVolumeConfigurado;
-        }
-        notificarEstadoVideo();
-    });
+            const volSalvo = (res && typeof res.ytVolumeLevel === 'number') ? res.ytVolumeLevel : 1.0;
+            ultimoVolumeConfigurado = Math.max(0, Math.min(1.0, volSalvo));
+            volumeConfiguradoCarregado = true;
+            if (Math.abs(video.volume - ultimoVolumeConfigurado) > 0.01) {
+                video.volume = ultimoVolumeConfigurado;
+            }
+            if (player && typeof player.setVolume === 'function') {
+                try { player.setVolume(Math.round(ultimoVolumeConfigurado * 100)); } catch (e) {}
+            }
+            sincronizarStorageYouTube(ultimoVolumeConfigurado);
+            notificarEstadoVideo();
+        });
+    }
 }
 
 function desativarAutoplayELegendas() {
@@ -387,7 +774,8 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                 playing: video ? (!video.paused && !video.ended && video.readyState >= 2) : false,
                 currentTime: video ? video.currentTime : 0,
                 duration: video && !isNaN(video.duration) ? video.duration : 0,
-                title: document.title.replace(/ - YouTube$/, '')
+                title: document.title.replace(/ - YouTube$/, ''),
+                isAd: isUltimoEstadoAdAtivo
             });
             return true;
         }
@@ -404,7 +792,10 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                 fadeTipo = null;
 
                 document.documentElement.classList.remove('video-finalizado');
+                videoFinalizadoProcessado = false;
                 if (video.muted) video.muted = false;
+                desmutarPlayerNativoYouTubeSeNecessario(video);
+                limparMudoStorageYouTube();
 
                 // Bloqueia listeners ANTES do play para evitar restauração de volume prematura
                 estaEmFade = true;
@@ -427,6 +818,8 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             } else if (request.command === "stop") {
                 // Notifica imediatamente o popup para atualizar os botões
                 sendResponse({ playing: false });
+                aplicarVisualCortina(false);
+                isUltimoEstadoAdAtivo = false;
                 executarFadeOutAudio(video, () => {
                     video.pause();
                     if (!video.ended) {
@@ -445,15 +838,36 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             } else if (request.command === "mute_toggle") {
                 cancelarFadeSeHouver(video);
                 video.muted = !video.muted;
+                const muteBtn = document.querySelector('.ytp-mute-button');
+                if (muteBtn) {
+                    const botaoMudoAtivo = isBotaoMuteDoYouTubeAtivo();
+                    if (video.muted && !botaoMudoAtivo) {
+                        muteBtn.click();
+                    } else if (!video.muted && botaoMudoAtivo) {
+                        muteBtn.click();
+                    }
+                }
+                limparMudoStorageYouTube();
                 sendResponse({ muted: video.muted, volume: video.volume });
 
             } else if (request.command === "volume") {
                 cancelarFadeSeHouver(video);
                 const novoVol = Math.max(0, Math.min(1.0, request.value));
-                if (novoVol > 0) video.muted = false;
+                if (novoVol > 0) {
+                    video.muted = false;
+                    desmutarPlayerNativoYouTubeSeNecessario(video);
+                }
                 video.volume = novoVol;
                 ultimoVolumeConfigurado = novoVol;
-                chrome.storage.local.set({ ytVolumeLevel: novoVol });
+                const player = document.querySelector('.html5-video-player') || document.getElementById('movie_player');
+                if (player && typeof player.setVolume === 'function') {
+                    try { player.setVolume(Math.round(novoVol * 100)); } catch (e) {}
+                }
+                const storSession = getSessionStorageVolume();
+                if (storSession) {
+                    storSession.set({ ytVolumeLevel: novoVol });
+                }
+                sincronizarStorageYouTube(novoVol);
                 sendResponse({ volume: video.volume, muted: video.muted });
 
             } else if (request.command === "fullscreen_toggle") {
@@ -484,6 +898,7 @@ function notificarEstadoVideo(extra = {}) {
         volume: Math.max(0, Math.min(1, volAtual)),
         muted: video ? video.muted : false,
         title: document.title.replace(/ - YouTube$/, ''),
+        isAd: isUltimoEstadoAdAtivo,
         ...extra
     };
     chrome.runtime.sendMessage(payload, () => {
@@ -491,36 +906,52 @@ function notificarEstadoVideo(extra = {}) {
     });
 }
 
-// --- Lógica de Bloqueio/Pulo e Contagem de Anúncios ---
-let adMutedOriginalState = null;
-let ultimoAdIdentificador = null;
-let adSkipClicadoParaEsteAd = false;
-let adNumeroAtual = 0;
-let ultimoMomentoAdTimestamp = 0;
+let videoFinalizadoProcessado = false;
 
-function isAdNoTelao() {
-    if (!document.documentElement.classList.contains('extensao-igreja-projector-active')) return false;
-    const player = document.querySelector('#movie_player') || document.querySelector('.html5-video-player');
-    if (player && (player.classList.contains('ad-showing') || player.classList.contains('ad-interrupting'))) {
+// Verifica se o vídeo oficial do culto realmente chegou ao fim
+function verificarSeVideoChegouAoFim(video) {
+    if (!video) video = document.querySelector('video');
+    if (!video) return false;
+
+    // Se estiver em anúncio ativo, o vídeo do culto ainda não é considerado finalizado
+    if (verificarSeHaAnuncio() || isUltimoEstadoAdAtivo) return false;
+
+    // Segurança essencial: vídeos no início (tempo < 1s) ou com duração inválida nunca são considerados no fim
+    if (isNaN(video.duration) || video.duration < 3 || video.currentTime < 1) {
+        return false;
+    }
+
+    // 1. Se a tag HTML5 disparou ended
+    if (video.ended) return true;
+
+    // 2. Se o player do YouTube está com a classe nativa de finalizado
+    const player = document.querySelector('.html5-video-player') || document.getElementById('movie_player');
+    if (player && player.classList.contains('ended-mode')) {
         return true;
     }
-    return !!document.querySelector('.ytp-ad-player-overlay, .ytp-ad-text, .ytp-ad-simple-ad-badge, .ytp-ad-preview-text, .ytp-ad-module > *');
-}
 
-function onVideoEndedEvent() {
-    if (!document.documentElement.classList.contains('extensao-igreja-projector-active')) return;
-
-    // Se o evento 'ended' disparou enquanto um anúncio estava ativo ou acabou de pular (últimos 2 segundos),
-    // é o término do anúncio, NÃO do vídeo principal do culto!
-    if (isAdNoTelao() || ultimoAdIdentificador !== null || (Date.now() - ultimoMomentoAdTimestamp < 2000)) {
-        console.log("Projetor Igreja: Evento 'ended' ignorado (término de anúncio, mantendo projeção ativa).");
-        return;
+    // 3. Se o tempo atual atingiu o fim (com tolerância de 0.3s)
+    if (video.currentTime >= video.duration - 0.3) {
+        return true;
     }
 
-    console.log("Projetor Igreja: Vídeo principal finalizado. Blackout ativado.");
+    return false;
+}
+
+function finalizarVideoEAvancarPlaylist() {
+    if (!document.documentElement.classList.contains('extensao-igreja-projector-active')) return;
+    if (videoFinalizadoProcessado) return;
+    videoFinalizadoProcessado = true;
+
+    console.log("Projetor Igreja: Fim de vídeo confirmado. Ativando blackout e avançando playlist...");
+    aplicarVisualCortina(false);
+    isUltimoEstadoAdAtivo = false;
     document.documentElement.classList.add('video-finalizado');
+
     const video = document.querySelector('video');
-    if (video) video.pause();
+    if (video) {
+        video.pause();
+    }
 
     // Desativa o autoplay nativamente se ainda estiver ligado
     const autoNavBtn = document.querySelector('.ytp-autonav-toggle-button');
@@ -528,13 +959,35 @@ function onVideoEndedEvent() {
         autoNavBtn.click();
     }
 
-    // Notifica o popup para avançar a playlist (se houver)
-    chrome.runtime.sendMessage({ action: 'videoEnded' }, () => {
-        void chrome.runtime.lastError;
-    });
+    // Notifica o background para avançar a playlist ou aplicar blackout
+    if (chrome.runtime?.id) {
+        chrome.runtime.sendMessage({ action: 'videoEnded' }, () => {
+            void chrome.runtime.lastError;
+        });
+    }
 }
 
-// Lógica para detectar fim do vídeo e bloquear autoplay
+function onVideoEndedEvent() {
+    // Se o evento ended ocorreu enquanto havia um anúncio rodando, marca que o vídeo oficial do culto já encerrou
+    if (verificarSeHaAnuncio() || isUltimoEstadoAdAtivo) {
+        isAnuncioDeFimDeVideo = true;
+        return;
+    }
+    finalizarVideoEAvancarPlaylist();
+}
+
+function onVideoTimeUpdateEvent() {
+    if (verificarSeHaAnuncio() || isUltimoEstadoAdAtivo) return;
+    const video = document.querySelector('video');
+    if (video && !isNaN(video.duration) && video.duration > 2) {
+        duracaoVideoPrincipal = video.duration;
+        if (video.currentTime > tempoMaximoAtingidoVideoPrincipal) {
+            tempoMaximoAtingidoVideoPrincipal = video.currentTime;
+        }
+    }
+}
+
+// Lógica para detectar fim do vídeo e gerenciar ciclo de eventos
 function setupPostVideoLogic() {
     const video = document.querySelector('video');
     if (!video) return;
@@ -546,6 +999,7 @@ function setupPostVideoLogic() {
     video.removeEventListener('volumechange', onVideoVolumeChangeEvent);
     video.removeEventListener('canplay', onVideoCanPlayEvent);
     video.removeEventListener('ended', onVideoEndedEvent);
+    video.removeEventListener('timeupdate', onVideoTimeUpdateEvent);
 
     video.addEventListener('play', onVideoPlayEvent);
     video.addEventListener('pause', onVideoPauseEvent);
@@ -553,51 +1007,52 @@ function setupPostVideoLogic() {
     video.addEventListener('volumechange', onVideoVolumeChangeEvent);
     video.addEventListener('canplay', onVideoCanPlayEvent);
     video.addEventListener('ended', onVideoEndedEvent);
+    video.addEventListener('timeupdate', onVideoTimeUpdateEvent);
 }
 
 function onVideoCanPlayEvent() {
     const video = document.querySelector('video');
-    if (!video) return;
-    if (isAdNoTelao()) {
-        video.muted = true;
-        video.volume = 0;
+    if (verificarSeHaAnuncio() || isUltimoEstadoAdAtivo) {
+        cortarAudioAnuncioImediato();
         return;
     }
-    if (!estaEmFade) {
+    if (video && !estaEmFade) {
         aplicarVolumeConfigurado(video);
     }
 }
 
 function onVideoPlayEvent() {
     const video = document.querySelector('video');
-    if (!video) return;
-    if (isAdNoTelao()) {
-        video.muted = true;
-        video.volume = 0;
-        processarAnuncios();
+    if (verificarSeHaAnuncio() || isUltimoEstadoAdAtivo) {
+        cortarAudioAnuncioImediato();
         return;
     }
-    // Vídeo principal começou a rodar: remove blackout garantidamente
-    document.documentElement.classList.remove('video-finalizado');
-    if (!estaEmFade) {
-        aplicarVolumeConfigurado(video);
+    if (video && !estaEmFade) {
+        if (isBotaoMuteDoYouTubeAtivo() || video.muted) {
+            sincronizarEDesmutarPlayerTelao(video);
+        } else {
+            aplicarVolumeConfigurado(video);
+        }
     }
     notificarEstadoVideo({ playing: true });
 }
 
 function onVideoPlayingEvent() {
     const video = document.querySelector('video');
-    if (!video) return;
-    if (isAdNoTelao()) {
-        video.muted = true;
-        video.volume = 0;
-        processarAnuncios();
+    if (verificarSeHaAnuncio() || isUltimoEstadoAdAtivo) {
+        cortarAudioAnuncioImediato();
         return;
     }
-    // Vídeo principal rodando: remove blackout
-    document.documentElement.classList.remove('video-finalizado');
-    if (!estaEmFade) {
-        aplicarVolumeConfigurado(video);
+    // Se o vídeo estiver tocando e longe do final, reseta o flag de finalizado
+    if (video && !isNaN(video.duration) && video.duration > 3 && video.currentTime < video.duration - 2) {
+        videoFinalizadoProcessado = false;
+    }
+    if (video && !estaEmFade) {
+        if (isBotaoMuteDoYouTubeAtivo() || video.muted) {
+            sincronizarEDesmutarPlayerTelao(video);
+        } else {
+            aplicarVolumeConfigurado(video);
+        }
     }
     notificarEstadoVideo({ playing: true });
 }
@@ -610,39 +1065,44 @@ function onVideoPauseEvent() {
 }
 
 function onVideoVolumeChangeEvent() {
+    // Não interfere no volume enquanto um fade estiver em andamento
     if (estaEmFade) return;
 
-    // Se for anúncio no telão, anula instantaneamente qualquer tentativa do player ou anúncio de desmutar
-    if (isAdNoTelao()) {
-        const video = document.querySelector('video');
-        if (video) {
-            video.muted = true;
-            video.volume = 0;
-        }
+    if (verificarSeHaAnuncio() || isUltimoEstadoAdAtivo) {
+        cortarAudioAnuncioImediato();
         return;
     }
 
     const video = document.querySelector('video');
     if (video) {
-        // Se o player do YouTube tentar resetar o volume para um valor arbitrário/baixo
-        // diferente da preferência configurada (ex: volume interno de 0.16), restauramos o volume configurado
-        if (Math.abs(video.volume - ultimoVolumeConfigurado) > 0.01) {
-            video.volume = ultimoVolumeConfigurado;
+        const volEsperado = (typeof ultimoVolumeConfigurado === 'number' && ultimoVolumeConfigurado > 0) ? ultimoVolumeConfigurado : 1.0;
+        // Se o volume da tag divergir do configurado pelo operador e não estiver mudo:
+        if (Math.abs(video.volume - volEsperado) > 0.03 && !video.muted) {
+            video.volume = volEsperado;
+            const player = document.querySelector('.html5-video-player') || document.getElementById('movie_player');
+            if (player && typeof player.setVolume === 'function') {
+                try { player.setVolume(Math.round(volEsperado * 100)); } catch (e) {}
+            }
+            sincronizarStorageYouTube(volEsperado);
         }
     }
 
     notificarEstadoVideo();
 }
 
-// Inicializa a lógica de fim de vídeo e observador de anúncios
+// Inicializa a lógica de fim de vídeo
 setupPostVideoLogic();
-setupAdObserver();
 
 // Re-inicializa no evento de mudança de página (SPA)
 window.addEventListener('yt-navigate-finish', () => {
+    videoFinalizadoProcessado = false;
+    isAnuncioDeFimDeVideo = false;
+    tempoMaximoAtingidoVideoPrincipal = 0;
+    duracaoVideoPrincipal = 0;
     document.documentElement.classList.remove('video-finalizado');
+    aplicarVisualCortina(false);
+    isUltimoEstadoAdAtivo = false;
     setupPostVideoLogic();
-    setupAdObserver();
     applyProjectorRules();
     // Notifica com atraso suave para esperar o título carregar
     setTimeout(() => notificarEstadoVideo(), 300);
@@ -653,6 +1113,10 @@ window.addEventListener('yt-navigate-finish', () => {
 // Isso permite iniciar o enforcement de mudo/pause ainda mais cedo,
 // enquanto o vídeo novo ainda está sendo carregado pela página.
 window.addEventListener('yt-navigate-start', () => {
+    videoFinalizadoProcessado = false;
+    isAnuncioDeFimDeVideo = false;
+    tempoMaximoAtingidoVideoPrincipal = 0;
+    duracaoVideoPrincipal = 0;
     // Pede ao background de forma assíncrona para saber se deve aplicar regras
     if (!chrome.runtime?.id) return; // Protege contra "Extension context invalidated"
     chrome.runtime.sendMessage({ action: "isProjector" }, (response) => {
@@ -664,143 +1128,5 @@ window.addEventListener('yt-navigate-start', () => {
     });
 });
 
-function registrarLogAd(acao) {
-    if (!chrome.runtime?.id) return;
 
-    const data = new Date();
-    const timestamp = data.toLocaleDateString('pt-BR') + ' ' + data.toLocaleTimeString('pt-BR');
-    const msg = `[${timestamp}] ${acao}`;
-    console.log("Projetor Igreja Log:", msg);
-    
-    chrome.storage.local.get(['adLogs'], (result) => {
-        if (!chrome.runtime?.id) return;
-        let logs = result.adLogs || [];
-        logs.push(msg);
-        if (logs.length > 100) logs.shift(); // Mantém apenas os últimos 100
-        chrome.storage.local.set({ adLogs: logs });
-    });
-}
-
-function processarAnuncios() {
-    if (!chrome.runtime?.id) return;
-    if (!document.documentElement.classList.contains('extensao-igreja-projector-active')) return;
-
-    // Garante que o observador de mutações esteja acoplado ao player
-    setupAdObserver();
-
-    const video = document.querySelector('video');
-    const isAdShowing = isAdNoTelao();
-
-    if (isAdShowing) {
-        ultimoMomentoAdTimestamp = Date.now();
-
-        // 1. MUTA O ÁUDIO IMEDIATAMENTE COM DUPLA GARANTIA (muted=true E volume=0)
-        // Isso elimina 100% de qualquer chance de vazamento de áudio antes de qualquer outra ação
-        if (video) {
-            if (adMutedOriginalState === null) {
-                adMutedOriginalState = video.muted;
-            }
-            video.muted = true;
-            video.volume = 0;
-        }
-
-        // 2. Identifica se é um NOVO anúncio (inclusive no caso de múltiplos: "1 de 2" -> "2 de 2")
-        const adBadgeTexto = document.querySelector('.ytp-ad-text, .ytp-ad-simple-ad-badge, .ytp-ad-preview-text')?.textContent?.trim() || '';
-        const adSrc = video ? (video.currentSrc || video.src || '') : '';
-        const adIdentificadorAtual = adSrc + '|' + adBadgeTexto;
-
-        if (adIdentificadorAtual !== ultimoAdIdentificador && adIdentificadorAtual.length > 1) {
-            ultimoAdIdentificador = adIdentificadorAtual;
-            adSkipClicadoParaEsteAd = false; // Permite pular o novo anúncio assim que o botão surgir
-
-            // Incrementa o contador de anúncios reais no storage
-            chrome.storage.local.get(['adCount'], (res) => {
-                if (!chrome.runtime?.id) return;
-                adNumeroAtual = (res.adCount || 0) + 1;
-                chrome.storage.local.set({ adCount: adNumeroAtual });
-
-                const detalheTexto = adBadgeTexto ? ` (${adBadgeTexto})` : '';
-                registrarLogAd(`Anúncio #${adNumeroAtual}${detalheTexto} interceptado. Áudio mutado e aceleração ativada.`);
-            });
-        }
-
-        // 3. Tenta clicar no botão "Pular Anúncio" (Skip Ad) para o anúncio atual
-        const skipButtons = document.querySelectorAll('.ytp-skip-ad-button, .ytp-ad-skip-button, .ytp-ad-skip-button-modern, .ytp-ad-text.ytp-ad-skip-button-text');
-        if (skipButtons.length > 0 && !adSkipClicadoParaEsteAd) {
-            skipButtons.forEach(btn => {
-                if (btn && typeof btn.click === 'function') btn.click();
-            });
-            adSkipClicadoParaEsteAd = true;
-            const num = adNumeroAtual > 0 ? `#${adNumeroAtual}` : '';
-            registrarLogAd(`Anúncio ${num}: Botão 'Pular Anúncio' acionado com sucesso.`);
-        }
-
-        // 4. Para anúncios não-puláveis, acelera ao máximo (16x) e avança para o final
-        if (video && !isNaN(video.duration) && video.currentTime < video.duration - 0.2) {
-            video.playbackRate = 16.0;
-            if (video.duration > 0) {
-                video.currentTime = video.duration - 0.1;
-            }
-        }
-    } else {
-        // Nenhum anúncio ativo: se havia anúncio rodando antes, restaura velocidade e áudio
-        if (ultimoAdIdentificador !== null) {
-            ultimoAdIdentificador = null;
-            adSkipClicadoParaEsteAd = false;
-            ultimoMomentoAdTimestamp = Date.now();
-            adMutedOriginalState = null;
-
-            // Remove imediatamente qualquer cortina preta de blackout
-            document.documentElement.classList.remove('video-finalizado');
-
-            if (video) {
-                if (video.playbackRate !== 1.0) {
-                    video.playbackRate = 1.0;
-                }
-                
-                // Desmuta e restaura o volume configurado para o culto
-                aplicarVolumeConfigurado(video);
-
-                // Se o vídeo principal tiver ficado pausado após a transição, retoma imediatamente
-                if (video.paused && !video.ended) {
-                    video.play().catch(() => {});
-                }
-            }
-            registrarLogAd("Anúncios finalizados. Áudio e vídeo do culto restaurados.");
-        }
-    }
-
-    // Garante que autoplay e legendas continuem desativados no projetor
-    desativarAutoplayELegendas();
-}
-
-// Observador instantâneo do DOM: detecta a classe .ad-showing ou overlay no exato microssegundo em que é inserida
-function setupAdObserver() {
-    const player = document.querySelector('#movie_player') || document.querySelector('.html5-video-player');
-    if (player && !player._projetorAdObserver) {
-        player._projetorAdObserver = true;
-        const adObserver = new MutationObserver(() => {
-            if (!document.documentElement.classList.contains('extensao-igreja-projector-active')) return;
-            if (player.classList.contains('ad-showing') || player.classList.contains('ad-interrupting') || isAdNoTelao()) {
-                const video = document.querySelector('video');
-                if (video) {
-                    if (adMutedOriginalState === null) adMutedOriginalState = video.muted;
-                    video.muted = true;
-                    video.volume = 0;
-                }
-                processarAnuncios();
-            }
-        });
-        adObserver.observe(player, { attributes: true, attributeFilter: ['class'], subtree: true, childList: true });
-    }
-}
-
-function initAdSkipper() {
-    setupAdObserver();
-    // Intervalo de 50ms para varredura contínua de segurança
-    setInterval(processarAnuncios, 50);
-}
-
-// Inicializa o scanner de anúncios
-initAdSkipper();
 

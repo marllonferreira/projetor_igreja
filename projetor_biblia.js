@@ -40,15 +40,81 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         } else {
             updateContent();
         }
+
+        // Esconde imagem de espera se estiver visível
+        const esperaImg = document.getElementById('espera-img');
+        if (esperaImg) {
+            esperaImg.classList.remove('show');
+            setTimeout(() => { esperaImg.style.display = 'none'; }, 400);
+        }
     }
 
     if (request.action === "encerrarBiblia") {
-        // Escurece a tela suavemente sem fechar a janela
+        // Escurece o texto bíblico suavemente
         const container = document.getElementById('conteudoBiblia');
         if (container) container.classList.remove('show');
+
+        // Se houver tela de espera configurada, exibe suavemente
+        const esperaImg = document.getElementById('espera-img');
+        if (esperaImg && esperaImg.src) {
+            esperaImg.style.display = 'block';
+            setTimeout(() => { esperaImg.classList.add('show'); }, 50);
+        }
+        sendResponse({ ok: true });
+    }
+
+    if (request.action === "updateSettings" && request.settings) {
+        const s = request.settings;
+        const container = document.getElementById('conteudoBiblia');
+        const textoAlvo = document.getElementById('texto-alvo');
+        
+        // Se houver versículo exibido, aplica cor e zoom em tempo real
+        if (textoAlvo && container && container.classList.contains('show')) {
+            if (s.bibliaGlobalCor) {
+                textoAlvo.style.color = s.bibliaGlobalCor;
+            }
+            if (s.bibliaGlobalZoom) {
+                const baseFontSizeVW = 5.5;
+                const zoomFactor = s.bibliaGlobalZoom / 100;
+                const length = textoAlvo.textContent.length;
+                let finalFontSize = baseFontSizeVW;
+                if (length > 300) finalFontSize = 3.5;
+                else if (length > 150) finalFontSize = 4.5;
+                textoAlvo.style.fontSize = (finalFontSize * zoomFactor) + 'vw';
+            }
+        }
+
+        // Atualiza a imagem de espera no cache interno
+        const esperaImg = document.getElementById('espera-img');
+        if (esperaImg) {
+            if (s.telaoImagemEspera) {
+                esperaImg.src = s.telaoImagemEspera;
+                if (container && !container.classList.contains('show')) {
+                    esperaImg.style.display = 'block';
+                    setTimeout(() => { esperaImg.classList.add('show'); }, 50);
+                }
+            } else {
+                esperaImg.classList.remove('show');
+                setTimeout(() => {
+                    esperaImg.style.display = 'none';
+                    esperaImg.src = '';
+                }, 400);
+            }
+        }
         sendResponse({ ok: true });
     }
 });
+
+// Carrega imagem de espera ao abrir se houver
+if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
+    chrome.storage.local.get(['projetorSettings'], (result) => {
+        const settings = result.projetorSettings || {};
+        const esperaImg = document.getElementById('espera-img');
+        if (esperaImg && settings.telaoImagemEspera) {
+            esperaImg.src = settings.telaoImagemEspera;
+        }
+    });
+}
 
 // Responde ao controle de vídeo para evitar erros se o popup enviar controles para esta aba
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {

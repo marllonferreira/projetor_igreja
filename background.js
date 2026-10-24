@@ -10,6 +10,11 @@ const MODO_TESTE = false;
 
 let projetorTabId = null;
 
+// Permite que content scripts acessem chrome.storage.session
+if (chrome.storage && chrome.storage.session && chrome.storage.session.setAccessLevel) {
+    chrome.storage.session.setAccessLevel({ accessLevel: 'TRUSTED_AND_UNTRUSTED_CONTEXTS' });
+}
+
 // Recupera o ID salvo ao iniciar (se existir)
 chrome.storage.local.get(["projetorTabId"], (result) => {
     if (result.projetorTabId) {
@@ -39,7 +44,8 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                 isProjector: isProjector,
                 projectorIsOpen: (currentTabId !== null),
                 ytMudoAutoMain: (settings.ytMudoAutoMain === true),
-                ytAutoplayBlockMain: (settings.ytAutoplayBlockMain === true)
+                ytAutoplayBlockMain: (settings.ytAutoplayBlockMain === true),
+                prefDimmingAds: (settings.prefDimmingAds !== false)
             };
             // console.log("Background [DEBUG]: Enviando resposta para aba:", sender.tab?.id, resposta);
             sendResponse(resposta);
@@ -123,17 +129,17 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 chrome.tabs.onRemoved.addListener((tabId) => {
     if (tabId === projetorTabId) {
         projetorTabId = null;
-        chrome.storage.local.remove(["projetorTabId", "adLogs", "adCount"]);
+        chrome.storage.local.remove(["projetorTabId", "adLogs"]);
         // Playlist preservada intencionalmente na sessão; apagada apenas ao fechar o navegador.
         chrome.storage.session.set({ ytPlaylistAtivo: false });
-        console.log("Background: Aba do projetor fechada. ID, Logs e Contador de Anúncios removidos. Playlist preservada.");
+        console.log("Background: Aba do projetor fechada. ID e Logs de Anúncios removidos. Playlist preservada.");
     }
 });
 
 // ── Limpa estado da sessão ao reiniciar o navegador ────────────────────────
 chrome.runtime.onStartup.addListener(() => {
     projetorTabId = null;
-    chrome.storage.local.remove(["projetorTabId", "adLogs", "adCount", "ytVolumeLevel"]);
+    chrome.storage.local.remove(["projetorTabId", "adLogs", "ytVolumeLevel"]);
     chrome.storage.session.clear();
 
     chrome.storage.local.get(["projetorSettings"], (result) => {
@@ -152,7 +158,7 @@ chrome.runtime.onStartup.addListener(() => {
 // ── Instala alarme diário na primeira vez / reinstalação e limpa sessão ──────
 chrome.runtime.onInstalled.addListener(() => {
     projetorTabId = null;
-    chrome.storage.local.remove(["projetorTabId", "adLogs", "adCount", "ytVolumeLevel"]);
+    chrome.storage.local.remove(["projetorTabId", "adLogs", "ytVolumeLevel"]);
     chrome.storage.session.clear();
     agendarVerificacaoDiaria();
 });

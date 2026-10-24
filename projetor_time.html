@@ -50,6 +50,22 @@
             text-shadow: 0 4px 20px rgba(0,0,0,0.8);
             margin: 0;
             display: none;
+            transition: color 0.4s ease, text-shadow 0.4s ease;
+        }
+
+        .time-pulse-red {
+            animation: pulseGlowRed 1.4s infinite ease-in-out;
+        }
+
+        @keyframes pulseGlowRed {
+            0%, 100% {
+                opacity: 1;
+                text-shadow: 0 4px 20px rgba(231, 76, 60, 0.4);
+            }
+            50% {
+                opacity: 0.75;
+                text-shadow: 0 4px 30px rgba(231, 76, 60, 0.9);
+            }
         }
 
         .text-block {
@@ -60,10 +76,33 @@
             display: none;
             white-space: pre-wrap;
         }
+
+        #espera-img {
+            position: fixed;
+            inset: 0;
+            width: 100vw;
+            height: 100vh;
+            object-fit: contain;
+            display: none;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        #espera-img.show {
+            opacity: 1;
+        }
+
+        .container {
+            z-index: 2;
+        }
     </style>
 </head>
 
 <body>
+    <img id="espera-img" alt="Tela de Espera">
+
     <div class="container" id="conteudoTime">
         <div class="time-block" id="relogio-alvo"></div>
         <div class="time-block" id="contador-alvo"></div>

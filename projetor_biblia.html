@@ -84,10 +84,33 @@
             letter-spacing: 1px;
             vertical-align: middle;
         }
+
+        #espera-img {
+            position: fixed;
+            inset: 0;
+            width: 100vw;
+            height: 100vh;
+            object-fit: contain;
+            display: none;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        #espera-img.show {
+            opacity: 1;
+        }
+
+        .container {
+            z-index: 2;
+        }
     </style>
 </head>
 
 <body>
+    <img id="espera-img" alt="Tela de Espera">
+
     <div class="container" id="conteudoBiblia">
         <div class="versiculo-texto" id="texto-alvo">
             Aguardando texto...

@@ -10,6 +10,7 @@ let currentSettings = {
     showPlaylist: true,
     ytMudoAutoMain: false,
     ytAutoplayBlockMain: false,
+    prefDimmingAds: true,
     bibliaGlobalCor: '#ffffff',
     bibliaGlobalZoom: 100,
     prefMemorizarMidia: true,
@@ -17,6 +18,9 @@ let currentSettings = {
     timeGlobalCor: '#ffffff',
     timeGlobalTamanho: 8,
     timeGlobalAlinhamento: 'center',
+    timeAlertaAtivo: true,
+    timeAlertaMinutos: 1,
+    telaoImagemEspera: null,
     themeMode: 'auto'
 };
 
@@ -188,49 +192,8 @@ chrome.storage.local.get(["projetorSettings"], (result) => {
     // Aplica o tema salvo imediatamente (antes de qualquer render) para evitar flash
     aplicarTema(currentSettings.themeMode || 'auto');
     
-    if (document.getElementById('configFullscreen')) {
-        document.getElementById('configFullscreen').checked = currentSettings.openFullscreen;
-        document.getElementById('configWindowSize').value = currentSettings.windowSize;
-        document.getElementById('configWindowSize').disabled = currentSettings.openFullscreen;
-        
-        document.getElementById('prefShowClose').checked = currentSettings.showClose;
-        document.getElementById('prefShowStop').checked = currentSettings.showStop;
-        document.getElementById('prefShowFullscreen').checked = currentSettings.showFullscreen;
-        document.getElementById('prefShowVolume').checked = currentSettings.showVolume;
-        document.getElementById('prefShowProgress').checked = currentSettings.showProgress;
-        
-        if (document.getElementById('prefShowPlaylist')) {
-            document.getElementById('prefShowPlaylist').checked = currentSettings.showPlaylist !== false;
-        }
-        if (document.getElementById('prefMudoAutoMain')) {
-            document.getElementById('prefMudoAutoMain').checked = currentSettings.ytMudoAutoMain === true;
-        }
-        if (document.getElementById('prefAutoplayBlockMain')) {
-            document.getElementById('prefAutoplayBlockMain').checked = currentSettings.ytAutoplayBlockMain === true;
-        }
-        
-        if (document.getElementById('bibliaCor')) {
-            document.getElementById('bibliaCor').value = currentSettings.bibliaGlobalCor;
-            document.getElementById('bibliaZoom').value = currentSettings.bibliaGlobalZoom;
-        }
-
-        if (document.getElementById('timeCor')) {
-            document.getElementById('timeCor').value = currentSettings.timeGlobalCor || '#ffffff';
-            document.getElementById('timeTamanho').value = currentSettings.timeGlobalTamanho || 8;
-            document.getElementById('timeAlinhamento').value = currentSettings.timeGlobalAlinhamento || 'center';
-        }
-
-        if (document.getElementById('prefMemorizarMidia')) {
-            document.getElementById('prefMemorizarMidia').checked = currentSettings.prefMemorizarMidia;
-        }
-
-        if (document.getElementById('configFrequenciaUpdate')) {
-            document.getElementById('configFrequenciaUpdate').value = currentSettings.prefFrequenciaAtualizacao || 3;
-        }
-
-        // Sincroniza os radio buttons de tema
-        sincronizarRadioTema();
-    }
+    // Sincroniza todos os campos de configuracao com currentSettings
+    restaurarCamposConfiguracoesUI();
     
     aplicarVisibilidadeControles();
     if (typeof atualizarVisibilidadePlaylist === 'function') atualizarVisibilidadePlaylist();
@@ -238,6 +201,98 @@ chrome.storage.local.get(["projetorSettings"], (result) => {
     // Avalia silenciosamente se há atualização pendente no storage
     evaluateUpdateStatus();
 });
+
+/**
+ * Sincroniza todos os campos da UI das 6 abas de configurações com os valores salvos em currentSettings.
+ */
+function restaurarCamposConfiguracoesUI() {
+    if (!document.getElementById('configFullscreen')) return;
+
+    // Telão
+    if (document.getElementById('configMonitor')) {
+        document.getElementById('configMonitor').value = currentSettings.targetMonitor || 'auto';
+    }
+    document.getElementById('configFullscreen').checked = currentSettings.openFullscreen;
+    document.getElementById('configWindowSize').value = currentSettings.windowSize;
+    document.getElementById('configWindowSize').disabled = currentSettings.openFullscreen;
+    document.getElementById('prefShowClose').checked = currentSettings.showClose;
+
+    // YouTube
+    document.getElementById('prefShowStop').checked = currentSettings.showStop;
+    document.getElementById('prefShowFullscreen').checked = currentSettings.showFullscreen;
+    document.getElementById('prefShowVolume').checked = currentSettings.showVolume;
+    document.getElementById('prefShowProgress').checked = currentSettings.showProgress;
+    if (document.getElementById('prefShowPlaylist')) {
+        document.getElementById('prefShowPlaylist').checked = currentSettings.showPlaylist !== false;
+    }
+    if (document.getElementById('prefMudoAutoMain')) {
+        document.getElementById('prefMudoAutoMain').checked = currentSettings.ytMudoAutoMain === true;
+    }
+    if (document.getElementById('prefAutoplayBlockMain')) {
+        document.getElementById('prefAutoplayBlockMain').checked = currentSettings.ytAutoplayBlockMain === true;
+    }
+    if (document.getElementById('prefDimmingAds')) {
+        document.getElementById('prefDimmingAds').checked = currentSettings.prefDimmingAds !== false;
+    }
+
+    // Geral
+    if (document.getElementById('configFrequenciaUpdate')) {
+        document.getElementById('configFrequenciaUpdate').value = currentSettings.prefFrequenciaAtualizacao || 3;
+    }
+
+    // Bíblia
+    if (document.getElementById('bibliaCor')) {
+        document.getElementById('bibliaCor').value = currentSettings.bibliaGlobalCor || '#ffffff';
+        document.getElementById('bibliaZoom').value = currentSettings.bibliaGlobalZoom || 100;
+    }
+
+    // Mídia
+    if (document.getElementById('prefMemorizarMidia')) {
+        document.getElementById('prefMemorizarMidia').checked = currentSettings.prefMemorizarMidia !== false;
+    }
+
+    // Time
+    if (document.getElementById('timeCor')) {
+        document.getElementById('timeCor').value = currentSettings.timeGlobalCor || '#ffffff';
+        document.getElementById('timeTamanho').value = currentSettings.timeGlobalTamanho || 8;
+        document.getElementById('timeAlinhamento').value = currentSettings.timeGlobalAlinhamento || 'center';
+    }
+    if (document.getElementById('timeAlertaAtivo')) {
+        document.getElementById('timeAlertaAtivo').checked = currentSettings.timeAlertaAtivo !== false;
+    }
+    if (document.getElementById('timeAlertaMinutos')) {
+        document.getElementById('timeAlertaMinutos').value = currentSettings.timeAlertaMinutos || 1;
+    }
+    const grpAlerta = document.getElementById('timeAlertaMinutosGroup');
+    if (grpAlerta) {
+        grpAlerta.style.display = (currentSettings.timeAlertaAtivo !== false) ? 'inline-flex' : 'none';
+    }
+
+    // Sincroniza preview da Tela de Espera
+    const esperaImg = document.getElementById('telaoEsperaImg');
+    const esperaIcon = document.getElementById('telaoEsperaIcon');
+    const btnRemove = document.getElementById('btnRemoveEspera');
+    const statusEl = document.getElementById('telaoEsperaStatus');
+
+    if (esperaImg && esperaIcon && btnRemove && statusEl) {
+        if (currentSettings.telaoImagemEspera) {
+            esperaImg.src = currentSettings.telaoImagemEspera;
+            esperaImg.style.display = 'block';
+            esperaIcon.style.display = 'none';
+            btnRemove.style.display = 'flex';
+            statusEl.textContent = 'Imagem personalizada ativa';
+        } else {
+            esperaImg.src = '';
+            esperaImg.style.display = 'none';
+            esperaIcon.style.display = 'block';
+            btnRemove.style.display = 'none';
+            statusEl.textContent = 'Fundo preto padrão';
+        }
+    }
+
+    // Sincroniza os radio buttons de tema
+    sincronizarRadioTema();
+}
 
 if (document.getElementById('btnSettings')) {
     const btnSettings = document.getElementById('btnSettings');
@@ -252,8 +307,8 @@ if (document.getElementById('btnSettings')) {
             // Garante que "Sobre" esteja fechado
             document.getElementById('sobreView').style.display = 'none';
 
-            // Sincroniza radio buttons de tema ao abrir
-            sincronizarRadioTema();
+            // Sincroniza campos da UI com o estado salvo
+            restaurarCamposConfiguracoesUI();
 
             const monitorSelect = document.getElementById('configMonitor');
             monitorSelect.innerHTML = '<option value="auto">Automático (Secundário)</option>';
@@ -268,33 +323,16 @@ if (document.getElementById('btnSettings')) {
                         opt.textContent = name;
                         monitorSelect.appendChild(opt);
                     });
-                    monitorSelect.value = currentSettings.targetMonitor;
+                    monitorSelect.value = currentSettings.targetMonitor || 'auto';
                 });
             }
         } else {
-            // Fechar configurações (Cancelar) — restaura o tema salvo
+            // Fechar configurações (Cancelar) — restaura o tema salvo e todos os campos salvos
             aplicarTema(currentSettings.themeMode || 'auto');
-            sincronizarRadioTema();
+            restaurarCamposConfiguracoesUI();
 
             btnSettings.textContent = '⚙️';
             btnSettings.title = 'Configurações';
-            
-            // Restaura a UI para o que estava salvo
-            document.getElementById('configFullscreen').checked = currentSettings.openFullscreen;
-            document.getElementById('configWindowSize').value = currentSettings.windowSize;
-            document.getElementById('configWindowSize').disabled = currentSettings.openFullscreen;
-            document.getElementById('prefShowClose').checked = currentSettings.showClose;
-            document.getElementById('prefShowStop').checked = currentSettings.showStop;
-            document.getElementById('prefShowFullscreen').checked = currentSettings.showFullscreen;
-            document.getElementById('prefShowVolume').checked = currentSettings.showVolume;
-            document.getElementById('prefShowProgress').checked = currentSettings.showProgress;
-            if (document.getElementById('prefShowPlaylist')) {
-                document.getElementById('prefShowPlaylist').checked = currentSettings.showPlaylist !== false;
-            }
-            
-            if (document.getElementById('prefMemorizarMidia')) {
-                document.getElementById('prefMemorizarMidia').checked = currentSettings.prefMemorizarMidia;
-            }
 
             document.getElementById('settingsView').style.display = 'none';
             document.getElementById('mainView').style.display = 'block';
@@ -321,7 +359,7 @@ if (document.getElementById('btnSobre')) {
             if (pillVersao) pillVersao.textContent = `Versão ${versaoAtual}`;
 
             // Mostra última checagem salva se existir
-            chrome.storage.local.get(['dadosAtualizacao', 'adLogs', 'adCount'], (result) => {
+            chrome.storage.local.get(['dadosAtualizacao', 'adLogs'], (result) => {
                 const dados = result.dadosAtualizacao;
                 if (dados && dados.ultimaChecagem) {
                     const rowChecagem = document.getElementById('sobreUltimaChecagem');
@@ -330,13 +368,13 @@ if (document.getElementById('btnSobre')) {
                     if (valChecagem) valChecagem.textContent = dados.ultimaChecagem;
                 }
 
-                // Preenche a contagem de anúncios reais bloqueados/pulados
-                const adCount = (typeof result.adCount === 'number') ? result.adCount : ((result.adLogs && result.adLogs.length > 0) ? 1 : 0);
+                // Preenche a contagem de anúncios bloqueados
+                const logsAd = result.adLogs || [];
                 const rowAd = document.getElementById('sobreAdLogsRow');
                 const valAd = document.getElementById('sobreAdLogsValor');
                 if (rowAd && valAd) {
-                    if (adCount > 0) {
-                        valAd.textContent = adCount;
+                    if (logsAd.length > 0) {
+                        valAd.textContent = logsAd.length;
                         rowAd.style.display = 'flex';
                     } else {
                         rowAd.style.display = 'none';
@@ -545,6 +583,9 @@ if (document.getElementById('btnSaveSettings')) {
         if (document.getElementById('prefAutoplayBlockMain')) {
             currentSettings.ytAutoplayBlockMain = document.getElementById('prefAutoplayBlockMain').checked;
         }
+        if (document.getElementById('prefDimmingAds')) {
+            currentSettings.prefDimmingAds = document.getElementById('prefDimmingAds').checked;
+        }
         
         if (document.getElementById('bibliaCor')) {
             currentSettings.bibliaGlobalCor = document.getElementById('bibliaCor').value;
@@ -565,6 +606,13 @@ if (document.getElementById('btnSaveSettings')) {
             currentSettings.timeGlobalAlinhamento = document.getElementById('timeAlinhamento').value;
         }
 
+        if (document.getElementById('timeAlertaAtivo')) {
+            currentSettings.timeAlertaAtivo = document.getElementById('timeAlertaAtivo').checked;
+        }
+        if (document.getElementById('timeAlertaMinutos')) {
+            currentSettings.timeAlertaMinutos = parseInt(document.getElementById('timeAlertaMinutos').value) || 1;
+        }
+
         // Salva o tema selecionado
         const themeRadio = document.querySelector('input[name="themeMode"]:checked');
         if (themeRadio) {
@@ -572,8 +620,27 @@ if (document.getElementById('btnSaveSettings')) {
             aplicarTema(currentSettings.themeMode);
         }
 
+        // Sincroniza o campo de zoom rapido da Biblia se o operador estiver usando o padrao
+        const zoomRapidoEl = document.getElementById('bibliaZoomRapido');
+        if (zoomRapidoEl && currentSettings.bibliaGlobalZoom) {
+            zoomRapidoEl.value = currentSettings.bibliaGlobalZoom;
+            if (typeof estadoBiblia !== 'undefined') {
+                estadoBiblia.zoomRapido = currentSettings.bibliaGlobalZoom;
+                chrome.storage.session.set({ estadoBiblia: estadoBiblia });
+            }
+        }
+
         chrome.storage.local.set({ "projetorSettings": currentSettings });
         
+        chrome.storage.local.get(['projetorTabId'], (res) => {
+            const tabId = res.projetorTabId;
+            if (tabId) {
+                chrome.tabs.sendMessage(tabId, { action: 'updateSettings', settings: currentSettings }, () => {
+                    void chrome.runtime.lastError;
+                });
+            }
+        });
+
         aplicarVisibilidadeControles();
         atualizarVisibilidadePlaylist();
 
@@ -585,6 +652,49 @@ if (document.getElementById('btnSaveSettings')) {
             btnSettings.textContent = '⚙️';
             btnSettings.title = 'Configurações';
         }
+
+        mostrarAviso('✅ Configurações salvas!');
+    });
+}
+
+// ── Alternância da exibição do campo de minutos de aviso ──
+if (document.getElementById('timeAlertaAtivo')) {
+    document.getElementById('timeAlertaAtivo').addEventListener('change', (e) => {
+        const grp = document.getElementById('timeAlertaMinutosGroup');
+        if (grp) {
+            grp.style.display = e.target.checked ? 'inline-flex' : 'none';
+        }
+    });
+}
+
+// ── Botão Resetar Bíblia para Padrões ──
+if (document.getElementById('btnResetBiblia')) {
+    document.getElementById('btnResetBiblia').addEventListener('click', () => {
+        const corInput = document.getElementById('bibliaCor');
+        const zoomInput = document.getElementById('bibliaZoom');
+        if (corInput) corInput.value = '#ffffff';
+        if (zoomInput) zoomInput.value = 100;
+        mostrarAviso('ℹ️ Padrões da Bíblia redefinidos.');
+    });
+}
+
+// ── Botão Resetar Time para Padrões ──
+if (document.getElementById('btnResetTime')) {
+    document.getElementById('btnResetTime').addEventListener('click', () => {
+        const corInput = document.getElementById('timeCor');
+        const tamanhoInput = document.getElementById('timeTamanho');
+        const alinharInput = document.getElementById('timeAlinhamento');
+        const alertaAtivoInput = document.getElementById('timeAlertaAtivo');
+        const alertaMinutosInput = document.getElementById('timeAlertaMinutos');
+        const grpAlerta = document.getElementById('timeAlertaMinutosGroup');
+
+        if (corInput) corInput.value = '#ffffff';
+        if (tamanhoInput) tamanhoInput.value = 8;
+        if (alinharInput) alinharInput.value = 'center';
+        if (alertaAtivoInput) alertaAtivoInput.checked = true;
+        if (alertaMinutosInput) alertaMinutosInput.value = 1;
+        if (grpAlerta) grpAlerta.style.display = 'inline-flex';
+        mostrarAviso('ℹ️ Padrões de Time redefinidos.');
     });
 }
 
@@ -629,9 +739,14 @@ if (document.getElementById('fecharProjetor')) {
                 chrome.tabs.remove(tabId, () => {
                     if (chrome.runtime.lastError) console.log("Janela já estava fechada.");
                 });
-                chrome.storage.local.remove(["projetorTabId", "adLogs", "adCount"]);
+                chrome.storage.local.remove(["projetorTabId", "adLogs"]);
                 // Playlist preservada intencionalmente: só apaga ao fechar o navegador
                 alternarEstadoControles(false);
+                if (typeof limparPreviewBiblia === 'function') limparPreviewBiblia();
+                bibliaVersesList = [];
+                bibliaCurrentIndex = 0;
+                chrome.storage.session.remove('bibliaPaginacao');
+                if (typeof atualizarPaginacaoUI === 'function') atualizarPaginacaoUI();
             }
         });
     });
@@ -869,13 +984,25 @@ document.getElementById('btnMute').addEventListener('click', () => {
 const slider = document.getElementById('volumeSlider');
 const label = document.getElementById('volumeLabel');
 
-// Recupera a preferência de volume salva ao abrir o popup
-chrome.storage.local.get(['ytVolumeLevel'], (res) => {
+// Limpa qualquer resíduo legado salvo permanentemente no disco
+if (chrome.storage && chrome.storage.local) {
+    chrome.storage.local.remove(['ytVolumeLevel']);
+}
+
+// Recupera a preferência de volume salva apenas na sessão atual do navegador
+const storageSession = (chrome.storage && chrome.storage.session) ? chrome.storage.session : chrome.storage.local;
+storageSession.get(['ytVolumeLevel'], (res) => {
     if (res && typeof res.ytVolumeLevel === 'number') {
         const volPct = Math.round(res.ytVolumeLevel * 100);
         if (slider && label) {
             slider.value = volPct;
             label.textContent = volPct + '%';
+        }
+    } else {
+        // Nova sessão / navegador reaberto: padrão sempre 100% (máximo)
+        if (slider && label) {
+            slider.value = 100;
+            label.textContent = '100%';
         }
     }
 });
@@ -885,8 +1012,8 @@ slider.addEventListener('input', () => {
     label.textContent = vol + '%';
     if (vol > 0) atualizarIconeMute(false);
     
-    // Salva a preferência de volume imediatamente no storage
-    chrome.storage.local.set({ ytVolumeLevel: vol / 100 });
+    // Salva a preferência de volume apenas na sessão atual do navegador
+    storageSession.set({ ytVolumeLevel: vol / 100 });
 
     chrome.storage.local.get(["projetorTabId"], (result) => {
         const tabId = result.projetorTabId;
@@ -960,6 +1087,7 @@ function alternarEstadoControles(ativo) {
         if (vLabel) vLabel.textContent = '100%';
         atualizarIconeMute(false);
         atualizarProgresso(0, 0, "");
+        atualizarBadgeAnuncio(false);
 
         // Renderiza mantendo os itens atuais da sessão
         if (typeof carregarPlaylistSessao === 'function') {
@@ -984,6 +1112,8 @@ function formatTime(seconds) {
     return `${m}:${s}`;
 }
 
+let isAdAtivoNoPopup = false;
+
 // Atualiza a barra de progresso do vídeo
 function atualizarProgresso(currentTime, duration, title = "", isInitialLoad = false) {
     const slider = document.getElementById('progressSlider');
@@ -1000,6 +1130,10 @@ function atualizarProgresso(currentTime, duration, title = "", isInitialLoad = f
             titleLabel.textContent = 'Nenhum vídeo carregado';
             titleLabel.title = '';
         }
+        // Se houver anúncio ativo, mantém o título oculto para não ocupar espaço vertical extra
+        if (isAdAtivoNoPopup) {
+            titleLabel.style.display = 'none';
+        }
     }
 
     if (slider && label) {
@@ -1010,6 +1144,21 @@ function atualizarProgresso(currentTime, duration, title = "", isInitialLoad = f
             slider.value = 0;
             label.textContent = `00:00 / 00:00`;
         }
+    }
+}
+
+// Atualiza o indicador de anúncio no painel do operador substituindo o título do vídeo para não ocupar espaço vertical extra
+function atualizarBadgeAnuncio(isAd) {
+    isAdAtivoNoPopup = !!isAd;
+    const badge = document.getElementById('adStatusBadge');
+    const titleLabel = document.getElementById('videoTitleLabel');
+    
+    if (isAd) {
+        if (badge) badge.style.display = 'flex';
+        if (titleLabel) titleLabel.style.display = 'none';
+    } else {
+        if (badge) badge.style.display = 'none';
+        if (titleLabel) titleLabel.style.display = 'block';
     }
 }
 
@@ -1024,6 +1173,9 @@ function iniciarPollingDeProgresso() {
                 chrome.tabs.sendMessage(result.projetorTabId, { action: "controlVideo", command: "getVideoState" }, (resp) => {
                     if (!chrome.runtime.lastError && resp) {
                         atualizarProgresso(resp.currentTime, resp.duration, resp.title);
+                        if (resp.isAd !== undefined) {
+                            atualizarBadgeAnuncio(resp.isAd);
+                        }
                     }
                 });
             }
@@ -1046,7 +1198,7 @@ function carregarEstadoProjetor(tentativa) {
         chrome.tabs.get(tabId, (tab) => {
             if (chrome.runtime.lastError || !tab) {
                 // Aba não encontrada: limpa apenas o ID, preserva playlist
-                chrome.storage.local.remove(["projetorTabId", "adLogs", "adCount"]);
+                chrome.storage.local.remove(["projetorTabId", "adLogs"]);
                 alternarEstadoControles(false);
                 return;
             }
@@ -1068,16 +1220,31 @@ function carregarEstadoProjetor(tentativa) {
                         }
                         
                         alternarEstadoControles(true);
-                        const vol = Math.round(resp.volume * 100);
-                        const slider = document.getElementById('volumeSlider');
-                        const label = document.getElementById('volumeLabel');
-                        if (slider && label) {
-                            slider.value = vol;
-                            label.textContent = vol + '%';
-                        }
+                        chrome.storage.session.get(['ytVolumeLevel'], (sessRes) => {
+                            let vol;
+                            if (sessRes && typeof sessRes.ytVolumeLevel === 'number') {
+                                vol = Math.round(sessRes.ytVolumeLevel * 100);
+                            } else {
+                                // Início de sessão / navegador reaberto: padrão 100% (máximo)
+                                vol = 100;
+                                chrome.storage.session.set({ ytVolumeLevel: 1.0 });
+                            }
+                            if (Math.abs(resp.volume - (vol / 100)) > 0.04) {
+                                chrome.tabs.sendMessage(tabId, { action: "controlVideo", command: "volume", value: vol / 100 });
+                            }
+                            const slider = document.getElementById('volumeSlider');
+                            const label = document.getElementById('volumeLabel');
+                            if (slider && label) {
+                                slider.value = vol;
+                                label.textContent = vol + '%';
+                            }
+                        });
                         atualizarIconeMute(resp.muted);
                         atualizarBotaoPlay(resp.playing);
                         atualizarProgresso(resp.currentTime, resp.duration, resp.title);
+                        if (resp.isAd !== undefined) {
+                            atualizarBadgeAnuncio(resp.isAd);
+                        }
                         
                         // Restaura playlist apenas na sessão ativa
                         if (typeof carregarPlaylistSessao === 'function') carregarPlaylistSessao();
@@ -1100,8 +1267,14 @@ chrome.tabs.onRemoved.addListener((closedTabId) => {
     chrome.storage.local.get(["projetorTabId"], (result) => {
         if (result.projetorTabId === closedTabId) {
             // Remove apenas o ID do telão e logs de anúncio; preserva a playlist da sessão
-            chrome.storage.local.remove(["projetorTabId", "adLogs", "adCount"]);
+            chrome.storage.local.remove(["projetorTabId", "adLogs"]);
             alternarEstadoControles(false);
+            atualizarBadgeAnuncio(false);
+            if (typeof limparPreviewBiblia === 'function') limparPreviewBiblia();
+            bibliaVersesList = [];
+            bibliaCurrentIndex = 0;
+            chrome.storage.session.remove('bibliaPaginacao');
+            if (typeof atualizarPaginacaoUI === 'function') atualizarPaginacaoUI();
         }
     });
 });
@@ -1110,9 +1283,7 @@ function enviarComandoProjetor(comando) {
     chrome.storage.local.get(["projetorTabId"], (result) => {
         const tabId = result.projetorTabId;
         if (tabId) {
-            chrome.tabs.sendMessage(tabId, { action: "controlVideo", command: comando }, () => {
-                void chrome.runtime.lastError;
-            });
+            chrome.tabs.sendMessage(tabId, { action: "controlVideo", command: comando });
         }
     });
 }
@@ -1199,7 +1370,7 @@ let bibliaBookName = "";
 let bibliaChapter = "";
 let bibliaTranslation = "";
 
-chrome.storage.session.get(['estadoBiblia', 'bibliaPaginacao'], (result) => {
+chrome.storage.session.get(['estadoBiblia', 'bibliaPaginacao', 'bibliaPreviewState'], (result) => {
     if (result.estadoBiblia) estadoBiblia = result.estadoBiblia;
     
     if(document.getElementById('bibliaVersao')) document.getElementById('bibliaVersao').value = estadoBiblia.versao;
@@ -1221,6 +1392,18 @@ chrome.storage.session.get(['estadoBiblia', 'bibliaPaginacao'], (result) => {
         bibliaTranslation = result.bibliaPaginacao.translation || "";
         atualizarPaginacaoUI();
     }
+
+    // Restaura o preview bíblico se já havia sido ativado na sessão do navegador
+    if (result.bibliaPreviewState && result.bibliaPreviewState.visivel && result.bibliaPreviewState.html) {
+        const container = document.getElementById('bibliaPreviewContainer');
+        const textEl = document.getElementById('bibliaPreviewText');
+        const refEl = document.getElementById('bibliaPreviewRef');
+        if (container && textEl && refEl) {
+            refEl.textContent = result.bibliaPreviewState.ref || '📖 Prévia do Versículo';
+            textEl.innerHTML = result.bibliaPreviewState.html;
+            container.style.display = 'flex';
+        }
+    }
 });
 
 function salvarEstadoPaginacao() {
@@ -1233,6 +1416,171 @@ function salvarEstadoPaginacao() {
             translation: bibliaTranslation
         }
     });
+}
+
+// ═══════════════════════════════════════════════════════════════
+// Módulo Bíblia: Cache e Pré-Visualização Dinâmica
+// ═══════════════════════════════════════════════════════════════
+const bibliaCapitulosCache = new Map();
+let bibliaPreviewDebounceTimer = null;
+let bibliaPreviewReqId = 0;
+
+function salvarEstadoPreview(visivel, ref, html) {
+    if (!visivel) {
+        chrome.storage.session.remove('bibliaPreviewState');
+    } else {
+        chrome.storage.session.set({
+            bibliaPreviewState: {
+                visivel: true,
+                ref: ref || '',
+                html: html || ''
+            }
+        });
+    }
+}
+
+async function buscarCapituloBiblia(translation, bookId, chapter) {
+    const chave = `${translation}_${bookId}_${chapter}`;
+    if (bibliaCapitulosCache.has(chave)) {
+        return bibliaCapitulosCache.get(chave);
+    }
+    const urlApi = `https://bolls.life/get-chapter/${translation}/${bookId}/${chapter}/`;
+    const response = await fetch(urlApi);
+    if (!response.ok) throw new Error('Falha ao buscar capítulo da Bíblia na API');
+    const data = await response.json();
+    bibliaCapitulosCache.set(chave, data);
+    return data;
+}
+
+function limparPreviewBiblia() {
+    const container = document.getElementById('bibliaPreviewContainer');
+    const textEl = document.getElementById('bibliaPreviewText');
+    const refEl = document.getElementById('bibliaPreviewRef');
+    if (container) container.style.display = 'none';
+    if (textEl) textEl.innerHTML = '';
+    if (refEl) refEl.textContent = '📖 Prévia do Versículo';
+    salvarEstadoPreview(false);
+}
+
+async function atualizarPreviewBiblia() {
+    const container = document.getElementById('bibliaPreviewContainer');
+    const textEl = document.getElementById('bibliaPreviewText');
+    const refEl = document.getElementById('bibliaPreviewRef');
+    if (!container || !textEl || !refEl) return;
+
+    // Torna visível ao interagir
+    container.style.display = 'flex';
+
+    const translation = document.getElementById('bibliaVersao').value;
+    const bookId = parseInt(document.getElementById('bibliaLivro').value);
+    const chapter = document.getElementById('bibliaCapitulo').value;
+    const verseStr = document.getElementById('bibliaVersiculo').value.trim();
+    const agrupar = parseInt(document.getElementById('bibliaAgrupar').value) || 1;
+
+    if (!bookId || !chapter || parseInt(chapter) < 1) {
+        textEl.innerHTML = '<span class="biblia-preview-empty">Selecione um livro e capítulo válidos.</span>';
+        refEl.textContent = '📖 Prévia do Versículo';
+        salvarEstadoPreview(false);
+        return;
+    }
+
+    const bookObj = booksList.find(b => b.id === bookId);
+    const bookName = bookObj ? bookObj.name : '';
+    const versaoExibida = translation.replace(/(PT|\d+)$/, '');
+    const verseStart = parseInt(verseStr) || 1;
+
+    const reqId = ++bibliaPreviewReqId;
+    const chave = `${translation}_${bookId}_${chapter}`;
+
+    if (!bibliaCapitulosCache.has(chave)) {
+        textEl.innerHTML = '<span class="biblia-preview-loading">⏳ Buscando prévia...</span>';
+        refEl.textContent = `📖 ${bookName} ${chapter}:${verseStart} (${versaoExibida})`;
+    }
+
+    try {
+        const data = await buscarCapituloBiblia(translation, bookId, chapter);
+        if (reqId !== bibliaPreviewReqId) return; // Requisição mais nova já em andamento
+
+        if (!data || data.length === 0) {
+            textEl.innerHTML = '<span class="biblia-preview-error">⚠️ Versículos não encontrados.</span>';
+            salvarEstadoPreview(false);
+            return;
+        }
+
+        let index = data.findIndex(v => v.verse >= verseStart);
+        if (index === -1) {
+            textEl.innerHTML = `<span class="biblia-preview-error">⚠️ Versículo ${verseStart} não encontrado no cap. ${chapter}.</span>`;
+            salvarEstadoPreview(false);
+            return;
+        }
+
+        const end = Math.min(index + agrupar, data.length);
+        const versesToDisplay = data.slice(index, end);
+
+        let refFinal = `📖 ${bookName} ${chapter}:${versesToDisplay[0].verse}`;
+        if (versesToDisplay.length > 1) {
+            refFinal += `-${versesToDisplay[versesToDisplay.length - 1].verse}`;
+        }
+        refFinal += ` (${versaoExibida})`;
+        refEl.textContent = refFinal;
+
+        textEl.innerHTML = versesToDisplay.map(v => `<span class="biblia-preview-vnum">${v.verse}</span> ${v.text}`).join(' ');
+        salvarEstadoPreview(true, refFinal, textEl.innerHTML);
+    } catch (e) {
+        if (reqId === bibliaPreviewReqId) {
+            console.error("Erro ao carregar prévia da Bíblia:", e);
+            textEl.innerHTML = '<span class="biblia-preview-error">⚠️ Erro ao carregar prévia.</span>';
+            salvarEstadoPreview(false);
+        }
+    }
+}
+
+function agendarPreviewBiblia() {
+    clearTimeout(bibliaPreviewDebounceTimer);
+    bibliaPreviewDebounceTimer = setTimeout(() => {
+        atualizarPreviewBiblia();
+    }, 280);
+}
+
+function sincronizarPreviewComIndiceAtual() {
+    const container = document.getElementById('bibliaPreviewContainer');
+    const textEl = document.getElementById('bibliaPreviewText');
+    const refEl = document.getElementById('bibliaPreviewRef');
+    if (!container || !textEl || !refEl || container.style.display === 'none') return;
+    if (bibliaVersesList.length === 0) return;
+
+    const agrupar = parseInt(document.getElementById('bibliaAgrupar').value) || 1;
+    const end = Math.min(bibliaCurrentIndex + agrupar, bibliaVersesList.length);
+    const versesToDisplay = bibliaVersesList.slice(bibliaCurrentIndex, end);
+    const versaoExibida = bibliaTranslation.replace(/(PT|\d+)$/, '');
+
+    let refFinal = `📖 ${bibliaBookName} ${bibliaChapter}:${versesToDisplay[0].verse}`;
+    if (versesToDisplay.length > 1) {
+        refFinal += `-${versesToDisplay[versesToDisplay.length - 1].verse}`;
+    }
+    refFinal += ` (${versaoExibida})`;
+    refEl.textContent = refFinal;
+
+    textEl.innerHTML = versesToDisplay.map(v => `<span class="biblia-preview-vnum">${v.verse}</span> ${v.text}`).join(' ');
+    salvarEstadoPreview(true, refFinal, textEl.innerHTML);
+}
+
+// Listeners para exibir a prévia sob demanda ao interagir com os campos
+['bibliaVersao', 'bibliaLivro'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('change', agendarPreviewBiblia);
+});
+
+['bibliaCapitulo', 'bibliaVersiculo', 'bibliaAgrupar'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) {
+        el.addEventListener('input', agendarPreviewBiblia);
+        el.addEventListener('change', agendarPreviewBiblia);
+    }
+});
+
+if (document.getElementById('btnFecharPreviewBiblia')) {
+    document.getElementById('btnFecharPreviewBiblia').addEventListener('click', limparPreviewBiblia);
 }
 
 if (document.getElementById('projetarBiblia')) {
@@ -1261,9 +1609,7 @@ if (document.getElementById('projetarBiblia')) {
         btn.innerHTML = '<span>⏳ Buscando...</span>';
 
         try {
-            const response = await fetch(urlApi);
-            if (!response.ok) throw new Error('Falha na API');
-            const data = await response.json();
+            const data = await buscarCapituloBiblia(translation, bookId, chapter);
             
             if (data.length === 0) {
                 mostrarAviso("⚠️ Versículos não encontrados.");
@@ -1283,6 +1629,7 @@ if (document.getElementById('projetarBiblia')) {
             salvarEstadoPaginacao();
             atualizarPaginacaoUI();
             enviarVersiculoAtualParaProjetor();
+            sincronizarPreviewComIndiceAtual();
         } catch (e) {
             console.error("Erro na busca da Bíblia:", e);
             mostrarAviso("⚠️ Erro ao buscar versículo.");
@@ -1308,6 +1655,7 @@ if (document.getElementById('btnVersiculoAnterior')) {
             bibliaCurrentIndex = Math.max(bibliaCurrentIndex - agrupar, 0);
             salvarEstadoPaginacao();
             enviarVersiculoAtualParaProjetor();
+            sincronizarPreviewComIndiceAtual();
         }
     });
     
@@ -1317,6 +1665,7 @@ if (document.getElementById('btnVersiculoAnterior')) {
             bibliaCurrentIndex += agrupar;
             salvarEstadoPaginacao();
             enviarVersiculoAtualParaProjetor();
+            sincronizarPreviewComIndiceAtual();
         }
     });
 }
@@ -1391,6 +1740,11 @@ if (document.getElementById('encerrarBiblia')) {
                     () => { void chrome.runtime.lastError; }); // silencia se aba não responder
             }
         });
+        limparPreviewBiblia();
+        bibliaVersesList = [];
+        bibliaCurrentIndex = 0;
+        chrome.storage.session.remove('bibliaPaginacao');
+        atualizarPaginacaoUI();
     });
 }
 
@@ -1434,8 +1788,6 @@ function enviarDadosBiblia(tabId, htmlContent, referencia, versao, cor, zoom) {
         versao: versao,
         cor: cor,
         zoom: zoom
-    }, () => {
-        void chrome.runtime.lastError;
     });
 }
 
@@ -1451,7 +1803,6 @@ function abrirNovaJanelaBiblia(url, htmlContent, referencia, versao, cor, zoom) 
         if (window && window.tabs && window.tabs.length > 0) {
             const tabId = window.tabs[0].id;
             chrome.storage.local.set({ "projetorTabId": tabId });
-            chrome.runtime.sendMessage({ action: "setProjectorTabId", tabId: tabId });
             
             if (currentSettings.openFullscreen) {
                 chrome.windows.update(window.id, { state: "fullscreen" });
@@ -2125,14 +2476,25 @@ chrome.runtime.onMessage.addListener((request) => {
         if (typeof atualizarProgresso === 'function') {
             atualizarProgresso(request.currentTime, request.duration, request.title);
         }
+        if (request.isAd !== undefined) {
+            atualizarBadgeAnuncio(request.isAd);
+        }
         if (request.volume !== undefined) {
-            const vol = Math.round(request.volume * 100);
-            const slider = document.getElementById('volumeSlider');
-            const label = document.getElementById('volumeLabel');
-            if (slider && label) {
-                slider.value = vol;
-                label.textContent = vol + '%';
-            }
+            chrome.storage.session.get(['ytVolumeLevel'], (sessRes) => {
+                const slider = document.getElementById('volumeSlider');
+                const label = document.getElementById('volumeLabel');
+                if (!slider || !label) return;
+                if (sessRes && typeof sessRes.ytVolumeLevel === 'number') {
+                    // Mantém com fidelidade o volume que o operador configurou na sessão
+                    const volSessao = Math.round(sessRes.ytVolumeLevel * 100);
+                    slider.value = volSessao;
+                    label.textContent = volSessao + '%';
+                } else {
+                    // Sem volume definido na sessão (início de sessão): sempre 100% (máximo)
+                    slider.value = 100;
+                    label.textContent = '100%';
+                }
+            });
         }
         if (request.muted !== undefined && typeof atualizarIconeMute === 'function') {
             atualizarIconeMute(request.muted);
@@ -2162,7 +2524,6 @@ function abrirNovaMidiaTab(url, onReady) {
         if (chrome.runtime.lastError || !window || !window.tabs || window.tabs.length === 0) return;
         const tabId = window.tabs[0].id;
         chrome.storage.local.set({ 'projetorTabId': tabId });
-        chrome.runtime.sendMessage({ action: "setProjectorTabId", tabId: tabId });
 
         if (currentSettings.openFullscreen) {
             chrome.windows.update(window.id, { state: 'fullscreen' });
@@ -2223,7 +2584,16 @@ function updateTimePlayPauseBtn() {
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (message.action === 'timeTick') {
         const display = document.getElementById('timeFeedbackDisplay');
-        if (display) display.textContent = message.timeStr;
+        if (display) {
+            display.textContent = message.timeStr;
+            if (message.estadoAlerta === 'esgotado') {
+                display.style.color = '#e74c3c';
+            } else if (message.estadoAlerta === 'alerta') {
+                display.style.color = '#f39c12';
+            } else {
+                display.style.color = 'var(--accent)';
+            }
+        }
     }
 });
 
@@ -2277,6 +2647,13 @@ if (document.getElementById('timeSegundos')) {
 if (document.getElementById('timeTextoLivre')) {
     document.getElementById('timeTextoLivre').addEventListener('input', saveTimeState);
 }
+if (document.getElementById('timeAlertaAtivo')) {
+    document.getElementById('timeAlertaAtivo').addEventListener('change', (e) => {
+        const group = document.getElementById('timeAlertaMinutosGroup');
+        if (group) group.style.display = e.target.checked ? 'flex' : 'none';
+    });
+}
+
 if (document.getElementById('timeModo')) {
     document.getElementById('timeModo').addEventListener('change', (e) => {
         const timerGroup = document.getElementById('timeTimerGroup');
@@ -2316,6 +2693,8 @@ if (document.getElementById('btnTimeReset')) {
         timeIsPlaying = false;
         updateTimePlayPauseBtn();
         saveTimeState();
+        const display = document.getElementById('timeFeedbackDisplay');
+        if (display) display.style.color = 'var(--accent)';
         chrome.storage.local.get(['projetorTabId'], (result) => {
             const tabId = result.projetorTabId;
             if (tabId) {
@@ -2336,6 +2715,8 @@ if (document.getElementById('projetarTime')) {
         const cor = currentSettings.timeGlobalCor || '#ffffff';
         const tamanho = currentSettings.timeGlobalTamanho || 8;
         const alinhamento = currentSettings.timeGlobalAlinhamento || 'center';
+        const alertaAtivo = currentSettings.timeAlertaAtivo !== false;
+        const alertaMinutos = currentSettings.timeAlertaMinutos || 1;
         
         const config = {
             action: 'showTime',
@@ -2347,6 +2728,8 @@ if (document.getElementById('projetarTime')) {
             cor,
             tamanho,
             alinhamento,
+            alertaAtivo,
+            alertaMinutos,
             iniciarDoZero: true
         };
         
@@ -2360,6 +2743,8 @@ if (document.getElementById('projetarTime')) {
 
 if (document.getElementById('encerrarTime')) {
     document.getElementById('encerrarTime').addEventListener('click', () => {
+        const display = document.getElementById('timeFeedbackDisplay');
+        if (display) display.style.color = 'var(--accent)';
         chrome.storage.local.get(['projetorTabId'], (result) => {
             const tabId = result.projetorTabId;
             if (tabId) {
@@ -2374,10 +2759,16 @@ if (document.getElementById('btnResetTime')) {
         document.getElementById('timeCor').value = '#ffffff';
         document.getElementById('timeTamanho').value = 8;
         document.getElementById('timeAlinhamento').value = 'center';
+        if (document.getElementById('timeAlertaAtivo')) document.getElementById('timeAlertaAtivo').checked = true;
+        if (document.getElementById('timeAlertaMinutos')) document.getElementById('timeAlertaMinutos').value = 1;
+        const alertaGrupo = document.getElementById('timeAlertaMinutosGroup');
+        if (alertaGrupo) alertaGrupo.style.display = 'flex';
         
         currentSettings.timeGlobalCor = '#ffffff';
         currentSettings.timeGlobalTamanho = 8;
         currentSettings.timeGlobalAlinhamento = 'center';
+        currentSettings.timeAlertaAtivo = true;
+        currentSettings.timeAlertaMinutos = 1;
         chrome.storage.local.set({ "projetorSettings": currentSettings });
         
         // Atualizar telão se estiver aberto
@@ -2394,6 +2785,8 @@ if (document.getElementById('btnResetTime')) {
                     cor: currentSettings.timeGlobalCor,
                     tamanho: currentSettings.timeGlobalTamanho,
                     alinhamento: currentSettings.timeGlobalAlinhamento,
+                    alertaAtivo: currentSettings.timeAlertaAtivo,
+                    alertaMinutos: currentSettings.timeAlertaMinutos,
                     iniciarDoZero: false
                 };
                 chrome.tabs.sendMessage(tabId, config, () => { void chrome.runtime.lastError; });
@@ -2446,7 +2839,6 @@ function abrirNovaJanelaTime(url, config) {
         if (window && window.tabs && window.tabs.length > 0) {
             const tabId = window.tabs[0].id;
             chrome.storage.local.set({ "projetorTabId": tabId });
-            chrome.runtime.sendMessage({ action: "setProjectorTabId", tabId: tabId });
             
             if (currentSettings.openFullscreen) {
                 chrome.windows.update(window.id, { state: "fullscreen" });
@@ -2490,13 +2882,12 @@ function abrirNovaJanelaTime(url, config) {
 // ── Botão de Download de Logs de Anúncios na aba Sobre ──
 if (document.getElementById('sobreAdLogsValor')) {
     document.getElementById('sobreAdLogsValor').addEventListener('click', () => {
-        chrome.storage.local.get(['adLogs', 'adCount'], (result) => {
+        chrome.storage.local.get(['adLogs'], (result) => {
             const logs = result.adLogs || [];
-            const count = (typeof result.adCount === 'number') ? result.adCount : ((logs.length > 0) ? 1 : 0);
-            if (logs.length === 0 && count === 0) return; // Não faz nada se não houver registros
+            if (logs.length === 0) return; // Não faz nada se não houver logs
             
             // Adiciona um cabeçalho bonitinho no TXT
-            const cabecalho = `=== HISTÓRICO DE ANÚNCIOS PULADOS (SESSÃO ATUAL) ===\nTotal de anúncios reais interceptados: ${count}\n\n`;
+            const cabecalho = "=== HISTÓRICO DE ANÚNCIOS PULADOS (SESSÃO ATUAL) ===\n\n";
             const conteudo = cabecalho + logs.join('\n');
             
             const blob = new Blob([conteudo], { type: 'text/plain' });
@@ -2511,4 +2902,139 @@ if (document.getElementById('sobreAdLogsValor')) {
             });
         });
     });
-}
+}
+
+// ═══════════════════════════════════════════════════════════════
+// Configuração da Tela de Espera / Logotipo (Aba Telão)
+// ═══════════════════════════════════════════════════════════════
+if (document.getElementById('btnSelectEspera')) {
+    const btnSelect = document.getElementById('btnSelectEspera');
+    const fileInput = document.getElementById('telaoEsperaInput');
+    const btnRemove = document.getElementById('btnRemoveEspera');
+    const esperaImg = document.getElementById('telaoEsperaImg');
+    const esperaIcon = document.getElementById('telaoEsperaIcon');
+    const statusEl = document.getElementById('telaoEsperaStatus');
+
+    btnSelect.addEventListener('click', () => {
+        fileInput.click();
+    });
+
+    fileInput.addEventListener('change', (e) => {
+        const file = e.target.files && e.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (event) => {
+            const tempImg = new Image();
+            tempImg.onload = () => {
+                const canvas = document.createElement('canvas');
+                let w = tempImg.width;
+                let h = tempImg.height;
+                const maxDim = 1920;
+                if (w > maxDim || h > maxDim) {
+                    if (w > h) {
+                        h = Math.round((h * maxDim) / w);
+                        w = maxDim;
+                    } else {
+                        w = Math.round((w * maxDim) / h);
+                        h = maxDim;
+                    }
+                }
+                canvas.width = w;
+                canvas.height = h;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(tempImg, 0, 0, w, h);
+                const dataUrl = canvas.toDataURL('image/jpeg', 0.88);
+
+                currentSettings.telaoImagemEspera = dataUrl;
+                chrome.storage.local.set({ "projetorSettings": currentSettings });
+
+                if (esperaImg) {
+                    esperaImg.src = dataUrl;
+                    esperaImg.style.display = 'block';
+                }
+                if (esperaIcon) esperaIcon.style.display = 'none';
+                if (btnRemove) btnRemove.style.display = 'flex';
+                if (statusEl) statusEl.textContent = file.name || 'Imagem personalizada ativa';
+
+                // Notifica o telão ativo em tempo real
+                chrome.storage.local.get(['projetorTabId'], (res) => {
+                    const tabId = res.projetorTabId;
+                    if (tabId) {
+                        chrome.tabs.sendMessage(tabId, { action: 'updateTelaEspera', imagem: dataUrl }, () => {
+                            void chrome.runtime.lastError;
+                        });
+                    }
+                });
+            };
+            tempImg.src = event.target.result;
+        };
+        reader.readAsDataURL(file);
+    });
+
+    btnRemove.addEventListener('click', () => {
+        currentSettings.telaoImagemEspera = null;
+        chrome.storage.local.set({ "projetorSettings": currentSettings });
+
+        if (esperaImg) {
+            esperaImg.src = '';
+            esperaImg.style.display = 'none';
+        }
+        if (esperaIcon) esperaIcon.style.display = 'block';
+        if (btnRemove) btnRemove.style.display = 'none';
+        if (statusEl) statusEl.textContent = 'Fundo preto padrão';
+        fileInput.value = '';
+
+        // Notifica o telão ativo para retornar ao preto puro
+        chrome.storage.local.get(['projetorTabId'], (res) => {
+            const tabId = res.projetorTabId;
+            if (tabId) {
+                chrome.tabs.sendMessage(tabId, { action: 'updateTelaEspera', imagem: null }, () => {
+                    void chrome.runtime.lastError;
+                });
+            }
+        });
+    });
+}
+
+// ═══════════════════════════════════════════════════════════════
+// Sistema de Tooltips Informativos (Clique nos ícones ?)
+// ═══════════════════════════════════════════════════════════════
+function abrirInfoTooltip(texto) {
+    const overlay = document.getElementById('infoTooltipOverlay');
+    const content = document.getElementById('infoTooltipContent');
+    if (!overlay || !content) return;
+    content.textContent = texto;
+    overlay.style.display = 'flex';
+}
+
+function fecharInfoTooltip() {
+    const overlay = document.getElementById('infoTooltipOverlay');
+    if (overlay) overlay.style.display = 'none';
+}
+
+document.addEventListener('click', (e) => {
+    const infoIcon = e.target.closest('.info-icon');
+    if (infoIcon) {
+        e.preventDefault();
+        e.stopPropagation();
+        const texto = infoIcon.getAttribute('data-info') || infoIcon.getAttribute('title');
+        if (texto) {
+            abrirInfoTooltip(texto);
+        }
+        return;
+    }
+
+    const overlay = document.getElementById('infoTooltipOverlay');
+    if (overlay && overlay.style.display === 'flex') {
+        if (e.target === overlay || e.target.id === 'btnCloseInfoTooltip') {
+            fecharInfoTooltip();
+        }
+    }
+});
+
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+        fecharInfoTooltip();
+    }
+});

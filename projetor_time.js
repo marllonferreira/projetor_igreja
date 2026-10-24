@@ -33,6 +33,10 @@ function updateRelogio() {
 }
 
 let lastTimeStr = '';
+let corOriginal = '#ffffff';
+let alertaVisualAtivo = true;
+let alertaMinutosRestantes = 1;
+let ultimoEstadoAlerta = 'normal';
 
 function updateContador() {
     const el = document.getElementById('contador-alvo');
@@ -54,13 +58,44 @@ function updateContador() {
         }
     }
     
+    // Tratamento de Alerta Visual
+    let estadoAlerta = 'normal';
+    if (currentModo === 'timer' && alertaVisualAtivo) {
+        const segundosAlerta = alertaMinutosRestantes * 60;
+        if (tempoAtualSegundos <= 0) {
+            estadoAlerta = 'esgotado';
+            el.style.color = '#e74c3c';
+            el.classList.add('time-pulse-red');
+        } else if (tempoAtualSegundos <= 10) {
+            estadoAlerta = 'esgotado';
+            el.style.color = '#e74c3c';
+            el.classList.remove('time-pulse-red');
+        } else if (tempoAtualSegundos <= segundosAlerta) {
+            estadoAlerta = 'alerta';
+            el.style.color = '#f39c12';
+            el.classList.remove('time-pulse-red');
+        } else {
+            estadoAlerta = 'normal';
+            el.style.color = corOriginal;
+            el.classList.remove('time-pulse-red');
+        }
+    } else {
+        el.style.color = corOriginal;
+        el.classList.remove('time-pulse-red');
+    }
+
     const str = formatTime(tempoAtualSegundos, true);
     el.textContent = str;
     
-    if (str !== lastTimeStr) {
+    if (str !== lastTimeStr || estadoAlerta !== ultimoEstadoAlerta) {
         lastTimeStr = str;
+        ultimoEstadoAlerta = estadoAlerta;
         try {
-            chrome.runtime.sendMessage({ action: 'timeTick', timeStr: str });
+            chrome.runtime.sendMessage({ 
+                action: 'timeTick', 
+                timeStr: str, 
+                estadoAlerta: estadoAlerta 
+            });
         } catch (e) {
             // popup pode estar fechado, ignora erro silenciosamente
         }
@@ -79,6 +114,12 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         const isVisible = container.classList.contains('show');
 
         const updateContent = () => {
+            // Guardar parâmetros de alerta visual
+            corOriginal = message.cor || '#ffffff';
+            alertaVisualAtivo = message.alertaAtivo !== false;
+            alertaMinutosRestantes = parseInt(message.alertaMinutos) || 1;
+            ultimoEstadoAlerta = 'normal';
+
             // Configurar Exibição do Relógio
             if (message.exibirRelogio) {
                 relogioEl.style.display = 'block';
@@ -128,7 +169,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
             }
             
             // Aplicar Formatação
-            const cor = message.cor || '#ffffff';
+            const cor = corOriginal;
             const tamanho = message.tamanho || 8; // vw
             const alinhamento = message.alinhamento || 'center';
             
@@ -154,6 +195,13 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         } else {
             updateContent();
         }
+
+        // Esconde imagem de espera se estiver visível
+        const esperaImg = document.getElementById('espera-img');
+        if (esperaImg) {
+            esperaImg.classList.remove('show');
+            setTimeout(() => { esperaImg.style.display = 'none'; }, 400);
+        }
         
         sendResponse({ ok: true });
     }
@@ -177,6 +225,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
     if (message.action === 'resetTime') {
         isContando = false;
+        const contadorEl = document.getElementById('contador-alvo');
+        if (contadorEl) contadorEl.classList.remove('time-pulse-red');
         if (currentModo === 'timer') {
             tempoAtualSegundos = totalSegundosConfig;
         } else if (currentModo === 'cronometro') {
@@ -188,6 +238,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
     if (message.action === 'encerrarTime') {
         const container = document.getElementById('conteudoTime');
+        const contadorEl = document.getElementById('contador-alvo');
+        if (contadorEl) contadorEl.classList.remove('time-pulse-red');
         if (container) {
             container.classList.remove('show');
             setTimeout(() => {
@@ -196,6 +248,77 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
                 isContando = false;
             }, 800);
         }
+
+        // Se houver tela de espera configurada, exibe suavemente
+        const esperaImg = document.getElementById('espera-img');
+        if (esperaImg && esperaImg.src) {
+            esperaImg.style.display = 'block';
+            setTimeout(() => { esperaImg.classList.add('show'); }, 50);
+        }
+        sendResponse({ ok: true });
+    }
+
+    if (message.action === 'updateSettings' && message.settings) {
+        const s = message.settings;
+        const container = document.getElementById('conteudoTime');
+        const relogioEl = document.getElementById('relogio-alvo');
+        const contadorEl = document.getElementById('contador-alvo');
+        const textoEl = document.getElementById('texto-alvo');
+
+        if (s.timeGlobalCor) corOriginal = s.timeGlobalCor;
+        if (s.timeAlertaAtivo !== undefined) alertaVisualAtivo = s.timeAlertaAtivo !== false;
+        if (s.timeAlertaMinutos !== undefined) alertaMinutosRestantes = parseInt(s.timeAlertaMinutos) || 1;
+
+        if (container) {
+            const alinhamento = s.timeGlobalAlinhamento || 'center';
+            container.style.textAlign = alinhamento;
+            container.style.alignItems = alinhamento === 'center' ? 'center' : (alinhamento === 'left' ? 'flex-start' : 'flex-end');
+
+            const tamanho = s.timeGlobalTamanho || 8;
+            if (relogioEl) {
+                relogioEl.style.fontSize = `${tamanho}vw`;
+                relogioEl.style.color = corOriginal;
+            }
+            if (contadorEl) {
+                contadorEl.style.fontSize = `${tamanho}vw`;
+            }
+            if (textoEl) {
+                textoEl.style.fontSize = `${tamanho * 0.7}vw`;
+                textoEl.style.color = corOriginal;
+            }
+        }
+
+        // Atualiza a renderizacao do contador para aplicar a nova cor/alerta de imediato
+        updateContador();
+
+        // Atualiza a imagem de espera
+        const esperaImg = document.getElementById('espera-img');
+        if (esperaImg) {
+            if (s.telaoImagemEspera) {
+                esperaImg.src = s.telaoImagemEspera;
+                if (!container || !container.classList.contains('show')) {
+                    esperaImg.style.display = 'block';
+                    setTimeout(() => { esperaImg.classList.add('show'); }, 50);
+                }
+            } else {
+                esperaImg.classList.remove('show');
+                setTimeout(() => {
+                    esperaImg.style.display = 'none';
+                    esperaImg.src = '';
+                }, 400);
+            }
+        }
         sendResponse({ ok: true });
     }
 });
+
+// Carrega imagem de espera ao abrir se houver
+if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
+    chrome.storage.local.get(['projetorSettings'], (result) => {
+        const settings = result.projetorSettings || {};
+        const esperaImg = document.getElementById('espera-img');
+        if (esperaImg && settings.telaoImagemEspera) {
+            esperaImg.src = settings.telaoImagemEspera;
+        }
+    });
+}

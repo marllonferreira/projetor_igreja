@@ -48,6 +48,13 @@
 /* Oculta Sugestões de Fim de Vídeo (Endscreen), Info Cards e Banners Relacionados */
 .extensao-igreja-projector-active .ytp-endscreen-content,
 .extensao-igreja-projector-active .html5-endscreen,
+.extensao-igreja-projector-active .videowall-endscreen,
+.extensao-igreja-projector-active .ytp-videowall-still,
+.extensao-igreja-projector-active .ytp-show-tiles,
+.extensao-igreja-projector-active .ytp-endscreen-paginate,
+.extensao-igreja-projector-active .ytp-modern-endscreen,
+.extensao-igreja-projector-active .ytp-suggestions,
+.extensao-igreja-projector-active .ytp-suggested-action-badge,
 .extensao-igreja-projector-active .ytp-ce-element,
 .extensao-igreja-projector-active .iv-branding,
 .extensao-igreja-projector-active .ytp-cards-button,
@@ -57,6 +64,7 @@
 .extensao-igreja-projector-active .ytp-upnext,
 .extensao-igreja-projector-active .ytp-upnext-overlay,
 .extensao-igreja-projector-active .ytp-autonav-endscreen-upnext-container {
+    display: none !important;
     opacity: 0 !important;
     visibility: hidden !important;
     pointer-events: none !important;
@@ -114,14 +122,66 @@
 }
 
 /* Cortina preta total que cobre tudo ao finalizar */
-.video-finalizado::after {
-    content: "";
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background: black;
-    z-index: 999999;
-    pointer-events: none;
+.video-finalizado::after,
+.video-finalizado body::after {
+    content: "" !important;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    background: black !important;
+    z-index: 2147483647 !important;
+    pointer-events: none !important;
+}
+
+/* MODO CORTINA / DIMMING DE ANÚNCIOS NO TELÃO (FASE 4) */
+/* 1. Escurecimento instantâneo a nível de renderização nativa assim que surge classe de anúncio */
+.extensao-igreja-projector-active .html5-video-player.ad-showing video,
+.extensao-igreja-projector-active .html5-video-player.ad-interrupting video,
+.extensao-igreja-projector-active.ad-cortina-ativa video,
+.extensao-igreja-projector-active.ad-cortina-ativa .html5-video-player,
+.extensao-igreja-projector-active.ad-cortina-ativa #player-container {
+    filter: brightness(0.02) blur(8px) !important;
+    opacity: 0.02 !important;
+    transition: none !important;
+}
+
+/* 2. Cortina preta instantânea via pseudo-elemento no player durante o anúncio */
+.extensao-igreja-projector-active .html5-video-player.ad-showing::after,
+.extensao-igreja-projector-active .html5-video-player.ad-interrupting::after {
+    content: "" !important;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    background: rgba(0, 0, 0, 0.95) !important;
+    backdrop-filter: blur(8px) !important;
+    z-index: 2147483645 !important;
+    pointer-events: none !important;
+}
+
+/* 3. Overlay permanente da cortina com transição suave ao retornar para o vídeo principal */
+#projetor-ad-cortina-overlay {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    background: rgba(0, 0, 0, 0.94) !important;
+    backdrop-filter: blur(8px) !important;
+    z-index: 2147483646 !important;
+    pointer-events: none !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    transition: opacity 0.35s ease, visibility 0.35s ease !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+#projetor-ad-cortina-overlay.show {
+    opacity: 1 !important;
+    visibility: visible !important;
 }

@@ -4,7 +4,7 @@
   <img src="doc/icon.png" width="100" height="100" alt="Projetor Igreja">
   <br><br>
   <p>
-    <img src="https://img.shields.io/badge/vers%C3%A3o-3.6-blue.svg" alt="Versão">
+    <img src="https://img.shields.io/badge/vers%C3%A3o-3.7-blue.svg" alt="Versão">
     <img src="https://img.shields.io/badge/plataforma-Chrome%20Extension-4285F4.svg" alt="Plataforma">
     <img src="https://img.shields.io/badge/HTML5%20|%20CSS3%20|%20JS-Vanilla-F7DF1E.svg" alt="Tecnologias">
     <a href="LICENSE"><img src="https://img.shields.io/badge/licen%C3%A7a-MIT-green.svg" alt="Licença"></a>
@@ -29,6 +29,7 @@ Uma extensão para navegadores baseados em Chromium (Google Chrome, Edge, Brave)
 ### 🔴 Módulo YouTube
 - **Limpeza Visual Absoluta no Telão:** Oculta completamente barra de pesquisa, comentários, vídeos sugeridos, chat ao vivo, título do vídeo, sugestões de fim de vídeo (Endscreens) e cards interativos. A tela de projeção se mantém 100% limpa, exibindo apenas o conteúdo do vídeo e a tela preta no final.
 - **🛡️ Bloqueio e Aceleração Silenciosa de Anúncios:** Sistema automático que intercepta propagandas na tela de projeção. O áudio do anúncio é silenciado preventivamente, a reprodução é acelerada para 16x ou avançada imediatamente para o final, e botões de pular ("Pular Anúncio") são clicados no mesmo instante em que surgem, evitando constrangimentos sonoros ou visuais durante o culto.
+- **🎬 Modo Cortina / Dimming de Anúncios no Telão:** Quando ativado nas preferências, aplica escurecimento profundo (94%) e desfoque óptico (*blur*) no telão durante propagandas do YouTube, impedindo a exibição de logotipos e comerciais para a congregação. O painel do operador exibe um badge visual pulsante (`🟡 Anúncio no telão`), permitindo monitorar o processo em tempo real.
 - **📊 Contador e Histórico de Anúncios Pulados:** Identifica com precisão cada anúncio individual interceptado na tela de projeção (mesmo em blocos de anúncios duplos do YouTube, como "1 de 2" e "2 de 2"). O sistema registra os eventos e permite acompanhar a contagem ao vivo na aba Sobre.
 - **🔇 Mudo e Pausa Automáticos na Tela Principal:** Quando ativado nas preferências, silencia e pausa imediatamente qualquer vídeo reproduzido na aba do operador (tela principal) enquanto o telão estiver em uso. A interceptação é contínua e inteligente, barrando até reproduções automáticas acidentais geradas por ações nativas do YouTube (como redimensionar a tela).
 - **🔊 Reset Inteligente de Volume:** O nível de volume do player na aba de projeção preserva a sua configuração durante o uso ativo, mas retorna automaticamente ao padrão de 100% caso o navegador seja completamente fechado e reaberto, garantindo previsibilidade no próximo culto.
@@ -47,11 +48,13 @@ Uma extensão para navegadores baseados em Chromium (Google Chrome, Edge, Brave)
 
 ### 📖 Módulo Bíblia
 - **Projeção de Versículos:** Escolha versão (NVI, ARA, ACF, etc), Livro, Capítulo e os versículos desejados, que são buscados rapidamente via API.
+- **👁️ Pré-Visualização / Preview de Texto:** Visor inteligente integrado no painel do operador que exibe o versículo selecionado antes do envio ao telão, permitindo conferir a redação e passagens agrupadas com total segurança.
 - **Paginação:** Agrupe múltiplos versículos por tela (ex: 3 versículos por vez) e passe os "slides" facilmente pelos botões de Anterior/Próximo.
 - **Ajustes Rápidos:** Possibilidade de ajustar o Zoom rapidamente de dentro do próprio painel para melhorar a legibilidade no telão.
 
 ### ⏰ Módulo Time
 - **Contagem Regressiva e Progressiva:** Configure facilmente um timer (regressivo) ou cronômetro (progressivo) para auxiliar pregadores, palestrantes ou ministérios no palco.
+- **🚦 Alerta Visual Dinâmico:** Mudança automática da cor dos dígitos no telão para amarelo no tempo de aviso configurável, vermelho aos 10 segundos restantes e vermelho pulsante ao esgotar o tempo.
 - **Relógio de Palco Visível:** Mantenha um relógio digital em tempo real discreto ou em destaque na tela.
 - **Mensagens Livres:** Adicione recados curtos ou avisos na tela de projeção em conjunto com os contadores.
 - **Controle Preciso:** Envie a configuração para a tela e dispare a contagem no momento exato (com opções de Iniciar, Pausar e Zerar), acompanhando tudo por um display de feedback dentro da própria extensão.
@@ -60,13 +63,15 @@ Uma extensão para navegadores baseados em Chromium (Google Chrome, Edge, Brave)
 - **🎨 Nova Identidade Visual:** O novo design apresenta um fundo roxo vibrante em gradiente com elementos em branco e detalhes tridimensionais, unindo um símbolo de play, a projeção de luz e a presença marcante da cruz no projetor. O contraste aprimorado melhora a visibilidade na barra do navegador tanto em temas claros quanto escuros, padronizando a identidade visual da aplicação.
 - **🎨 Sistema Completo de Temas:** A interface suporta os modos Claro, Escuro e Automático (baseado no sistema operacional), oferecendo conforto visual perfeito seja em ambientes muito iluminados ou escuros.
 - **Gerenciamento Inteligente de Telão:** Botão para abrir o telão em uma janela limpa, com detecção automática do monitor secundário e opção de iniciar já em Fullscreen. A extensão **impede a abertura de múltiplos telões** se o telão já estiver aberto, ela exibe um aviso e coloca a janela existente em foco.
+- **🖼️ Tela de Espera / Logotipo da Congregação:** Permite definir uma imagem ou logotipo oficial da igreja local para ser exibido automaticamente no telão durante repouso, abertura da projeção, parada no YouTube (Stop) ou encerramento de módulos. Mantém fundo preto clássico se não houver imagem.
 - **Layout Adaptativo:** A interface do popup se ajusta automaticamente com base nos recursos habilitados nas preferências. Quando muitos itens estão visíveis ao mesmo tempo, um modo compacto é ativado para evitar barras de rolagem desnecessárias.
-- **Menu de Preferências Centralizado:** Personalize a extensão profundamente através da tela de configurações, dividida por módulos:
-  - **Geral:** Escolha o tema da interface (Auto, Claro, Escuro), o monitor alvo (automático ou manual), defina a frequência de busca de atualizações (3 a 30 dias), opte por abrir em Tela Cheia, exibir ou ocultar o botão de fechar e configure a resolução padrão.
-  - **YouTube:** Ative ou desative itens da interface de controle (Botão Parar, Tela Cheia, Controles de Volume, Barra de Progresso, Lista de Reprodução) e as funções de proteção da aba principal (Mudo Automático e Pausar Automaticamente).
+- **Menu de Preferências Centralizado em 6 Abas:** Personalize a extensão profundamente através da tela de configurações com novo design simétrico em card e sistema interativo de ajuda (`[?]`):
+  - **Geral:** Frequência de busca de atualizações (3 a 30 dias).
+  - **Telão:** Monitor alvo (automático ou manual), Tela Cheia ao abrir, Botão Fechar Telão, resolução padrão e configuração da Tela de Espera / Logotipo.
+  - **YouTube:** Ative ou desative itens da interface (Botão Parar, Tela Cheia, Controles de Volume, Barra de Progresso, Lista de Reprodução), funções de proteção da aba principal (Mudo Automático e Pausar Automaticamente) e Escurecer Anúncios no Telão (Modo Cortina).
   - **Bíblia:** Defina a cor padrão do texto e o nível de zoom inicial.
   - **Mídia:** Ative a memorização das imagens importadas para não perdê-las ao fechar o navegador.
-  - **Time:** Configure a cor do texto, o tamanho da fonte e o alinhamento da tela de cronômetro/relógio.
+  - **Time:** Configure a cor do texto, tamanho da fonte, alinhamento e Alerta Visual com tempo de aviso em minutos.
 - **Armazenamento Seguro:** As imagens carregadas na mídia ficam salvas no armazenamento local, permitindo carregar várias imagens em alta resolução sem perda de dados entre sessões.
 - **📊 Contador de Anúncios da Sessão e Relatório:** Quer saber quantas propagandas foram evitadas durante o culto? Clique no ícone de informação (**ℹ️**) no topo da extensão (aba **Sobre**) para visualizar o item *"Anúncios pulados nesta sessão: X"*, que rastreia individualmente cada anúncio pulado no telão (incluindo sequências de "1 de 2" e "2 de 2"). Clicando sobre o número exibido, a extensão gera e baixa automaticamente um relatório em texto (`.txt`) com a data, horário e histórico de cada interceptação. O contador é limpo automaticamente ao fechar o telão.
 - **🔔 Notificação Inteligente de Atualização:** O sistema de atualização funciona em duas camadas complementares:
@@ -144,7 +149,7 @@ Uma extensão para navegadores baseados em Chromium (Google Chrome, Edge, Brave)
 4. **Para Mídia:** Selecione a aba 🖼️ Mídia, carregue as imagens que vai usar no culto e clique na imagem desejada para enviá-la ao telão instantaneamente.
 5. **Para Bíblia:** Selecione a aba 📖 Bíblia, escolha o texto, os ajustes de formatação e clique em "Projetar". Navegue pelos versículos com os botões de Avançar/Voltar.
 6. **Para Time:** Selecione a aba ⏰ Time, defina o tempo e as opções desejadas e clique em "Projetar" (o tempo ficará pausado na tela). Em seguida, clique em "Iniciar" para dar o play na contagem acompanhando pelo painel.
-7. **(Dica - Contador de Anúncios)** Clique no ícone de informação **ℹ️** (aba **Sobre**) no topo do popup para conferir quantos anúncios foram pulados durante a sessão do culto. Se quiser guardar o histórico, basta clicar no número para baixar um arquivo `.txt` detalhado!
+7. **(Dica - Contador de Anúncios)** Clique no ícone de informação **ℹ️** (aba **Sobre**) no topo do popup para conferir quantos anúncios foram pulados durante a sessão. Se quiser guardar o histórico, basta clicar no número para baixar um arquivo `.txt` detalhado!
 8. **(Dica - Configurações)** Clique no ícone de "Engrenagem" ⚙️ para abrir as Preferências e deixar a extensão do seu jeito!
 
 ## 🤝 Apoie o Projeto
