@@ -1687,3 +1687,100 @@ body.compact-mode .biblia-preview-body {
         box-shadow: 0 0 8px rgba(243, 156, 18, 0.25);
     }
 }
+
+/* ── Configuração de Versões da Bíblia ── */
+.biblia-versoes-config-section {
+    margin-top: 8px;
+}
+
+.biblia-versoes-config-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 5px;
+}
+
+.biblia-versoes-count {
+    font-size: 9.5px;
+    font-weight: 600;
+    color: var(--accent);
+}
+
+.biblia-versoes-config-list {
+    max-height: 112px;
+    overflow-y: auto;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 4px 6px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+}
+
+.biblia-versoes-config-list::-webkit-scrollbar {
+    width: 4px;
+}
+
+.biblia-versoes-config-list::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.biblia-versoes-config-list::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 4px;
+}
+
+.biblia-versoes-config-list::-webkit-scrollbar-thumb:hover {
+    background: var(--border-hover);
+}
+
+.biblia-versao-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 5px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 10.5px;
+    color: var(--text);
+    transition: background 0.15s ease, opacity 0.15s ease;
+    user-select: none;
+}
+
+.biblia-versao-item:hover {
+    background: var(--item-hover-bg);
+}
+
+.biblia-versao-item.unchecked {
+    opacity: 0.55;
+}
+
+.biblia-versao-item input[type="checkbox"] {
+    margin: 0;
+    cursor: pointer;
+    accent-color: var(--accent);
+    flex-shrink: 0;
+}
+
+.biblia-versao-sigla {
+    font-weight: 700;
+    font-size: 9.5px;
+    color: var(--accent);
+    background: var(--pill-version-bg);
+    padding: 1px 5px;
+    border-radius: 4px;
+    min-width: 34px;
+    text-align: center;
+    flex-shrink: 0;
+}
+
+.biblia-versao-nome {
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: var(--text);
+}

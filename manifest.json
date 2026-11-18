@@ -1,7 +1,7 @@
 {
     "manifest_version": 3,
     "name": "Projetor Igreja",
-    "version": "3.7",
+    "version": "3.8",
     "description": "Sistema de projeção profissional para YouTube, Bíblia, Mídia e Cronômetro em igrejas.",
     "permissions": [
         "storage",
@@ -53,6 +53,8 @@
         "<all_urls>",
         "https://www.youtube.com/*",
         "https://www.youtube-nocookie.com/*",
+        "https://raw.githubusercontent.com/*",
+        "https://cdn.jsdelivr.net/*",
         "https://bolls.life/*",
         "https://api.github.com/*"
     ],

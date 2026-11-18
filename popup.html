@@ -129,17 +129,7 @@
         <div id="bibliaView" class="tab-content main-tab-content">
             <div class="form-group">
                 <label for="bibliaVersao">Versão:</label>
-                <select id="bibliaVersao" class="form-control">
-                    <option value="NVIPT">NVI - Nova Versão Internacional</option>
-                    <option value="NVT">NVT - Nova Versão Transformadora</option>
-                    <option value="ARA">ARA - Almeida Revista e Atualizada</option>
-                    <option value="ARC09">ARC - Almeida Revista e Corrigida</option>
-                    <option value="ACF11">ACF - Almeida Corrigida Fiel</option>
-                    <option value="NAA">NAA - Nova Almeida Atualizada</option>
-                    <option value="NTLH">NTLH - Nova Tradução Linguagem Hoje</option>
-                    <option value="KJA">KJA - King James Atualizada</option>
-                    <option value="NBV07">NBV - Nova Bíblia Viva</option>
-                </select>
+                <select id="bibliaVersao" class="form-control"></select>
             </div>
             <div class="form-group">
                 <label for="bibliaLivro">Livro:</label>
@@ -493,6 +483,16 @@
                             title="Ajusta o tamanho geral da fonte na tela de Bíblia. Valores maiores aumentam o texto.">?</span></label>
                     <input type="number" id="bibliaZoom" class="form-control" value="100" min="50" max="400" step="10">
                 </div>
+            </div>
+            <div class="biblia-versoes-config-section">
+                <div class="biblia-versoes-config-header">
+                    <label style="margin-bottom: 0; font-size: 10px; color: var(--muted); display: inline-flex; align-items: center;">
+                        Versões no Seletor:
+                        <span class="info-icon" title="Escolha quais versões da Bíblia ficarão visíveis na lista de seleção principal. Desmarque as que você não costuma utilizar.">?</span>
+                    </label>
+                    <span id="bibliaVersoesCount" class="biblia-versoes-count">0 ativas</span>
+                </div>
+                <div id="configBibliaVersoesList" class="biblia-versoes-config-list"></div>
             </div>
             <button class="btn btn-abrir btn-reset-padrao" id="btnResetBiblia"
                 style="margin-top: 10px; justify-content: center; width: 100%; padding: 5px;">

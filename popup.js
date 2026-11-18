@@ -13,6 +13,7 @@ let currentSettings = {
     prefDimmingAds: true,
     bibliaGlobalCor: '#ffffff',
     bibliaGlobalZoom: 100,
+    bibliaVersoesOcultas: [],
     prefMemorizarMidia: true,
     prefFrequenciaAtualizacao: 3,
     timeGlobalCor: '#ffffff',
@@ -244,6 +245,12 @@ function restaurarCamposConfiguracoesUI() {
     if (document.getElementById('bibliaCor')) {
         document.getElementById('bibliaCor').value = currentSettings.bibliaGlobalCor || '#ffffff';
         document.getElementById('bibliaZoom').value = currentSettings.bibliaGlobalZoom || 100;
+    }
+    if (typeof renderizarConfigVersoesBiblia === 'function') {
+        renderizarConfigVersoesBiblia();
+    }
+    if (typeof popularVersoesBiblia === 'function') {
+        popularVersoesBiblia();
     }
 
     // Mídia
@@ -592,6 +599,27 @@ if (document.getElementById('btnSaveSettings')) {
             currentSettings.bibliaGlobalZoom = parseInt(document.getElementById('bibliaZoom').value) || 100;
         }
 
+        const checksVersoes = document.querySelectorAll('#configBibliaVersoesList .biblia-versao-check');
+        if (checksVersoes.length > 0) {
+            const versaoAntes = document.getElementById('bibliaVersao') ? document.getElementById('bibliaVersao').value : '';
+            const ocultas = [];
+            checksVersoes.forEach(chk => {
+                if (!chk.checked) ocultas.push(chk.value);
+            });
+            currentSettings.bibliaVersoesOcultas = ocultas;
+            popularVersoesBiblia();
+
+            const versaoDepois = document.getElementById('bibliaVersao') ? document.getElementById('bibliaVersao').value : '';
+            if (versaoAntes && versaoDepois && versaoAntes !== versaoDepois) {
+                estadoBiblia.versao = versaoDepois;
+                chrome.storage.session.set({ estadoBiblia: estadoBiblia });
+                const previewEl = document.getElementById('bibliaPreviewContainer');
+                if (previewEl && previewEl.style.display !== 'none') {
+                    atualizarPreviewBiblia();
+                }
+            }
+        }
+
         if (document.getElementById('prefMemorizarMidia')) {
             currentSettings.prefMemorizarMidia = document.getElementById('prefMemorizarMidia').checked;
         }
@@ -672,8 +700,29 @@ if (document.getElementById('btnResetBiblia')) {
     document.getElementById('btnResetBiblia').addEventListener('click', () => {
         const corInput = document.getElementById('bibliaCor');
         const zoomInput = document.getElementById('bibliaZoom');
+        const zoomRapidoInput = document.getElementById('bibliaZoomRapido');
+
         if (corInput) corInput.value = '#ffffff';
         if (zoomInput) zoomInput.value = 100;
+        if (zoomRapidoInput) zoomRapidoInput.value = 100;
+
+        currentSettings.bibliaGlobalCor = '#ffffff';
+        currentSettings.bibliaGlobalZoom = 100;
+        currentSettings.bibliaVersoesOcultas = [];
+        chrome.storage.local.set({ "projetorSettings": currentSettings });
+
+        if (typeof renderizarConfigVersoesBiblia === 'function') renderizarConfigVersoesBiblia();
+        if (typeof popularVersoesBiblia === 'function') popularVersoesBiblia();
+
+        if (typeof estadoBiblia !== 'undefined') {
+            estadoBiblia.zoomRapido = 100;
+            chrome.storage.session.set({ estadoBiblia: estadoBiblia });
+        }
+
+        if (typeof bibliaVersesList !== 'undefined' && bibliaVersesList.length > 0 && typeof enviarVersiculoAtualParaProjetor === 'function') {
+            enviarVersiculoAtualParaProjetor();
+        }
+
         mostrarAviso('ℹ️ Padrões da Bíblia redefinidos.');
     });
 }
@@ -1318,6 +1367,160 @@ document.querySelectorAll('.config-tab-btn').forEach(btn => {
 });
 
 // ── Lógica da Bíblia ──
+// ── Regra Mestra de Versões da Bíblia (Controle Interno / Administração) ──
+// Para desabilitar ou ativar uma versão no sistema, altere a propriedade "ativa" (true/false).
+const GITHUB_BIBLE_REPO = 'marllonferreira/bible';
+
+const bibliaVersionsList = [
+    // ══════════════════════════════════════════════════════════════════
+    // FONTE 1 (PRIMÁRIA): Repositório Próprio GitHub (marllonferreira/bible)
+    // ══════════════════════════════════════════════════════════════════
+    // Bloco 1: Família Almeida Tradicional + Mais Usadas nos Cultos
+    { id: 'ARA',   sigla: 'ARA',  nome: 'Almeida Revista e Atualizada', api: 'github', arquivo: 'pt_ara',  bollsId: 'ARA',   ativa: true },
+    { id: 'NAA',   sigla: 'NAA',  nome: 'Nova Almeida Atualizada',      api: 'github', arquivo: 'pt_naa',  bollsId: 'NAA',   ativa: true },
+    { id: 'ARC09', sigla: 'ARC',  nome: 'Almeida Revista e Corrigida',  api: 'github', arquivo: 'pt_arc',  bollsId: 'ARC09', ativa: true },
+    { id: 'ACF11', sigla: 'ACF',  nome: 'Almeida Corrigida Fiel',       api: 'github', arquivo: 'pt_acf',  bollsId: 'ACF11', ativa: true },
+    { id: 'NVIPT', sigla: 'NVI',  nome: 'Nova Versão Internacional',    api: 'github', arquivo: 'pt_nvi',  bollsId: null,    ativa: true },
+    { id: 'NVT',   sigla: 'NVT',  nome: 'Nova Versão Transformadora',   api: 'github', arquivo: 'pt_nvt',  bollsId: 'NVT',   ativa: true },
+    { id: 'NTLH',  sigla: 'NTLH', nome: 'Nova Tradução Linguagem Hoje', api: 'github', arquivo: 'pt_ntlh', bollsId: 'NTLH',  ativa: true },
+    // Bloco 2: Clássicas Contemporâneas
+    { id: 'ALM21', sigla: 'A21',  nome: 'Almeida Século 21',            api: 'github', arquivo: 'pt_a21',  bollsId: 'ALM21', ativa: true },
+    { id: 'KJA',   sigla: 'KJA',  nome: 'King James Atualizada',        api: 'github', arquivo: 'pt_kja',  bollsId: 'KJA',   ativa: true },
+    { id: 'NBV07', sigla: 'NBV',  nome: 'Nova Bíblia Viva',             api: 'github', arquivo: 'pt_nbv',  bollsId: 'NBV07', ativa: true },
+    // Bloco 3: Linguagem Simples / Históricas / Paráfrases
+    { id: 'VFL',   sigla: 'VFL',  nome: 'Versão Fácil de Ler',          api: 'github', arquivo: 'pt_vfl',  bollsId: 'VFL',   ativa: true },
+    { id: 'TB10',  sigla: 'TB',   nome: 'Tradução Brasileira',          api: 'github', arquivo: 'pt_tb',   bollsId: 'TB10',  ativa: true },
+    { id: 'OL',    sigla: 'OL',   nome: 'O Livro',                      api: 'github', arquivo: 'pt_ol',   bollsId: 'OL',    ativa: true },
+
+    // ══════════════════════════════════════════════════════════════════
+    // FONTE 2 (SECUNDÁRIA / CONTINGÊNCIA): Bolls.life API (https://bolls.life)
+    // Caso precise voltar alguma versão para a Bolls.life manualmente, mude ativa: true abaixo.
+    // ══════════════════════════════════════════════════════════════════
+    { id: 'ARA_BOLLS',   sigla: 'ARA',  nome: 'Almeida Revista e Atualizada', api: 'bolls', bollsId: 'ARA',   arquivo: 'pt_ara',  ativa: false },
+    { id: 'NAA_BOLLS',   sigla: 'NAA',  nome: 'Nova Almeida Atualizada',      api: 'bolls', bollsId: 'NAA',   arquivo: 'pt_naa',  ativa: false },
+    { id: 'ARC09_BOLLS', sigla: 'ARC',  nome: 'Almeida Revista e Corrigida',  api: 'bolls', bollsId: 'ARC09', arquivo: 'pt_arc',  ativa: false },
+    { id: 'ACF11_BOLLS', sigla: 'ACF',  nome: 'Almeida Corrigida Fiel',       api: 'bolls', bollsId: 'ACF11', arquivo: 'pt_acf',  ativa: false },
+    { id: 'NVIPT_BOLLS', sigla: 'NVI',  nome: 'Nova Versão Internacional',    api: 'bolls', bollsId: 'NVIPT', arquivo: 'pt_nvi',  ativa: false }, // Sem licença na Bolls.life
+    { id: 'NVT_BOLLS',   sigla: 'NVT',  nome: 'Nova Versão Transformadora',   api: 'bolls', bollsId: 'NVT',   arquivo: 'pt_nvt',  ativa: false },
+    { id: 'NTLH_BOLLS',  sigla: 'NTLH', nome: 'Nova Tradução Linguagem Hoje', api: 'bolls', bollsId: 'NTLH',  arquivo: 'pt_ntlh', ativa: false },
+    { id: 'ALM21_BOLLS', sigla: 'A21',  nome: 'Almeida Século 21',            api: 'bolls', bollsId: 'ALM21', arquivo: 'pt_a21',  ativa: false },
+    { id: 'KJA_BOLLS',   sigla: 'KJA',  nome: 'King James Atualizada',        api: 'bolls', bollsId: 'KJA',   arquivo: 'pt_kja',  ativa: false },
+    { id: 'NBV07_BOLLS', sigla: 'NBV',  nome: 'Nova Bíblia Viva',             api: 'bolls', bollsId: 'NBV07', arquivo: 'pt_nbv',  ativa: false },
+    { id: 'VFL_BOLLS',   sigla: 'VFL',  nome: 'Versão Fácil de Ler',          api: 'bolls', bollsId: 'VFL',   arquivo: 'pt_vfl',  ativa: false },
+    { id: 'TB10_BOLLS',  sigla: 'TB',   nome: 'Tradução Brasileira',          api: 'bolls', bollsId: 'TB10',  arquivo: 'pt_tb',   ativa: false },
+    { id: 'OL_BOLLS',    sigla: 'OL',   nome: 'O Livro',                      api: 'bolls', bollsId: 'OL',    arquivo: 'pt_ol',   ativa: false }
+];
+
+/** Retorna todas as versões habilitadas na regra mestra (sem duplicar siglas caso ambas as fontes estejam true) */
+function obterVersoesMestrasAtivas() {
+    const vistas = new Set();
+    return bibliaVersionsList.filter(v => {
+        if (!v.ativa || vistas.has(v.sigla)) return false;
+        vistas.add(v.sigla);
+        return true;
+    });
+}
+
+/** Retorna as versões ativas na regra mestra que não foram ocultadas pelo usuário nas configurações */
+function obterVersoesVisiveisUsuario() {
+    const mestras = obterVersoesMestrasAtivas();
+    const ocultas = Array.isArray(currentSettings.bibliaVersoesOcultas) ? currentSettings.bibliaVersoesOcultas : [];
+    const visiveis = mestras.filter(v => !ocultas.includes(v.id));
+    return visiveis.length > 0 ? visiveis : mestras;
+}
+
+/** Retorna a sigla de exibição limpa a partir do ID da versão na API */
+function obterSiglaVersao(id) {
+    const v = bibliaVersionsList.find(item => item.id === id);
+    if (v) return v.sigla;
+    return String(id || '').replace(/(PT|\d+)$/, '');
+}
+
+/** Popula o <select id="bibliaVersao"> apenas com as versões visíveis para o usuário */
+function popularVersoesBiblia() {
+    const select = document.getElementById('bibliaVersao');
+    if (!select) return;
+
+    const versoesVisiveis = obterVersoesVisiveisUsuario();
+    const valorPreferido = (typeof estadoBiblia !== 'undefined' && estadoBiblia.versao) ? estadoBiblia.versao : select.value;
+
+    select.innerHTML = '';
+    versoesVisiveis.forEach(v => {
+        const opt = document.createElement('option');
+        opt.value = v.id;
+        opt.textContent = `${v.sigla} - ${v.nome}`;
+        select.appendChild(opt);
+    });
+
+    if (versoesVisiveis.some(v => v.id === valorPreferido)) {
+        select.value = valorPreferido;
+    } else if (versoesVisiveis.length > 0) {
+        select.value = versoesVisiveis[0].id;
+        if (typeof estadoBiblia !== 'undefined') {
+            estadoBiblia.versao = versoesVisiveis[0].id;
+        }
+    }
+}
+
+/** Renderiza a lista de checkboxes de versões na aba Configurações > Bíblia */
+function renderizarConfigVersoesBiblia() {
+    const listEl = document.getElementById('configBibliaVersoesList');
+    const countEl = document.getElementById('bibliaVersoesCount');
+    if (!listEl) return;
+
+    const mestras = obterVersoesMestrasAtivas();
+    const ocultas = Array.isArray(currentSettings.bibliaVersoesOcultas) ? currentSettings.bibliaVersoesOcultas : [];
+    // Se todas as mestras estivessem marcadas como ocultas por algum resíduo, ignora o filtro para garantir ao menos 1
+    const todasOcultas = mestras.every(v => ocultas.includes(v.id));
+
+    listEl.innerHTML = '';
+
+    const atualizarContador = () => {
+        if (!countEl) return;
+        const totalMarcadas = listEl.querySelectorAll('.biblia-versao-check:checked').length;
+        countEl.textContent = `${totalMarcadas} de ${mestras.length} ativas`;
+    };
+
+    mestras.forEach(v => {
+        const isChecked = todasOcultas ? true : !ocultas.includes(v.id);
+        const label = document.createElement('label');
+        label.className = 'biblia-versao-item' + (isChecked ? '' : ' unchecked');
+        label.title = `${v.sigla} - ${v.nome}`;
+
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.className = 'biblia-versao-check';
+        checkbox.value = v.id;
+        checkbox.checked = isChecked;
+
+        checkbox.addEventListener('change', (e) => {
+            const marcadas = listEl.querySelectorAll('.biblia-versao-check:checked').length;
+            if (marcadas === 0) {
+                e.target.checked = true;
+                mostrarAviso('⚠️ Mantenha pelo menos 1 versão ativa!');
+                return;
+            }
+            label.classList.toggle('unchecked', !e.target.checked);
+            atualizarContador();
+        });
+
+        const siglaSpan = document.createElement('span');
+        siglaSpan.className = 'biblia-versao-sigla';
+        siglaSpan.textContent = v.sigla;
+
+        const nomeSpan = document.createElement('span');
+        nomeSpan.className = 'biblia-versao-nome';
+        nomeSpan.textContent = v.nome;
+
+        label.appendChild(checkbox);
+        label.appendChild(siglaSpan);
+        label.appendChild(nomeSpan);
+        listEl.appendChild(label);
+    });
+
+    atualizarContador();
+}
+
 const booksList = [
     { id: 1, name: "Gênesis" }, { id: 2, name: "Êxodo" }, { id: 3, name: "Levítico" }, { id: 4, name: "Números" }, { id: 5, name: "Deuteronômio" },
     { id: 6, name: "Josué" }, { id: 7, name: "Juízes" }, { id: 8, name: "Rute" }, { id: 9, name: "1 Samuel" }, { id: 10, name: "2 Samuel" },
@@ -1363,7 +1566,9 @@ function popularLivrosBiblia() {
 popularLivrosBiblia();
 
 // Estado da Sessão (somente o que é temporário na aba atual)
-let estadoBiblia = { versao: 'NVIPT', livro: 1, capitulo: 1, versiculo: '1', agrupar: 1 };
+const versaoPadraoInicial = obterVersoesMestrasAtivas()[0]?.id || 'ARA';
+let estadoBiblia = { versao: versaoPadraoInicial, livro: 1, capitulo: 1, versiculo: '1', agrupar: 1 };
+popularVersoesBiblia();
 let bibliaVersesList = [];
 let bibliaCurrentIndex = 0;
 let bibliaBookName = "";
@@ -1372,6 +1577,12 @@ let bibliaTranslation = "";
 
 chrome.storage.session.get(['estadoBiblia', 'bibliaPaginacao', 'bibliaPreviewState'], (result) => {
     if (result.estadoBiblia) estadoBiblia = result.estadoBiblia;
+
+    const versoesVisiveis = obterVersoesVisiveisUsuario();
+    if (!versoesVisiveis.some(v => v.id === estadoBiblia.versao) && versoesVisiveis.length > 0) {
+        estadoBiblia.versao = versoesVisiveis[0].id;
+        chrome.storage.session.set({ estadoBiblia: estadoBiblia });
+    }
     
     if(document.getElementById('bibliaVersao')) document.getElementById('bibliaVersao').value = estadoBiblia.versao;
     if(document.getElementById('bibliaLivro')) document.getElementById('bibliaLivro').value = estadoBiblia.livro;
@@ -1422,6 +1633,8 @@ function salvarEstadoPaginacao() {
 // Módulo Bíblia: Cache e Pré-Visualização Dinâmica
 // ═══════════════════════════════════════════════════════════════
 const bibliaCapitulosCache = new Map();
+const bibliaGithubJsonCache = new Map();
+const bibliaGithubFetchPromises = new Map();
 let bibliaPreviewDebounceTimer = null;
 let bibliaPreviewReqId = 0;
 
@@ -1439,15 +1652,129 @@ function salvarEstadoPreview(visivel, ref, html) {
     }
 }
 
+/**
+ * Remove marcações residuais da API (notas de rodapé <sup>ⓐ</sup>, <sup>[1]</sup>,
+ * epígrafes/títulos colados <b>...</b>, tags <FO>/<font> e quebras <br> desnecessárias).
+ */
+function limparTextoVersiculo(texto) {
+    if (!texto || typeof texto !== 'string') return '';
+    return texto
+        .replace(/<sup\b[^>]*>[\s\S]*?<\/sup>/gi, '')
+        .replace(/<b\b[^>]*>[\s\S]*?<\/b>/gi, '')
+        .replace(/<br\s*\/?>|<\/br>/gi, ' ')
+        .replace(/<\/?(?:font|fo)\b[^>]*>/gi, '')
+        .replace(/[\u2460-\u24FF]/g, '')
+        .replace(/\s{2,}/g, ' ')
+        .trim();
+}
+
+/** Carrega o JSON de uma versão a partir do repositório próprio no GitHub (com fallback CDN jsDelivr) */
+async function carregarJsonBibliaGithub(arquivo) {
+    if (bibliaGithubJsonCache.has(arquivo)) {
+        return bibliaGithubJsonCache.get(arquivo);
+    }
+    if (bibliaGithubFetchPromises.has(arquivo)) {
+        return bibliaGithubFetchPromises.get(arquivo);
+    }
+
+    const urls = [
+        `https://raw.githubusercontent.com/${GITHUB_BIBLE_REPO}/master/json/${arquivo}.json`,
+        `https://cdn.jsdelivr.net/gh/${GITHUB_BIBLE_REPO}@master/json/${arquivo}.json`
+    ];
+
+    const promise = (async () => {
+        for (const url of urls) {
+            try {
+                const resp = await fetch(url);
+                if (resp.ok) {
+                    const json = await resp.json();
+                    if (Array.isArray(json) && json.length >= 66) {
+                        bibliaGithubJsonCache.set(arquivo, json);
+                        bibliaGithubFetchPromises.delete(arquivo);
+                        return json;
+                    }
+                }
+            } catch (err) {
+                console.warn(`Falha ao buscar ${arquivo} em:`, url, err);
+            }
+        }
+        bibliaGithubFetchPromises.delete(arquivo);
+        throw new Error(`Falha ao carregar ${arquivo} na API Primária (GitHub)`);
+    })();
+
+    bibliaGithubFetchPromises.set(arquivo, promise);
+    return promise;
+}
+
+/** Extrai o capítulo no formato [{ verse, text }] a partir do JSON do GitHub */
+async function buscarCapituloNoGithub(arquivo, bookId, chapter) {
+    const books = await carregarJsonBibliaGithub(arquivo);
+    const bookObj = books[parseInt(bookId) - 1];
+    const capIdx = parseInt(chapter) - 1;
+    if (!bookObj || !Array.isArray(bookObj.chapters) || !Array.isArray(bookObj.chapters[capIdx])) {
+        return [];
+    }
+    return bookObj.chapters[capIdx].map((txt, idx) => ({
+        verse: idx + 1,
+        text: limparTextoVersiculo(txt)
+    }));
+}
+
+/** Busca o capítulo na API Secundária (Bolls.life) */
+async function buscarCapituloNaBolls(bollsId, bookId, chapter) {
+    const urlApi = `https://bolls.life/get-chapter/${bollsId}/${bookId}/${chapter}/`;
+    const response = await fetch(urlApi);
+    if (!response.ok) throw new Error('Falha ao buscar capítulo da Bíblia na API Bolls.life');
+    const rawData = await response.json();
+    return Array.isArray(rawData)
+        ? rawData.map(v => ({ ...v, text: limparTextoVersiculo(v.text) }))
+        : [];
+}
+
 async function buscarCapituloBiblia(translation, bookId, chapter) {
     const chave = `${translation}_${bookId}_${chapter}`;
     if (bibliaCapitulosCache.has(chave)) {
         return bibliaCapitulosCache.get(chave);
     }
-    const urlApi = `https://bolls.life/get-chapter/${translation}/${bookId}/${chapter}/`;
-    const response = await fetch(urlApi);
-    if (!response.ok) throw new Error('Falha ao buscar capítulo da Bíblia na API');
-    const data = await response.json();
+
+    const versaoInfo = bibliaVersionsList.find(v => v.id === translation) || {
+        id: translation,
+        api: 'bolls',
+        bollsId: translation,
+        arquivo: null
+    };
+
+    let data = [];
+
+    if (versaoInfo.api === 'github' && versaoInfo.arquivo) {
+        try {
+            // 1. Tenta na Fonte Primária (Repositório Próprio GitHub)
+            data = await buscarCapituloNoGithub(versaoInfo.arquivo, bookId, chapter);
+        } catch (errPrimaria) {
+            // 2. Contingência Automática: Se falhar e houver equivalente válido na Bolls.life, usa a Fonte 2
+            if (versaoInfo.bollsId) {
+                console.warn(`Contingência acionada para ${translation} via Bolls.life:`, errPrimaria);
+                data = await buscarCapituloNaBolls(versaoInfo.bollsId, bookId, chapter);
+            } else {
+                throw errPrimaria;
+            }
+        }
+    } else {
+        const codigoBolls = versaoInfo.bollsId || translation;
+        try {
+            // 1. Tenta na Fonte Bolls.life (quando ativada manualmente)
+            data = await buscarCapituloNaBolls(codigoBolls, bookId, chapter);
+        } catch (errBolls) {
+            // 2. Contingência Automática: Se a Bolls.life falhar, usa o Repositório Próprio GitHub
+            if (versaoInfo.arquivo) {
+                console.warn(`Contingência acionada para ${translation} via GitHub:`, errBolls);
+                data = await buscarCapituloNoGithub(versaoInfo.arquivo, bookId, chapter);
+            } else {
+                throw errBolls;
+            }
+        }
+    }
+
     bibliaCapitulosCache.set(chave, data);
     return data;
 }
@@ -1486,7 +1813,7 @@ async function atualizarPreviewBiblia() {
 
     const bookObj = booksList.find(b => b.id === bookId);
     const bookName = bookObj ? bookObj.name : '';
-    const versaoExibida = translation.replace(/(PT|\d+)$/, '');
+    const versaoExibida = obterSiglaVersao(translation);
     const verseStart = parseInt(verseStr) || 1;
 
     const reqId = ++bibliaPreviewReqId;
@@ -1552,7 +1879,7 @@ function sincronizarPreviewComIndiceAtual() {
     const agrupar = parseInt(document.getElementById('bibliaAgrupar').value) || 1;
     const end = Math.min(bibliaCurrentIndex + agrupar, bibliaVersesList.length);
     const versesToDisplay = bibliaVersesList.slice(bibliaCurrentIndex, end);
-    const versaoExibida = bibliaTranslation.replace(/(PT|\d+)$/, '');
+    const versaoExibida = obterSiglaVersao(bibliaTranslation);
 
     let refFinal = `📖 ${bibliaBookName} ${bibliaChapter}:${versesToDisplay[0].verse}`;
     if (versesToDisplay.length > 1) {
@@ -1685,26 +2012,6 @@ if (document.getElementById('bibliaZoomRapido')) {
     });
 }
 
-if (document.getElementById('btnResetBiblia')) {
-    document.getElementById('btnResetBiblia').addEventListener('click', () => {
-        // Limpa inputs
-        document.getElementById('bibliaCor').value = '#ffffff';
-        document.getElementById('bibliaZoom').value = 100;
-        if(document.getElementById('bibliaZoomRapido')) document.getElementById('bibliaZoomRapido').value = 100;
-        
-        // Atualiza configurações globais
-        currentSettings.bibliaGlobalCor = '#ffffff';
-        currentSettings.bibliaGlobalZoom = 100;
-        chrome.storage.local.set({ "projetorSettings": currentSettings });
-        
-        // Atualiza sessão
-        estadoBiblia.zoomRapido = 100;
-        chrome.storage.session.set({ estadoBiblia: estadoBiblia });
-        
-        if (bibliaVersesList.length > 0) enviarVersiculoAtualParaProjetor();
-    });
-}
-
 function enviarVersiculoAtualParaProjetor() {
     if (bibliaVersesList.length === 0) return;
     
@@ -1724,8 +2031,7 @@ function enviarVersiculoAtualParaProjetor() {
     // O zoom projetado vem do zoom rápido (que por sua vez inicia igual ao global)
     const zoom = document.getElementById('bibliaZoomRapido') ? document.getElementById('bibliaZoomRapido').value : (currentSettings.bibliaGlobalZoom || 100);
 
-    // Remove o sufixo "PT" ou números do código da versão (ex: "NVIPT" → "NVI", "ARC09" → "ARC")
-    const versaoExibida = bibliaTranslation.replace(/(PT|\d+)$/, '');
+    const versaoExibida = obterSiglaVersao(bibliaTranslation);
 
     projetarTextoBiblia(htmlContent, refText, versaoExibida, cor, zoom);
 }

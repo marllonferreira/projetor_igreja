@@ -4,7 +4,7 @@
   <img src="doc/icon.png" width="100" height="100" alt="Projetor Igreja">
   <br><br>
   <p>
-    <img src="https://img.shields.io/badge/vers%C3%A3o-3.7-blue.svg" alt="Versão">
+    <img src="https://img.shields.io/badge/vers%C3%A3o-3.8-blue.svg" alt="Versão">
     <img src="https://img.shields.io/badge/plataforma-Chrome%20Extension-4285F4.svg" alt="Plataforma">
     <img src="https://img.shields.io/badge/HTML5%20|%20CSS3%20|%20JS-Vanilla-F7DF1E.svg" alt="Tecnologias">
     <a href="LICENSE"><img src="https://img.shields.io/badge/licen%C3%A7a-MIT-green.svg" alt="Licença"></a>
@@ -47,7 +47,8 @@ Uma extensão para navegadores baseados em Chromium (Google Chrome, Edge, Brave)
 - **Transição Suave:** Encerre a apresentação de mídia a qualquer momento com um clique, aplicando um "fade out" escuro na tela.
 
 ### 📖 Módulo Bíblia
-- **Projeção de Versículos:** Escolha versão (NVI, ARA, ACF, etc), Livro, Capítulo e os versículos desejados, que são buscados rapidamente via API.
+- **Projeção de Versículos (13 Traduções em Português):** Escolha entre 13 versões completas em português (ARA, NAA, ARC, ACF, NVI, NVT, NTLH, A21, KJA, NBV, VFL, TB e OL), organizadas por relevância de uso nos cultos, além de Livro, Capítulo e versículos desejados.
+- **🛡️ Multi-API com Contingência e Texto Limpo:** Arquitetura com fonte primária dedicada e contingência automática em segundo plano para máxima estabilidade durante o culto, com higienização automática que remove marcações residuais de notas de rodapé para exibir o texto limpo no telão.
 - **👁️ Pré-Visualização / Preview de Texto:** Visor inteligente integrado no painel do operador que exibe o versículo selecionado antes do envio ao telão, permitindo conferir a redação e passagens agrupadas com total segurança.
 - **Paginação:** Agrupe múltiplos versículos por tela (ex: 3 versículos por vez) e passe os "slides" facilmente pelos botões de Anterior/Próximo.
 - **Ajustes Rápidos:** Possibilidade de ajustar o Zoom rapidamente de dentro do próprio painel para melhorar a legibilidade no telão.
@@ -69,7 +70,7 @@ Uma extensão para navegadores baseados em Chromium (Google Chrome, Edge, Brave)
   - **Geral:** Frequência de busca de atualizações (3 a 30 dias).
   - **Telão:** Monitor alvo (automático ou manual), Tela Cheia ao abrir, Botão Fechar Telão, resolução padrão e configuração da Tela de Espera / Logotipo.
   - **YouTube:** Ative ou desative itens da interface (Botão Parar, Tela Cheia, Controles de Volume, Barra de Progresso, Lista de Reprodução), funções de proteção da aba principal (Mudo Automático e Pausar Automaticamente) e Escurecer Anúncios no Telão (Modo Cortina).
-  - **Bíblia:** Defina a cor padrão do texto e o nível de zoom inicial.
+  - **Bíblia:** Defina a cor padrão do texto, o nível de zoom inicial e escolha quais traduções ficarão visíveis no seletor principal.
   - **Mídia:** Ative a memorização das imagens importadas para não perdê-las ao fechar o navegador.
   - **Time:** Configure a cor do texto, tamanho da fonte, alinhamento e Alerta Visual com tempo de aviso em minutos.
 - **Armazenamento Seguro:** As imagens carregadas na mídia ficam salvas no armazenamento local, permitindo carregar várias imagens em alta resolução sem perda de dados entre sessões.
